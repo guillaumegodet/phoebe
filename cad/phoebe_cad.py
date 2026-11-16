@@ -96,7 +96,19 @@ class Params:
     brg_h: float = 36.5             # hauteur d'axe du palier (type UCP205)
     brg_J: float = 105.0            # entraxe des vis du palier
     brg_bolt: float = 10.5
-    arm_y: float = 425.0            # plan des bras de roue
+    arm_y: float = 430.0            # plan médian des roues arrière
+    hub_old: float = 110.0          # largeur du moyeu arrière (type BMX à roue libre)
+    arm_dx: float = 270.0           # axe de roue par rapport au pivot (positif = roue devant le pivot)
+    arm_dz: float = -110.0
+    arm_lift: float = 69.0          # angle de relevage des roues, en degrés
+    arm_lock_r: float = 130.0       # rayon de la goupille de verrouillage du bras
+    # foil arrière : tête de safran relevable et orientable sur le tableau
+    rud_pin_x: float = -1325.0      # axe vertical de direction
+    rud_gz: tuple = (360.0, 470.0)  # hauteur des deux fémelots
+    rud_Lx: float = -1400.0         # axe de relevage du mât
+    rud_Lz: float = 520.0
+    rud_lock_r: float = 120.0
+    rud_mast: float = 870.0
     # direction avant relevable
     fork_px: float = 1305.0         # pivot de relevage (parallèle à Y)
     fork_pz: float = 495.0
@@ -113,6 +125,7 @@ class Params:
 
 P = Params()
 HINGE_BOLTS = [(300, 315), (325, 360), (300, 405), (325, 438)]          # (y, z) dans le couple porteur des foils
+LOCK_BOLTS = [(300, 440), (325, 415)]                                   # (y, z) équerre de verrou des bras
 STEM_BOLTS = [(1200, 435), (1200, 500), (1262, 440), (1262, 500)]        # (x, z) dans l'étrave
 
 # ----------------------------------------------------------------------------
@@ -227,6 +240,8 @@ def frame_poly(x, kind):
         body = body.difference(box(-P.t_plate / 2 - tol, 0, P.t_plate / 2 + tol, (zb + zt) / 2))
     holes = []
     if abs(x - P.x_frame_foil) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in HINGE_BOLTS]
+    if kind == 'transom': holes += [(sg * 30, zz, 8.5) for sg in (1, -1) for zz in P.rud_gz]
+    if abs(x - P.x_frame_axle) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in LOCK_BOLTS]
     if abs(x - P.x_frame_axle) < 1: holes += [(sg * (P.brg_y + d), P.shaft_z, P.brg_bolt) for sg in (1, -1) for d in (-P.brg_J / 2, P.brg_J / 2)]
     for yy, zz, d in holes: body = body.difference(Point(yy, zz).buffer(d / 2, 16))
     return biggest(body.buffer(0)).simplify(0.1)
@@ -271,7 +286,8 @@ def build(outdir):
             pts = [V(*to3d(a, b)) for a, b in c2]
             d0 = c2 - np.roll(c2, 1, axis=0); d1 = np.roll(c2, -1, axis=0) - c2
             turn = np.abs(np.degrees(np.arctan2(d0[:, 0] * d1[:, 1] - d0[:, 1] * d1[:, 0], (d0 * d1).sum(axis=1))))
-            corners = [i for i in range(n) if turn[i] > 15]
+            l0 = np.hypot(*d0.T); l1 = np.hypot(*d1.T); med = np.median(l1)
+            corners = [i for i in range(n) if turn[i] > 15 or max(l0[i], l1[i]) > 4 * med]   # angles vifs et extrémités de segments droits
             if not corners:
                 cen = c2.mean(axis=0); r = np.hypot(*(c2 - cen).T)
                 if n >= 16 and r.std() < 0.02 * r.mean():
@@ -356,14 +372,73 @@ def build(outdir):
     parts += hinge_side(False, False, "babord_deploye") + hinge_side(True, True, "tribord_replie")
 
     # --- 2. arbre arrière : paliers à semelle vissés sur la face avant du couple porteur
-    xf = P.x_frame_axle + tU; xa = xf + P.brg_h
-    parts.append(("arbre_arriere", cyl((xa, -P.arm_y - 30, P.shaft_z), (xa, P.arm_y + 30, P.shaft_z), P.shaft_d / 2), STEEL))
+    xf = P.x_frame_axle + tU; xa = xf + P.brg_h; zS = P.shaft_z
+    ys = P.arm_y + P.hub_old / 2 + 25
+    parts.append(("arbre_arriere", cyl((xa, -ys, zS), (xa, ys, zS), P.shaft_d / 2), STEEL))
+    zB = zg(xa / P.HL) + 5                                   # au-dessus du plat-bord
+    yin = P.arm_y - P.hub_old / 2 - 6                        # face intérieure du flasque de bras
+    brk = unary_union([box(190, zS - 25, 338, zS + 25), box(285, zS + 25, 338, zB + 37), box(285, zB, yin - 2, zB + 37)])
+    for d in (-P.brg_J / 2, P.brg_J / 2): brk = brk.difference(circ(P.brg_y + d, zS, P.brg_bolt))
+    for yy, zz in LOCK_BOLTS: brk = brk.difference(circ(yy, zz, 8.5))
+    flats.append(("equerre_verrou_bras", 6.0, 2, brk, [], 'ALU'))
+    # flasque de bras : pivot, axe de roue et deux trous de goupille (route / relevé)
+    lift = math.radians(P.arm_lift); a0 = math.atan2(P.arm_dz, P.arm_dx)
+    hornA = (xa, zS + P.arm_lock_r)
+    aB = math.pi / 2 - lift if P.arm_dx > 0 else math.pi / 2 + lift
+    hornB = (xa + P.arm_lock_r * math.cos(aB), zS + P.arm_lock_r * math.sin(aB))
+    axl = (xa + P.arm_dx, zS + P.arm_dz)
+    armp = unary_union([Point(xa, zS).buffer(36), Point(*axl).buffer(30), Point(*hornA).buffer(16), Point(*hornB).buffer(16)]).convex_hull
+    armp = armp.difference(circ(xa, zS, 30)).difference(circ(*axl, 10.5)).difference(circ(*hornA, 10.5)).difference(circ(*hornB, 10.5))
+    flats.append(("flasque_bras_arriere", 6.0, 4, armp, [], 'ALU'))
+    def rear_side(mirror, lifted, tag):
+        out = []
+        yc = P.brg_y
+        out.append((f"palier_semelle_{tag}", bx(xf, xf + 15, yc - 70, yc + 70, zS - 19, zS + 19), ALU))
+        out.append((f"palier_corps_{tag}", cyl((xa, yc - 17, zS), (xa, yc + 17, zS), 32), ALU))
+        x0 = P.x_frame_axle - tU - 6
+        out.append((f"equerre_verrou_{tag}", solid(brk, lambda a, b: (x0, a, b), (6, 0, 0)), ALU))
+        out.append((f"equerre_verrou_patte_{tag}", bx(x0, xa + 32, yin - 8, yin - 2, zB, zB + 37), ALU))
+        out.append((f"goupille_bras_{tag}", cyl((xa, yin - 14, hornA[1]), (xa, yin + 12, hornA[1]), 5), STEEL))
+        y1 = P.arm_y + P.hub_old / 2
+        mov = [(f"flasque_bras_int", solid(armp, lambda a, b: (a, yin, b), (0, 6, 0)), ALU),
+               (f"flasque_bras_ext", solid(armp, lambda a, b: (a, y1, b), (0, 6, 0)), ALU),
+               ("fourreau_pivot_bras", cyl((xa, yin, zS), (xa, y1 + 6, zS), 15), STEEL),
+               ("pignon_arbre", cyl((xa, yin + 12, zS), (xa, yin + 15, zS), 33), STEEL),
+               ("pignon_roue_libre", cyl((axl[0], yin + 12, axl[1]), (axl[0], yin + 15, axl[1]), 33), STEEL),
+               ("moyeu_arriere", cyl((axl[0], yin + 6, axl[1]), (axl[0], y1, axl[1]), 22), STEEL),
+               ("roue_arriere_encombrement", cyl((axl[0], P.arm_y - 22, axl[1]), (axl[0], P.arm_y + 22, axl[1]), P.wheel_r), ENV)]
+        for k, (ex, ez) in enumerate(((xa + 70 * (1 if P.arm_dx > 0 else -1), zS + 65), (xa + 10 * (1 if P.arm_dx > 0 else -1), zS + 80))):
+            mov.append((f"entretoise_bras_{k + 1}", cyl((ex, yin + 6, ez), (ex, y1, ez), 8), ALU))
+        for nm, sd, c in mov:
+            if lifted: sd = sd.rotate(V(xa, 0, zS), V(xa, 1, zS), -P.arm_lift if P.arm_dx > 0 else P.arm_lift)
+            out.append((f"{nm}_{tag}", sd, c))
+        return [(nm, sd.mirror("XZ") if mirror else sd, c) for nm, sd, c in out]
+    parts += rear_side(False, True, "babord_releve") + rear_side(True, False, "tribord_route")
+
+    # --- 2 bis. foil arrière : tête de safran relevable, orientable sur deux fémelots
+    xp, Lx, Lz = P.rud_pin_x, P.rud_Lx, P.rud_Lz; xt = P.x_transom - P.t_plate / 2
+    for k, z0 in enumerate(P.rud_gz):
+        parts.append((f"femelot_{k + 1}_embase", bx(xt - 6, xt, -45, 45, z0 - 20, z0 + 20), ALU))
+        parts.append((f"femelot_{k + 1}_bras", bx(xp - 20, xt - 6, -18, 18, z0 - 6, z0 + 6), ALU))
+    g0, g1 = P.rud_gz
+    parts.append(("axe_direction_arriere", cyl((xp, 0, g0 - 20), (xp, 0, g1 + 10), 6), STEEL))
+    parts.append(("bloc_pivot_safran", bx(xp - 18, xp + 18, -11, 11, g0 + 6, g1 - 6), ALU))
+    locks = [(Lx + P.rud_lock_r * math.cos(math.radians(a)), Lz + P.rud_lock_r * math.sin(math.radians(a))) for a in (270, 216, 90)]
+    rc = unary_union([Point(xp, g0 + 30).buffer(18), Point(xp, g1 - 28).buffer(18), Point(Lx, Lz).buffer(45)] + [Point(*q).buffer(22) for q in locks]).convex_hull
+    for z0 in P.rud_gz: rc = rc.difference(box(xp - 22, z0 - 8, xt, z0 + 8))
+    rc = biggest(rc.difference(circ(Lx, Lz, 12.5)))
+    for q in locks: rc = rc.difference(circ(*q, 10.5))
+    flats.append(("joue_tete_de_safran", 6.0, 2, rc, [], 'ALU'))
     for sg, tag in ((1, "babord"), (-1, "tribord")):
-        yc = sg * P.brg_y
-        parts.append((f"palier_semelle_{tag}", bx(xf, xf + 15, yc - 70, yc + 70, P.shaft_z - 19, P.shaft_z + 19), ALU))
-        parts.append((f"palier_corps_{tag}", cyl((xa, yc - 17, P.shaft_z), (xa, yc + 17, P.shaft_z), 32), ALU))
-        parts.append((f"contre_plaque_palier_{tag}", bx(P.x_frame_axle - tU - 5, P.x_frame_axle - tU, yc - 75, yc + 75, P.shaft_z - 25, P.shaft_z + 25), ALU))
-        parts.append((f"moyeu_bras_{tag}", cyl((xa, sg * (P.arm_y - 20), P.shaft_z), (xa, sg * (P.arm_y + 20), P.shaft_z), 22), STEEL))
+        parts.append((f"joue_tete_de_safran_{tag}", solid(rc, lambda a, b, y0=(11 if sg > 0 else -17): (a, y0, b), (0, 6, 0)), ALU))
+    parts.append(("palonnier_direction_arriere", bx(xp - 18, xp - 2, -130, 130, g1 + 8, g1 + 20), ALU))
+    parts.append(("axe_relevage_foil_arriere", cyl((Lx, -22, Lz), (Lx, 22, Lz), 6), STEEL))
+    parts.append(("goupille_foil_arriere", cyl((locks[0][0], -22, locks[0][1]), (locks[0][0], 22, locks[0][1]), 5), STEEL))
+    zb = Lz + 40 - P.rud_mast
+    parts.append(("mat_foil_arriere_encombrement", bx(Lx - 55, Lx + 55, -8, 8, zb, Lz + 40), CARB))
+    parts.append(("aile_foil_arriere_encombrement", bx(Lx - 55, Lx + 55, -300, 300, zb - 8, zb + 8), CARB))
+    parts.append(("moteur_immerge_encombrement", cyl((Lx - 100, 0, zb + 90), (Lx + 170, 0, zb + 90), 40), ALU))
+    parts.append(("helice_tuyere_encombrement", cyl((Lx - 190, 0, zb + 90), (Lx - 105, 0, zb + 90), 95), ENV))
 
     # --- 3. direction avant relevable : console pivotante + jeu de direction + fourche
     ang = math.radians(P.head_angle); u = (-math.cos(ang), math.sin(ang)); wv = (math.sin(ang), math.cos(ang))
@@ -472,6 +547,8 @@ def build(outdir):
         "contreplaque_m2_par_epaisseur": {f"{k:g} mm": round(v, 2) for k, v in sorted(area.items())},
         "masse_contreplaque_kg": round(m_ply, 1), "lisses_m": round(str_len / 1000, 1), "masse_lisses_kg": round(m_str, 1),
         "nb_pieces_3D": len(parts),
+        "largeur_hors_tout_route_mm": round(2 * (P.arm_y + P.hub_old / 2 + 6 + 8)),
+        "envergure_foils_avant_mm": round(2 * (P.hinge_y + P.hinge_e + P.wing_span)),
     }
     json.dump(rep, open(os.path.join(outdir, "bilan.json"), "w"), indent=1, ensure_ascii=False)
     print(json.dumps(rep, indent=1, ensure_ascii=False))
@@ -487,7 +564,7 @@ def build(outdir):
             vs, tr = s.tessellate(1.5)
             v = np.array([(p.x, p.y, p.z) for p in vs])
             ax.add_collection3d(Poly3DCollection(v[np.array(tr)], facecolor=col, edgecolor=(0, 0, 0, 0.15), linewidths=0.1))
-        ax.set_xlim(-1400, 1900); ax.set_ylim(-1650, 1650); ax.set_zlim(-1150, 2150); ax.view_init(el, az); ax.set_axis_off()
+        ax.set_xlim(-1750, 1850); ax.set_ylim(-1800, 1800); ax.set_zlim(-1300, 2300); ax.view_init(el, az); ax.set_axis_off()
         ax.set_box_aspect((1, 1, 1), zoom=1.9)
     ax = fig.add_subplot(2, 1, 2)
     for poly, lab, th in placed:

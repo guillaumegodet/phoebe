@@ -17,5 +17,7 @@
  "masse_contreplaque_kg": 11.6,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 71
+ "nb_pieces_3D": 106,
+ "largeur_hors_tout_route_mm": 998,
+ "envergure_foils_avant_mm": 1736
 }

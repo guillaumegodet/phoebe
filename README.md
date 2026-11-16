@@ -37,11 +37,15 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 | Charnières des foils avant | Deux joues alu de 6 mm prennent le couple porteur en sandwich (4 vis M8). Une chape pivote autour d'un axe de 12 mm et se verrouille par goupille, repliée ou déployée. | Mât de foil à platine (entraxe 165 × 90 à vérifier) |
 | Arbre arrière | Arbre de 25 mm, paliers à semelle vissés sur la face avant du couple porteur, contre-plaques alu à l'arrière. | Paliers type UCP205 |
 | Direction avant | Console pivotante entre deux joues alu boulonnées sur l'étrave, verrouillée par goupille. Elle porte un jeu de direction classique et une fourche de 20 pouces. | Fourche et jeu de direction 1 1/8 |
+| Bras des roues arrière | Deux flasques alu de 6 mm par roue, pivotant sur l'arbre. Une goupille les verrouille sur une équerre fixée au couple porteur, en position route ou relevée (69°). Chaîne entre les flasques. | Moyeu arrière de 110 mm à roue libre (type BMX), roue de 20 pouces |
+| Foil arrière | Tête de safran relevable : deux joues alu pivotent sur deux fémelots vissés au tableau (direction), le mât pivote entre les joues (relevage), avec trois positions de goupille. Palonnier pour les câbles. | Mât de foil, moteur immergé |
 | Siège | Deux rails alu posés sur les varangues, assise et dossier en contreplaqué de 9 mm. | |
 
-Dans l'assemblage STEP, le foil bâbord est déployé et le foil tribord replié.
+Dans l'assemblage STEP, le côté bâbord est en configuration eau (foil déployé, roue relevée) et le côté tribord en configuration route (foil replié, roue au sol).
 
-Non modélisé à ce stade : bras de roues arrière et leur relevage, commande de direction (leviers vers la fourche et vers le mât arrière), support orientable du foil arrière, étanchéité des sorties d'arbre, visserie.
+Cotes qui découlent de ces interfaces : largeur hors tout sur route d'environ 1,00 m (imposée par les moyeux arrière), envergure des foils avant déployés d'environ 1,74 m.
+
+Non modélisé à ce stade : commande de direction (leviers vers la fourche et vers le palonnier arrière), transmission complète (chaîne du pédalier à l'arbre), freins, étanchéité des sorties d'arbre, visserie.
 
 ## Avertissement
 
