@@ -102,7 +102,6 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Changement de vitesses, carters de chaîne, chaînes des bras arrière.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
-- Réaligner la maquette web sur le modèle CAO (elle montre encore 0,89 m de large et l'ancienne roue avant).
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
 - Choisir une licence pour le dépôt.
@@ -118,7 +117,7 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Sur le poste Windows de Guillaume, Python n'est pas dans le PATH : l'environnement est dans `.venv` (créé avec `uv venv --python 3.12`), à lancer par `.venv/Scripts/python.exe`. Préfixer par `PYTHONIOENCODING=utf-8` pour l'affichage des accents.
 - Les tubes souples (gaines, fourreau de chaîne) sont des balayages le long d'une liste de points de passage. Ils montrent un cheminement, pas une longueur de câble.
 - Les cotes des pièces du commerce (paliers UCP205, platine de mât 165 × 90, moyeu de 110 mm) sont notées de mémoire : les vérifier sur les fiches des fournisseurs avant de découper.
-- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter.
+- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter. Réalignée sur la CAO le 16 novembre 2026 (largeur, foils, fourche, pédalier, chaîne, leviers, câbles, pilote de 1,85 m) : ses cotes sont recopiées à la main, à reprendre après chaque évolution du modèle. Pour la contrôler sans navigateur piloté : capture avec Chrome en mode headless, l'ancre `#capture` masque l'interface.
 - Langue du projet : français. Messages de commit en français.
 
 ## Identité graphique et site
