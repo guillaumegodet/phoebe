@@ -9,15 +9,56 @@
   "165 kg": 174
  },
  "contreplaque_m2_par_epaisseur": {
-  "6 mm": 0.55,
-  "9 mm": 1.06,
+  "6 mm": 0.54,
+  "9 mm": 1.07,
   "12 mm": 0.52,
-  "18 mm": 0.23
+  "18 mm": 0.3
  },
- "masse_contreplaque_kg": 11.6,
+ "masse_contreplaque_kg": 12.3,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 106,
+ "nb_pieces_3D": 178,
  "largeur_hors_tout_route_mm": 998,
- "envergure_foils_avant_mm": 1736
+ "envergure_foils_avant_mm": 1736,
+ "transmission": {
+  "plateau_dents": 42,
+  "pignon_arbre_dents": 16,
+  "bras_dents_arbre_roue": [
+   16,
+   16
+  ],
+  "developpement_m_par_tour_de_pedalier": 4.12,
+  "vitesse_kmh_a_80_tr_min": 19.8,
+  "chaine_primaire_mm": 3135,
+  "chaine_primaire_maillons": 248,
+  "plan_de_chaine_y_mm": -35.0
+ },
+ "reglage_siege": {
+  "course_mm": 180.0,
+  "taille_pilote_m_siege_en_butee_arriere": 1.89,
+  "taille_pilote_m_siege_en_butee_avant": 1.55,
+  "avance_du_siege_mm_par_taille": {
+   "1.60 m": 151,
+   "1.70 m": 98,
+   "1.75 m": 72,
+   "1.80 m": 45,
+   "1.85 m": 19
+  }
+ },
+ "ergonomie": {
+  "pedalier_x_z_mm": [
+   470.0,
+   570.0
+  ],
+  "hanche_a_axe_de_pedale_jambe_tendue_siege_recule_mm": 949,
+  "pedalier_au_dessus_de_l_assise_mm": 302,
+  "pedale_au_plus_bas_z_mm": 400,
+  "manivelle_au_plus_avant_x_mm": 640
+ },
+ "direction": {
+  "braquage_vise_deg": 30.0,
+  "course_de_cable_mm": 37.5,
+  "debattement_levier_deg": 23.2,
+  "course_poignee_mm": 114
+ }
 }

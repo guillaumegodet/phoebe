@@ -26,11 +26,15 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 ## Architecture retenue
 
 - **Coque** : 2,58 m × 0,74 m, lattes d'épicéa de 18 × 18 mm et toile tendue vernie (skin-on-frame).
-- **Squelette en contreplaqué** : poutre de quille en caisson 120 × 60 mm, 13 couples dont 2 cloisons étanches et 2 couples porteurs doublés, étrave prolongée qui porte le pédalier, tableau arrière et gousset.
+- **Squelette en contreplaqué** : poutre de quille en caisson 120 × 60 mm, 13 couples dont 2 cloisons étanches et 2 couples porteurs doublés, étrave prolongée, tableau arrière et gousset.
+- **Pédalier** : sur une potence en contreplaqué de 18 mm encastrée dans la poutre, entre les couples +320 et +540 (x = 470, z = 570). Il est fixe : c'est le siège qui coulisse pour s'adapter au pilote. Il n'est plus sur l'étrave (voir « Pédalier reculé » plus bas).
 - **Foils avant** : deux foils en L articulés sur le couple porteur avant (x = +100), repliés vers le haut sur route.
 - **Foil arrière** : en T, sur une tête de safran relevable et orientable fixée au tableau.
 - **Roues** : 20 pouces. Bras arrière relevables de 69° autour de l'arbre transversal ; console de direction avant relevable sur l'étrave.
-- **Transmission** : pédalier, chaîne vers l'arbre transversal de 25 mm (x ≈ −572), une chaîne et une roue libre par roue arrière.
+- **Transmission** : plateau de 42 dents, chaîne dans le caisson de quille (plan y = −35), pignon de 16 dents sur l'arbre transversal de 25 mm (x ≈ −572), puis une chaîne et une roue libre par roue arrière. Brin tendu rectiligne entre deux galets vissés sur la semelle haute ; brin mou dans un fourreau au fond du caisson. Un seul rapport.
+- **Direction** : deux leviers (x = −230, y = ±262) sur un longeron d'épicéa. Câbles sous gaine en va-et-vient : vers le palonnier de fourche du même côté, vers le palonnier de la tête de safran en croisant. Palonniers de ±75 mm, 30° de braquage. Les gaines passent sous le plat-bord puis sur les ponts, sans traverser la coque. Les deux directions restent reliées en permanence.
+- **Freins** : tambours dans les moyeux arrière (un levier à double tirage, à bâbord), disque de 160 mm à l'avant (levier tribord). Un frein sur l'arbre ne servirait à rien : les roues libres sont dans les moyeux.
+- **Sorties d'arbre** : platine en contreplaqué contre le couple porteur, tube traversant, toile pincée entre deux brides, joint à lèvre 25 × 35 × 7.
 
 ## Chiffres de référence
 
@@ -41,7 +45,13 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 | Volume de coque sous le plat-bord | 416 L |
 | Tirant d'eau à 135 kg (véhicule et pilote) | 154 mm |
 | Tirant d'eau à 165 kg (avec un enfant) | 174 mm |
-| Contreplaqué du squelette | ≈ 2,4 m², ≈ 11,6 kg en okoumé |
+| Contreplaqué du squelette | ≈ 2,4 m², ≈ 12,3 kg en okoumé |
+| Développement | 4,12 m par tour de pédalier, 19,8 km/h à 80 tr/min |
+| Chaîne primaire | 3,14 m, 248 maillons |
+| Hanche → axe de pédale, jambe tendue, siège reculé | 0,95 m |
+| Réglage du siège | 180 mm de course : pilotes de 1,55 m (butée avant) à 1,89 m (butée arrière) ; Guillaume, 1,85 m, à 2 cm de la butée arrière |
+| Pédalier au-dessus de l'assise | 0,30 m |
+| Direction | 37,5 mm de course de câble, 23° de débattement des leviers |
 | Lisses | 18,3 m, ≈ 2,7 kg |
 | Largeur hors tout sur route | ≈ 1,00 m |
 | Envergure des foils avant déployés | ≈ 1,74 m |
@@ -52,6 +62,18 @@ Estimés à la main, à confirmer :
 - Puissance pour voler : de l'ordre de 1 kW vers 20 km/h. Autonomie en vol inférieure à une heure avec 1 kWh.
 - Budget du prototype : 6 000 à 12 000 € de matériel, médiane vers 8 000 €.
 - Version de série : 18 000 à 25 000 € en petite série.
+
+## Pédalier reculé (16 novembre 2026)
+
+Le modèle précédent plaçait le pédalier sur l'étrave, à x = 950, z = 480. Trois choses ne tenaient pas :
+
+- la cloison avant est à x = 1014 : ni le plateau ni les manivelles de 170 mm ne pouvaient tourner ;
+- la hanche du pilote est vers x = −280 : il fallait des jambes de 1,18 m (la maquette web trichait ainsi) ;
+- les talons passaient sous le niveau des varangues.
+
+Le pédalier a donc été reculé de 48 cm et monté de 9 cm, sur une potence. Il est réglé pour Guillaume, qui mesure 1,85 m : siège presque en butée arrière, à sa position d'origine. Demande de Guillaume : le siège doit coulisser d'avant en arrière pour s'adapter au pilote. Il avance donc de 180 mm au plus sur ses rails pour les pilotes plus petits (environ 5 cm par 10 cm de taille). Les tailles sont estimées avec un rapport jambe / taille de 0,503 (`leg_ratio`), à vérifier sur un gabarit. Les leviers et le centrage des masses ne changent pas pour Guillaume ; un pilote petit se retrouve plus en avant des leviers, qui restent fixes. L'alternative, avancer le siège de 35 cm en gardant le pédalier près de l'étrave, chargerait mieux la roue avant mais déplacerait le centre de gravité : **c'est une décision d'architecture à confirmer par Guillaume**. Tout suit `bb_x` et `bb_z` dans `Params`.
+
+Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongement de l'étrave vers l'arrière (x = 840 à 1014) ne sert plus au pédalier.
 
 ## Points durs connus
 
@@ -65,11 +87,21 @@ Estimés à la main, à confirmer :
 8. **Tensions électriques** : pédalier en 36 V, moteur immergé en 48 V ou plus. Deux batteries ou un pédalier 48 V.
 9. **Étanchéité** des sorties d'arbre et du passage des joues à l'étrave.
 10. **Réglementation** : vitesse limitée sur l'Erdre, statut de vélo à assistance sur route, marquage CE des bateaux à vérifier.
+11. **Pédalier haut** : 30 cm au-dessus de l'assise pour que les talons passent au-dessus des varangues (pédale au plus bas à z = 400). À valider sur un gabarit grandeur ; des manivelles plus courtes le feraient descendre.
+12. **Lumières dans la semelle haute de la poutre** : deux de 20 mm de large pour la chaîne (environ 170 et 145 mm de long) et une pour la potence. Elles affaiblissent la poutre là où elle travaille en compression : à renforcer ou à calculer.
+13. **Ancrage de la potence de pédalier** : l'effort de chaîne (jusqu'à 1,8 kN) tire à 35 cm au-dessus de la poutre. Collage dans le caisson à valider par essai.
+14. **Un seul rapport** : 4,12 m par tour, c'est long pour sortir de l'eau sur une cale. Piste : moyeu à vitesses intégrées en renvoi, ou plateau plus petit.
+15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
+16. **Ligne de chaîne** : le caisson impose y = −35, le moteur de pédalier donne environ 50 mm. Le boîtier est décalé de 15 mm vers bâbord, donc les pédales aussi.
+17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
 
 ## Ce qui reste à faire
 
-- Commande de direction : des leviers vers la fourche avant et vers le palonnier arrière.
-- Transmission complète du pédalier à l'arbre, freins.
+- Confirmer la position du pédalier (voir « Pédalier reculé »).
+- Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
+- Changement de vitesses, carters de chaîne, chaînes des bras arrière.
+- Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
+- Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
 - Réaligner la maquette web sur le modèle CAO (elle montre encore 0,89 m de large et l'ancienne roue avant).
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
@@ -82,7 +114,9 @@ Estimés à la main, à confirmer :
 - Unités en millimètres. Repère : X vers l'avant, Y vers bâbord, Z vers le haut, Z = 0 au sol en mode route, X = 0 au milieu de la coque.
 - Les pièces plates sont construites en 2D avec shapely, puis extrudées. Leurs contours alimentent aussi le DXF.
 - Dans l'assemblage, bâbord est en configuration eau (foil déployé, roue relevée) et tribord en configuration route.
-- Après toute modification : relire le STEP et vérifier que tous les solides sont valides, puis contrôler les collisions entre pièces.
+- Après toute modification : lancer `python3 cad/verifier.py`. Il régénère les sorties, relit le STEP, vérifie que tous les solides sont valides et liste les collisions entre pièces. Compter une dizaine de minutes ; `--seulement motif1,motif2` limite le contrôle aux pièces nommées. Les collisions listées entre un axe ou une goupille et la pièce qu'il traverse sont attendues : les perçages ne sont pas tous modélisés.
+- Sur le poste Windows de Guillaume, Python n'est pas dans le PATH : l'environnement est dans `.venv` (créé avec `uv venv --python 3.12`), à lancer par `.venv/Scripts/python.exe`. Préfixer par `PYTHONIOENCODING=utf-8` pour l'affichage des accents.
+- Les tubes souples (gaines, fourreau de chaîne) sont des balayages le long d'une liste de points de passage. Ils montrent un cheminement, pas une longueur de câble.
 - Les cotes des pièces du commerce (paliers UCP205, platine de mât 165 × 90, moyeu de 110 mm) sont notées de mémoire : les vérifier sur les fiches des fournisseurs avant de découper.
 - `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter.
 - Langue du projet : français. Messages de commit en français.

@@ -66,8 +66,6 @@ class Params:
     # étrave prolongée (porte le pédalier) et gousset arrière
     stem_x0: float = 840.0
     stem_top_aft: float = 525.0
-    bb_x: float = 950.0         # repère d'axe de pédalier
-    bb_z: float = 480.0
     knee_x1: float = -985.0
     # divers
     z_ref: float = 400.0        # ligne de référence gravée sur chaque couple
@@ -122,6 +120,45 @@ class Params:
     seat_w: float = 380.0
     seat_back: float = 645.0
     seat_angle: float = 49.4
+    hip_x: float = -280.0           # articulation de hanche du pilote, siège en butée arrière (repère d'ergonomie)
+    hip_z: float = 360.0
+    seat_travel: float = 180.0      # réglage du siège vers l'avant, sur ses rails, pour les pilotes plus petits
+    leg_ratio: float = 0.503        # (hanche -> axe de pédale, jambe tendue) / taille du pilote, à l'estime
+    # ---------------- pédalier et transmission primaire ----------------
+    # Le pédalier est porté par une potence en contreplaqué encastrée dans la poutre, entre deux couples.
+    # Il est fixe : c'est le siège qui coulisse pour s'adapter au pilote. Siège en butée arrière, il convient à
+    # un pilote de 1,89 m environ (Guillaume, 1,85 m, s'assoit 2 cm plus en avant). Manivelles et talons
+    # tournent sans toucher ni la cloison avant ni les varangues.
+    bb_x: float = 470.0
+    bb_z: float = 570.0
+    crank: float = 170.0
+    bb_shell: float = 68.0          # largeur du boîtier
+    bb_chainline: float = 50.0      # ligne de chaîne du moteur de pédalier (à vérifier sur sa fiche)
+    chain_y: float = -35.0          # plan de la chaîne primaire : elle passe dans le caisson de quille
+    z_ring: int = 42                # dents du plateau
+    z_shaft: int = 16               # dents du pignon d'arbre
+    z_idler: int = 15               # galets du brin tendu
+    z_idler_slack: int = 11         # galets du brin mou
+    idler_fwd_x: float = 160.0      # galets avant (entre les couples +100 et +320)
+    slack_fwd_x: float = 235.0
+    idler_aft_x: float = -490.0     # galets arrière (entre les couples -620 et -440)
+    slack_aft_x: float = -555.0
+    z_arm: tuple = (16, 16)         # dents arbre -> roue, sur chaque bras
+    # ---------------- commande de direction ----------------
+    lever_x: float = -230.0         # pivot des leviers (axe parallèle à Y)
+    lever_y: float = 262.0
+    lever_z: float = 335.0
+    lever_len: float = 290.0        # du pivot au haut de la poignée
+    lever_arm: float = 95.0         # du pivot à l'attache des câbles
+    horn: float = 75.0              # demi-longueur des palonniers (fourche et tête de safran)
+    steer_deg: float = 30.0         # braquage visé de chaque côté
+    rud_bar_z: float = 600.0        # palonnier arrière, au-dessus du pont
+    # ---------------- freins ----------------
+    drum_r: float = 50.0            # tambours dans les moyeux arrière (encombrement)
+    disc_r: float = 80.0            # disque avant
+    # ---------------- étanchéité des sorties d'arbre ----------------
+    seal_tube_r: float = 22.0       # tube de traversée (diamètre 44, alésage 35 pour un joint 25 x 35 x 7)
+    seal_flange_r: float = 36.0     # bride qui pince la toile
 
 P = Params()
 HINGE_BOLTS = [(300, 315), (325, 360), (300, 405), (325, 438)]          # (y, z) dans le couple porteur des foils
@@ -274,9 +311,69 @@ def draft_for(mass_kg):
     return (lo + hi) / 2 - P.z_keel
 
 # ----------------------------------------------------------------------------
+# TRANSMISSION PRIMAIRE (tracé dans le plan XZ, vu de tribord)
+# ----------------------------------------------------------------------------
+# La chaîne descend du plateau, court dans le caisson de quille sous le siège, puis remonte au pignon
+# de l'arbre. Brin tendu : rectiligne entre deux galets. Brin mou : dans un fourreau posé au fond du caisson.
+PITCH = 12.7
+def rp(z): return PITCH / (2 * math.sin(math.pi / z))          # rayon primitif
+XA = P.x_frame_axle + P.t_U + P.brg_h                           # abscisse de l'arbre arrière
+def tube_z(x): return beam_bot(x) + P.t_flange + 9.0            # axe du fourreau du brin mou
+def tangent(cA, rA, cB, rB):
+    """brin droit de la roue A vers la roue B. Rayon signé : + si la chaîne tourne dans le sens horaire."""
+    D = (cB[0] - cA[0], cB[1] - cA[1]); dist = math.hypot(*D)
+    a = math.atan2(D[1], D[0]) + math.acos((rA - rB) / dist)
+    n = (math.cos(a), math.sin(a))
+    return (cA[0] + rA * n[0], cA[1] + rA * n[1]), (cB[0] + rB * n[0], cB[1] + rB * n[1])
+def chain_layout():
+    ri, rs = rp(P.z_idler), rp(P.z_idler_slack)
+    W = {'arbre': ((XA, P.shaft_z), rp(P.z_shaft)),
+         'tendu_ar': ((P.idler_aft_x, beam_top(P.idler_aft_x) + 8), -ri),
+         'tendu_av': ((P.idler_fwd_x, beam_top(P.idler_fwd_x) + 8), -ri),
+         'plateau': ((P.bb_x, P.bb_z), rp(P.z_ring)),
+         'mou_av': ((P.slack_fwd_x, tube_z(P.slack_fwd_x) + rs), rs),
+         'mou_ar': ((P.slack_aft_x, tube_z(P.slack_aft_x) + rs), rs)}
+    order = ['arbre', 'tendu_ar', 'tendu_av', 'plateau', 'mou_av']
+    segs = [tangent(*W[a], *W[b]) for a, b in zip(order, order[1:])]
+    tube = [(x, tube_z(x)) for x in np.linspace(P.slack_fwd_x, P.slack_aft_x, 40)]
+    last = tangent(*W['mou_ar'], *W['arbre'])
+    def arc(name, p_in, p_out):
+        c, r = W[name]
+        a0 = math.atan2(p_in[1] - c[1], p_in[0] - c[0]); a1 = math.atan2(p_out[1] - c[1], p_out[0] - c[0])
+        return abs(r) * (((a0 - a1) if r > 0 else (a1 - a0)) % (2 * math.pi))
+    L = sum(math.dist(a, b) for a, b in segs + [last]) + sum(math.dist(a, b) for a, b in zip(tube, tube[1:]))
+    L += arc('arbre', last[1], segs[0][0]) + arc('tendu_ar', segs[0][1], segs[1][0]) + arc('tendu_av', segs[1][1], segs[2][0])
+    L += arc('plateau', segs[2][1], segs[3][0]) + arc('mou_av', segs[3][1], tube[0]) + arc('mou_ar', tube[-1], last[0])
+    def x_at(seg, z):                                            # abscisse d'un brin à la cote z
+        (x0, z0), (x1, z1) = seg; return x0 + (x1 - x0) * (z - z0) / (z1 - z0)
+    # lumières dans la semelle haute de la poutre : (x0, x1, y0, y1)
+    m = 12.0; cy = P.chain_y
+    s_fwd = (P.idler_fwd_x - ri - m, max(x_at(segs[3], beam_top(P.slack_fwd_x)), P.slack_fwd_x + rs) + m, cy - 10, cy + 10)
+    s_aft = (min(x_at(last, beam_top(P.slack_aft_x)), P.slack_aft_x - rs) - m, P.idler_aft_x + ri + m, cy - 10, cy + 10)
+    return {'roues': W, 'brins_tendus': segs[:3], 'brins_mous': [segs[3], last], 'fourreau': tube,
+            'longueur': L, 'lumieres': [s_fwd, s_aft]}
+CH = chain_layout()
+
+# potence de pédalier : plaque encastrée dans la poutre, entre les deux couples qui encadrent le pédalier
+def _half(kind): return P.t_U if kind == 'U' else P.t_frame / 2
+POT_X0 = max(x + _half(k) for x, k in P.stations if x < P.bb_x) + P.tol
+POT_X1 = min(x - _half(k) for x, k in P.stations if x > P.bb_x) - P.tol
+BB_BOLTS = [(-40, -28), (40, -28), (-40, 28), (40, 28)]
+def potence_poly():
+    bot = [(x, beam_bot(x) + P.t_flange) for x in np.linspace(POT_X0, POT_X1, 10)]
+    top = [(POT_X1, beam_top(POT_X1) + 60), (P.bb_x + 55, P.bb_z + 50), (P.bb_x - 55, P.bb_z + 50), (POT_X0, beam_top(POT_X0) + 60)]
+    g = Polygon(bot + top).buffer(0).difference(Point(P.bb_x, P.bb_z).buffer(21.5, 24))
+    for dx, dz in BB_BOLTS: g = g.difference(Point(P.bb_x + dx, P.bb_z + dz).buffer(3.25, 12))
+    return g
+CH['lumieres'].append((POT_X0 - P.tol, POT_X1 + P.tol, -P.t_plate / 2 - P.tol, P.t_plate / 2 + P.tol))
+for _x0, _x1, _, _ in CH['lumieres'][:2]:                       # les lumières de chaîne doivent rester entre deux couples
+    for _x, _k in P.stations:
+        if _x0 - _half(_k) < _x < _x1 + _half(_k): print(f"  ! lumière de chaîne {_x0:.0f}..{_x1:.0f} sous le couple x={_x}")
+
+# ----------------------------------------------------------------------------
 # CONSTRUCTION
 # ----------------------------------------------------------------------------
-def build(outdir):
+def build(outdir, apercu=True):
     import cadquery as cq
     V = cq.Vector
     def solid(poly, to3d, vec):
@@ -329,14 +426,20 @@ def build(outdir):
     xs = np.linspace(BEAM_X0, BEAM_X1, 400)
     arc = float(np.sum(np.hypot(np.diff(xs), np.diff([beam_bot(x) for x in xs]))))
     for nm, f0, f1 in (("poutre_semelle_basse", beam_bot, lambda x: beam_bot(x) + tf), ("poutre_semelle_haute", lambda x: beam_top(x) - tf, beam_top)):
-        parts.append((nm, solid(band(BEAM_X0, BEAM_X1, f0, f1), lambda a, b: (a, -P.beam_w / 2, b), (0, P.beam_w, 0)), (0.62, 0.42, 0.24)))
-    flats.append(("poutre_semelle_a_cintrer", tf, 2, box(0, 0, arc, P.beam_w), []))
+        sd = solid(band(BEAM_X0, BEAM_X1, f0, f1), lambda a, b: (a, -P.beam_w / 2, b), (0, P.beam_w, 0))
+        if nm.endswith("haute"):                             # lumières : chaîne (avant, arrière) et potence de pédalier
+            for x0, x1, y0, y1 in CH['lumieres']: sd = sd.cut(cq.Solid.makeBox(x1 - x0, y1 - y0, 400, V(x0, y0, 0)))
+        parts.append((nm, sd, (0.62, 0.42, 0.24)))
+    s_of = lambda x: float(np.interp(x, xs, np.concatenate([[0], np.cumsum(np.hypot(np.diff(xs), np.diff([beam_bot(q) for q in xs])))])))
+    top_flat = box(0, 0, arc, P.beam_w)
+    for x0, x1, y0, y1 in CH['lumieres']: top_flat = top_flat.difference(box(s_of(x0), y0 + P.beam_w / 2, s_of(x1), y1 + P.beam_w / 2))
+    flats.append(("poutre_semelle_basse_a_cintrer", tf, 1, box(0, 0, arc, P.beam_w), []))
+    flats.append(("poutre_semelle_haute_a_cintrer", tf, 1, top_flat, []))
 
     # étrave prolongée et gousset arrière
     stem = stem_with_slots()
-    parts.append(("etrave_support_pedalier", solid(stem, lambda a, b: (a, -P.t_plate / 2, b), (0, P.t_plate, 0)), (0.54, 0.35, 0.19)))
-    cross = [LineString([(P.bb_x - 15, P.bb_z), (P.bb_x + 15, P.bb_z)]), LineString([(P.bb_x, P.bb_z - 15), (P.bb_x, P.bb_z + 15)])]
-    flats.append(("etrave_support_pedalier", P.t_plate, 1, stem, cross))
+    parts.append(("etrave", solid(stem, lambda a, b: (a, -P.t_plate / 2, b), (0, P.t_plate, 0)), (0.54, 0.35, 0.19)))
+    flats.append(("etrave", P.t_plate, 1, stem, []))
     parts.append(("gousset_arriere", solid(KNEE, lambda a, b: (a, -P.t_plate / 2, b), (0, P.t_plate, 0)), (0.54, 0.35, 0.19)))
     flats.append(("gousset_arriere", P.t_plate, 1, KNEE, []))
 
@@ -346,6 +449,15 @@ def build(outdir):
     def cyl(p0, p1, r):
         d = V(*p1) - V(*p0); return cq.Solid.makeCylinder(r, d.Length, V(*p0), d)
     def circ(a, b, d): return Point(a, b).buffer(d / 2, 16)
+    PLY = (0.81, 0.66, 0.45); SPRUCE = (0.85, 0.72, 0.5); RUBBER = (0.1, 0.1, 0.11)
+    def ring(p0, p1, r_out, r_in):
+        d = (V(*p1) - V(*p0)).normalized()
+        return cyl(p0, p1, r_out).cut(cyl((V(*p0) - d).toTuple(), (V(*p1) + d).toTuple(), r_in))
+    def sy(sg, a, b): return tuple(sorted((sg * a, sg * b)))        # intervalle en Y, symétrisé
+    def gaine(pts, r=3.0):
+        """tube souple passant par une liste de points (gaine de câble, fourreau de chaîne)"""
+        vp = [V(*q) for q in pts]; e = cq.Edge.makeSpline(vp)
+        return cq.Solid.sweep(cq.Wire.makeCircle(r, vp[0], e.tangentAt(0)), [], cq.Wire.assembleEdges([e]), True, True)
 
     # --- 1. charnières des foils avant : deux joues alu prennent le couple porteur en sandwich
     hx, hy, hz, tU = P.x_frame_foil, P.hinge_y, P.hinge_z, P.t_U
@@ -399,6 +511,14 @@ def build(outdir):
         out.append((f"equerre_verrou_{tag}", solid(brk, lambda a, b: (x0, a, b), (6, 0, 0)), ALU))
         out.append((f"equerre_verrou_patte_{tag}", bx(x0, xa + 32, yin - 8, yin - 2, zB, zB + 37), ALU))
         out.append((f"goupille_bras_{tag}", cyl((xa, yin - 14, hornA[1]), (xa, yin + 12, hornA[1]), 5), STEEL))
+        # sortie d'arbre : platine rigide collée contre le couple, tube traversant, toile pincée entre deux brides, joint à lèvre
+        yp = yc + 71; rt = P.seal_tube_r
+        pl = bx(xf, xf + 72, yp, yp + 9, zS - 35, zS + 35).cut(cyl((xa, yp - 1, zS), (xa, yp + 10, zS), rt + 0.5))
+        out.append((f"platine_traversee_{tag}", pl, PLY))
+        out.append((f"tube_traversee_{tag}", ring((xa, yp + 1, zS), (xa, yin - 3, zS), rt, 17.5), ALU))
+        out.append((f"contre_bride_{tag}", ring((xa, yp + 9, zS), (xa, yp + 13, zS), P.seal_flange_r, rt + 0.5), ALU))
+        out.append((f"bride_de_toile_{tag}", ring((xa, yp + 19, zS), (xa, yp + 22, zS), P.seal_flange_r, rt + 0.5), ALU))
+        out.append((f"joint_a_levre_{tag}", ring((xa, yin - 10, zS), (xa, yin - 3, zS), 17.5, P.shaft_d / 2), RUBBER))
         y1 = P.arm_y + P.hub_old / 2
         mov = [(f"flasque_bras_int", solid(armp, lambda a, b: (a, yin, b), (0, 6, 0)), ALU),
                (f"flasque_bras_ext", solid(armp, lambda a, b: (a, y1, b), (0, 6, 0)), ALU),
@@ -406,6 +526,7 @@ def build(outdir):
                ("pignon_arbre", cyl((xa, yin + 12, zS), (xa, yin + 15, zS), 33), STEEL),
                ("pignon_roue_libre", cyl((axl[0], yin + 12, axl[1]), (axl[0], yin + 15, axl[1]), 33), STEEL),
                ("moyeu_arriere", cyl((axl[0], yin + 6, axl[1]), (axl[0], y1, axl[1]), 22), STEEL),
+               ("tambour_frein", ring((axl[0], P.arm_y + 24, axl[1]), (axl[0], P.arm_y + 50, axl[1]), P.drum_r, 22.5), ALU),
                ("roue_arriere_encombrement", cyl((axl[0], P.arm_y - 22, axl[1]), (axl[0], P.arm_y + 22, axl[1]), P.wheel_r), ENV)]
         for k, (ex, ez) in enumerate(((xa + 70 * (1 if P.arm_dx > 0 else -1), zS + 65), (xa + 10 * (1 if P.arm_dx > 0 else -1), zS + 80))):
             mov.append((f"entretoise_bras_{k + 1}", cyl((ex, yin + 6, ez), (ex, y1, ez), 8), ALU))
@@ -414,6 +535,7 @@ def build(outdir):
             out.append((f"{nm}_{tag}", sd, c))
         return [(nm, sd.mirror("XZ") if mirror else sd, c) for nm, sd, c in out]
     parts += rear_side(False, True, "babord_releve") + rear_side(True, False, "tribord_route")
+    flats.append(("platine_traversee_arbre", 9.0, 2, box(0, 0, 72, 70).difference(circ(P.brg_h, 35, 2 * P.seal_tube_r + 1)), []))
 
     # --- 2 bis. foil arrière : tête de safran relevable, orientable sur deux fémelots
     xp, Lx, Lz = P.rud_pin_x, P.rud_Lx, P.rud_Lz; xt = P.x_transom - P.t_plate / 2
@@ -424,14 +546,16 @@ def build(outdir):
     parts.append(("axe_direction_arriere", cyl((xp, 0, g0 - 20), (xp, 0, g1 + 10), 6), STEEL))
     parts.append(("bloc_pivot_safran", bx(xp - 18, xp + 18, -11, 11, g0 + 6, g1 - 6), ALU))
     locks = [(Lx + P.rud_lock_r * math.cos(math.radians(a)), Lz + P.rud_lock_r * math.sin(math.radians(a))) for a in (270, 216, 90)]
-    rc = unary_union([Point(xp, g0 + 30).buffer(18), Point(xp, g1 - 28).buffer(18), Point(Lx, Lz).buffer(45)] + [Point(*q).buffer(22) for q in locks]).convex_hull
+    zb_ = P.rud_bar_z                                         # corne des joues : porte le palonnier sur l'axe de direction, au-dessus du pont
+    rc = unary_union([Point(xp, g0 + 30).buffer(18), Point(xp, g1 - 28).buffer(18), Point(Lx, Lz).buffer(45), Point(xp, zb_).buffer(20)]
+                     + [Point(*q).buffer(22) for q in locks]).convex_hull
     for z0 in P.rud_gz: rc = rc.difference(box(xp - 22, z0 - 8, xt, z0 + 8))
-    rc = biggest(rc.difference(circ(Lx, Lz, 12.5)))
+    rc = biggest(rc.difference(circ(Lx, Lz, 12.5))).difference(circ(xp, zb_, 16.5))
     for q in locks: rc = rc.difference(circ(*q, 10.5))
     flats.append(("joue_tete_de_safran", 6.0, 2, rc, [], 'ALU'))
     for sg, tag in ((1, "babord"), (-1, "tribord")):
         parts.append((f"joue_tete_de_safran_{tag}", solid(rc, lambda a, b, y0=(11 if sg > 0 else -17): (a, y0, b), (0, 6, 0)), ALU))
-    parts.append(("palonnier_direction_arriere", bx(xp - 18, xp - 2, -130, 130, g1 + 8, g1 + 20), ALU))
+    parts.append(("palonnier_direction_arriere", cyl((xp, -P.horn - 7, zb_), (xp, P.horn + 7, zb_), 8), ALU))
     parts.append(("axe_relevage_foil_arriere", cyl((Lx, -22, Lz), (Lx, 22, Lz), 6), STEEL))
     parts.append(("goupille_foil_arriere", cyl((locks[0][0], -22, locks[0][1]), (locks[0][0], 22, locks[0][1]), 5), STEEL))
     zb = Lz + 40 - P.rud_mast
@@ -479,6 +603,87 @@ def build(outdir):
     for nm, pl, L in (("siege_assise", pan, 341.3), ("siege_dossier", back, P.seat_back)):
         parts.append((nm, solid(pl, lambda a_, b_: (a_, -P.seat_w / 2, b_), (0, P.seat_w, 0)), (0.86, 0.78, 0.6)))
         flats.append((nm, 9.0, 1, box(0, 0, L, P.seat_w), []))
+
+    # --- 5. pédalier et transmission primaire (chaîne dans le caisson de quille)
+    cy = P.chain_y; ybb = cy + P.bb_chainline; bbx, bbz = P.bb_x, P.bb_z
+    pot = potence_poly()
+    parts.append(("potence_pedalier", solid(pot, lambda a, b: (a, -P.t_plate / 2, b), (0, P.t_plate, 0)), (0.54, 0.35, 0.19)))
+    flats.append(("potence_pedalier", P.t_plate, 1, pot, []))
+    plt_ = box(bbx - 55, bbz - 42, bbx + 55, bbz + 42).difference(circ(bbx, bbz, 43))
+    for dx, dz in BB_BOLTS: plt_ = plt_.difference(circ(bbx + dx, bbz + dz, 6.5))
+    flats.append(("platine_pedalier", 4.0, 2, plt_, [], 'ALU'))
+    for y0, tag in ((P.t_plate / 2, "babord"), (-P.t_plate / 2 - 4, "tribord")):
+        parts.append((f"platine_pedalier_{tag}", solid(plt_, lambda a, b, y0=y0: (a, y0, b), (0, 4, 0)), ALU))
+    hs = P.bb_shell / 2
+    parts.append(("boitier_pedalier", ring((bbx, ybb - hs, bbz), (bbx, ybb + hs, bbz), 21, 12), ALU))
+    parts.append(("axe_pedalier", cyl((bbx, ybb - 78, bbz), (bbx, ybb + 78, bbz), 8.5), STEEL))
+    parts.append(("plateau", ring((bbx, cy - 1.5, bbz), (bbx, cy + 1.5, bbz), rp(P.z_ring), 30), STEEL))
+    parts.append(("moteur_pedalier_encombrement", cyl((bbx + 68, P.t_plate / 2 + 5, bbz - 60), (bbx + 68, ybb + 77, bbz - 60), 52), ENV))
+    for sg, tag in ((-1, "tribord"), (1, "babord")):         # manivelle tribord vers l'avant, bâbord vers l'arrière
+        ya, yb_ = sy(sg, abs(ybb + sg * 78), abs(ybb + sg * 78) + 12); xe = bbx - sg * P.crank
+        parts.append((f"manivelle_{tag}", bx(min(bbx, xe) - 14, max(bbx, xe) + 14, ya, yb_, bbz - 11, bbz + 11), ALU))
+        yo = ybb + sg * 90
+        parts.append((f"pedale_{tag}", cyl((xe, yo, bbz), (xe, yo + sg * 95, bbz), 8), ENV))
+    W = CH['roues']
+    for key, nm, ri_ in (('arbre', 'pignon_arbre_primaire', P.shaft_d / 2 + 0.1), ('tendu_av', 'galet_tendu_avant', 5.1), ('tendu_ar', 'galet_tendu_arriere', 5.1),
+                         ('mou_av', 'galet_mou_avant', 4.1), ('mou_ar', 'galet_mou_arriere', 4.1)):
+        (x0, z0), r = W[key]; h = 1.5 if key == 'arbre' else 4.0
+        parts.append((nm, ring((x0, cy - h, z0), (x0, cy + h, z0), abs(r), ri_), STEEL))
+    for key, tag in (('tendu_av', 'avant'), ('tendu_ar', 'arriere')):      # galets tendus : axe sur deux paliers vissés sur la semelle
+        (x0, z0), _ = W[key]; zt = max(beam_top(x0 - 12), beam_top(x0 + 12)) + 0.3
+        sup = cyl((x0, cy - 22, z0), (x0, cy + 22, z0), 5)
+        for ya in (cy - 22, cy + 14): sup = sup.fuse(bx(x0 - 12, x0 + 12, ya, ya + 8, zt, zt + 18))
+        parts.append((f"support_galet_tendu_{tag}", sup, ALU))
+    for key, tag in (('mou_av', 'avant'), ('mou_ar', 'arriere')):          # galets mous : axe traversant le caisson, en appui dans les âmes
+        (x0, z0), _ = W[key]; w = P.beam_w / 2 - P.t_web - 1
+        parts.append((f"axe_galet_mou_{tag}", cyl((x0, -w, z0), (x0, w, z0), 4), STEEL))
+    for k, (a, b) in enumerate(CH['brins_tendus']):
+        parts.append((f"chaine_brin_tendu_{k + 1}", cyl((a[0], cy, a[1]), (b[0], cy, b[1]), 4.5), STEEL))
+    for k, (a, b) in enumerate(CH['brins_mous']):
+        parts.append((f"chaine_brin_mou_{k + 1}", cyl((a[0], cy, a[1]), (b[0], cy, b[1]), 4.5), STEEL))
+    parts.append(("fourreau_brin_mou", gaine([(x, cy, z) for x, z in CH['fourreau'] if P.slack_aft_x + 18 < x < P.slack_fwd_x - 18], 8), RUBBER))
+
+    # --- 6. commande de direction : deux leviers, câbles sous gaine en va-et-vient vers la fourche et vers la tête de safran
+    xl, yl, zl = P.lever_x, P.lever_y, P.lever_z; zc = zl + P.lever_arm; hn = P.horn; zgr = zl + P.lever_len
+    Pb = at(P.wheel_r + 179)                                 # palonnier de fourche, en tête de pivot
+    parts.append(("palonnier_fourche", cyl(p3(Pb, -hn - 7), p3(Pb, hn + 7), 8), ALU))
+    parts.append(("potence_butees_avant", bx(1287, 1299, -6, 6, P.fork_pz + 18, 628).fuse(cyl((1293, -hn - 7, 620), (1293, hn + 7, 620), 6)), ALU))
+    parts.append(("support_butees_arriere", bx(-1173, -1167, -hn - 20, hn + 20, 548, zb_ + 12), ALU))
+    def gz(x, dz=30.0): return zg(x / P.HL) - dz             # hauteur de passage sous le plat-bord
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        parts.append((f"longeron_commande_{tag}", bx(-450, -70, *sy(sg, yl + 14, yl + 32), zl - 17, zl + 18), SPRUCE))
+        parts.append((f"levier_direction_{tag}", cyl((xl, sg * yl, zl - 15), (xl, sg * yl, zgr - 110), 11), ALU))
+        parts.append((f"poignee_{tag}", cyl((xl, sg * yl, zgr - 110), (xl, sg * yl, zgr), 15), RUBBER))
+        parts.append((f"axe_levier_{tag}", cyl((xl, sg * (yl + 11), zl), (xl, sg * (yl + 14), zl), 5), STEEL))
+        for x0, nm in ((xl + 80, "avant"), (xl - 92, "arriere")):          # butées de gaine, en équerre sur le longeron
+            st = bx(x0, x0 + 12, *sy(sg, yl + 14, yl + 26), zl + 18, zc + 8).fuse(bx(x0, x0 + 12, *sy(sg, yl - 7, yl + 14), zc - 8, zc + 8))
+            parts.append((f"butee_levier_{nm}_{tag}", st, ALU))
+        parts.append((f"cable_levier_avant_{tag}", cyl((xl + 11, sg * yl, zc), (xl + 80, sg * yl, zc), 1.5), STEEL))
+        parts.append((f"cable_levier_arriere_{tag}", cyl((xl - 80, sg * yl, zc), (xl - 11, sg * yl, zc), 1.5), STEEL))
+        # vers la fourche : même côté, la gaine arrive par l'avant du levier
+        parts.append((f"gaine_direction_avant_{tag}", gaine([(xl + 92, sg * yl, zc), (-80, sg * (yl + 2), zc + 2), (100, sg * 266, gz(100, 32)),
+            (320, sg * 296, gz(320)), (540, sg * 278, gz(540)), (760, sg * 232, gz(760)), (900, sg * 190, 500), (1014, sg * 115, 534),
+            (1170, sg * 80, 542), (1250, sg * hn, 590), (1287, sg * hn, 620)]), RUBBER))
+        a_ = V(1299, sg * hn, 620); b_ = V(Pb[0], sg * hn, Pb[1])
+        parts.append((f"cable_direction_avant_{tag}", cyl(a_.toTuple(), (b_ + (a_ - b_).normalized() * 8.5).toTuple(), 1.5), STEEL))
+        # vers la tête de safran : croisée (levier tribord -> corne bâbord), la gaine arrive par l'arrière du levier
+        parts.append((f"gaine_direction_arriere_{tag}", gaine([(xl - 92, sg * yl, zc), (-440, sg * (yl + 2), gz(-440)), (-620, sg * 256, 440),
+            (-740, sg * 232, 492), (-806, sg * 195, 522), (-900, sg * 105, 550 + 6 * sg), (-1030, -sg * 15, 560 + 6 * sg),
+            (-1120, -sg * 70, 592), (-1167, -sg * hn, zb_)]), RUBBER))
+        parts.append((f"cable_direction_arriere_{tag}", cyl((-1173, sg * hn, zb_), (xp + 8.5, sg * hn, zb_), 1.5), STEEL))
+
+    # --- 7. freins : tambours dans les moyeux arrière (levier à double tirage, à bâbord), disque à l'avant (levier tribord)
+    parts.append(("disque_frein_avant", ring(p3(A, -32), p3(A, -30), P.disc_r, 20), STEEL))
+    parts.append(("etrier_frein_avant", bx(A[0] - 60, A[0] - 30, -44.5, -34, A[1] + 50, A[1] + 85), ALU))
+    for sg, tag, nm in ((1, "babord", "arriere_double_tirage"), (-1, "tribord", "avant")):
+        parts.append((f"levier_frein_{nm}", cyl((xl + 21, sg * yl, zgr - 15), (xl + 45, sg * yl, zgr - 100), 5), ALU))
+    out_ = lambda sg: [(-560, sg * 320, 480), (-600, sg * (yin - 5), 520)]     # sortie par-dessus le plat-bord, au pivot du bras
+    parts.append(("gaine_frein_arriere_babord", gaine([(xl - 14, yl + 6, zgr - 125), (xl - 40, yl + 8, 468), (-300, 270, 458), (-440, 278, 450)] + out_(1)), RUBBER))
+    parts.append(("gaine_frein_arriere_tribord", gaine([(xl - 14, yl - 6, zgr - 125), (xl - 40, yl - 10, 462), (-330, 248, 440), (-440, 244, 420),
+        (-475, 225, 375), (-495, 150, 368), (-500, 0, 372), (-500, -200, 370), (-520, -280, 420)] + out_(-1)), RUBBER))
+    parts.append(("gaine_frein_avant", gaine([(xl + 14, -yl + 6, zgr - 125), (xl + 50, -yl + 8, 470), (-80, -yl + 8, 452), (100, -256, gz(100, 20)),
+        (320, -286, gz(320, 18)), (540, -268, gz(540, 18)), (760, -222, gz(760, 18)), (900, -178, 508), (1014, -98, 538), (1170, -60, 546),
+        (1262, -36, 562), (1340, -30, 566), (1420, -36, 480), (1468, -36, 420), (A[0] - 45, -39, A[1] + 87)]), RUBBER))
     flats[:] = [f if len(f) == 6 else f + ('CONTREPLAQUE',) for f in flats]
 
     # lisses (lofts de sections carrées)
@@ -550,9 +755,38 @@ def build(outdir):
         "largeur_hors_tout_route_mm": round(2 * (P.arm_y + P.hub_old / 2 + 6 + 8)),
         "envergure_foils_avant_mm": round(2 * (P.hinge_y + P.hinge_e + P.wing_span)),
     }
+    ratio = P.z_ring / P.z_shaft * P.z_arm[0] / P.z_arm[1]; dev = ratio * 2 * math.pi * P.wheel_r / 1000
+    course = P.horn * math.sin(math.radians(P.steer_deg)); a_lev = math.asin(course / P.lever_arm)
+    rep["transmission"] = {
+        "plateau_dents": P.z_ring, "pignon_arbre_dents": P.z_shaft, "bras_dents_arbre_roue": list(P.z_arm),
+        "developpement_m_par_tour_de_pedalier": round(dev, 2), "vitesse_kmh_a_80_tr_min": round(dev * 80 * 60 / 1000, 1),
+        "chaine_primaire_mm": round(CH['longueur']), "chaine_primaire_maillons": 2 * math.ceil(CH['longueur'] / PITCH / 2),
+        "plan_de_chaine_y_mm": P.chain_y,
+    }
+    def taille(avance):
+        return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)
+    def avance_pour(h):
+        return round(P.bb_x - P.hip_x - math.sqrt((h * 1000 * P.leg_ratio - P.crank) ** 2 - (P.bb_z - P.hip_z) ** 2))
+    rep["reglage_siege"] = {
+        "course_mm": P.seat_travel,
+        "taille_pilote_m_siege_en_butee_arriere": taille(0), "taille_pilote_m_siege_en_butee_avant": taille(P.seat_travel),
+        "avance_du_siege_mm_par_taille": {f"{h:.2f} m": avance_pour(h) for h in (1.60, 1.70, 1.75, 1.80, 1.85)},
+    }
+    rep["ergonomie"] = {
+        "pedalier_x_z_mm": [P.bb_x, P.bb_z],
+        "hanche_a_axe_de_pedale_jambe_tendue_siege_recule_mm": round(math.hypot(P.bb_x - P.hip_x, P.bb_z - P.hip_z) + P.crank),
+        "pedalier_au_dessus_de_l_assise_mm": round(P.bb_z - zs),
+        "pedale_au_plus_bas_z_mm": round(P.bb_z - P.crank),
+        "manivelle_au_plus_avant_x_mm": round(P.bb_x + P.crank),
+    }
+    rep["direction"] = {
+        "braquage_vise_deg": P.steer_deg, "course_de_cable_mm": round(course, 1),
+        "debattement_levier_deg": round(math.degrees(a_lev), 1), "course_poignee_mm": round(P.lever_len * math.sin(a_lev)),
+    }
     json.dump(rep, open(os.path.join(outdir, "bilan.json"), "w"), indent=1, ensure_ascii=False)
     print(json.dumps(rep, indent=1, ensure_ascii=False))
 
+    if not apercu: return parts, hull
     # ------------------------------------------------------------ aperçu
     import matplotlib; matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -561,7 +795,8 @@ def build(outdir):
     for k, (el, az) in enumerate(((20, -55), (4, -90))):
         ax = fig.add_subplot(2, 2, k + 1, projection='3d')
         for nm, s, col in parts:
-            vs, tr = s.tessellate(1.5)
+            souple = any(m in nm for m in ("gaine", "fourreau", "cable"))     # tubes souples : maillage grossier, sinon l'aperçu rame
+            vs, tr = s.tessellate(6.0, 0.9) if souple else s.tessellate(1.5)
             v = np.array([(p.x, p.y, p.z) for p in vs])
             ax.add_collection3d(Poly3DCollection(v[np.array(tr)], facecolor=col, edgecolor=(0, 0, 0, 0.15), linewidths=0.1))
         ax.set_xlim(-1750, 1850); ax.set_ylim(-1800, 1800); ax.set_zlim(-1300, 2300); ax.view_init(el, az); ax.set_axis_off()
