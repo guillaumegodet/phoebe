@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoebe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Un seul univers visuel : planche d'atelier nautique. Scène 3D plein écran,
+     cartouche en haut à gauche, commandes en bas. */
+  --sky-top:#dfe9ec;
+  --sky-low:#f3f1e8;
+  --ink:#16252b;
+  --ink-soft:#4d5f66;
+  --panel:rgba(250,249,244,.92);
+  --line:rgba(22,37,43,.16);
+  --accent:#0f6f86;
+  --accent-ink:#ffffff;
+  --font-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --font-body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:linear-gradient(var(--sky-top),var(--sky-low) 70%);
+  color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.4;
+  overflow:hidden;position:relative;
+}
+canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas#c:active{cursor:grabbing}
+.cartouche{
+  position:absolute;top:16px;left:16px;right:16px;max-width:400px;pointer-events:none;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+}
+.cartouche h1{
+  font-family:var(--font-display);font-weight:600;font-size:30px;line-height:1;margin:0 0 4px;
+  letter-spacing:.01em;text-transform:uppercase;
+}
+.cartouche .sub{color:var(--ink-soft);font-size:13px;margin:0 0 8px}
+.cartouche .state{
+  display:block;border-top:1px solid var(--line);padding-top:8px;font-size:14px;
+}
+.state b{font-weight:600}
+.dock{
+  position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;
+  max-width:460px;margin:0 auto;
+}
+.modes{display:flex;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.modes button{
+  flex:1;min-height:44px;border:0;background:transparent;color:var(--ink);border-radius:7px;
+  font:600 15px var(--font-body);cursor:pointer;
+}
+.modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts button{
+  flex:1;min-height:40px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:8px;font:500 14px var(--font-body);cursor:pointer;white-space:nowrap;padding:0 10px;
+}
+.opts button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet{
+  position:absolute;left:16px;right:16px;bottom:16px;max-width:460px;margin:0 auto;
+  background:#faf9f4;border:1px solid var(--line);border-radius:12px;padding:16px;
+  max-height:72%;overflow:auto;box-shadow:0 10px 40px rgba(22,37,43,.25);
+}
+.sheet[hidden]{display:none}
+.sheet h2{font-family:var(--font-display);font-size:22px;text-transform:uppercase;margin:0 0 10px;font-weight:600}
+.sheet dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.sheet dt{color:var(--ink-soft)}
+.sheet dd{margin:0;font-variant-numeric:tabular-nums}
+.sheet h3{font:600 14px var(--font-body);margin:14px 0 6px;color:var(--accent)}
+.sheet ul{margin:0;padding-left:18px;font-size:14px}
+.sheet li{margin-bottom:4px}
+.sheet .close{
+  position:sticky;top:0;float:right;min-width:44px;min-height:36px;border:1px solid var(--line);
+  background:#fff;border-radius:8px;font:500 14px var(--font-body);cursor:pointer;color:var(--ink);
+}
+.variant{display:inline-flex;margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;pointer-events:auto}
+.variant button{min-height:36px;padding:0 14px;border:0;background:transparent;font:600 14px var(--font-body);color:var(--ink);cursor:pointer}
+.variant button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.cap .cartouche,.cap .dock{display:none}
+#caplabel{display:none}
+.cap #caplabel{display:block;position:absolute;left:32px;bottom:28px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:10px 16px;font:600 26px var(--font-display);text-transform:uppercase;letter-spacing:.02em}
+.err{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center}
+.err[hidden]{display:none}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Maquette 3D de Phoebe, véhicule amphibie. Faites glisser pour tourner, pincez pour zoomer."></canvas>
+
+<div class="cartouche">
+  <h1>Phoebe</h1>
+  <p class="sub">Concept à l'échelle. Glisser pour tourner, pincer pour zoomer.</p>
+  <div class="state" id="state"></div>
+  <div class="variant" role="group" aria-label="Version"><button id="v-proto" aria-pressed="true">Prototype</button><button id="v-serie" aria-pressed="false">Série</button></div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="modes" role="group" aria-label="Mode">
+    <button id="m-route" aria-pressed="true">Route</button>
+    <button id="m-float" aria-pressed="false">Rivière</button>
+    <button id="m-foil" aria-pressed="false">Foils</button>
+    <button id="m-film" aria-pressed="false">Film</button>
+  </div>
+  <div class="opts">
+    <button id="o-skin" aria-pressed="false">Toile opaque</button>
+    <button id="o-rider" aria-pressed="true">Pilote</button>
+    <button id="o-canopy" aria-pressed="true">Capote</button>
+    <button id="o-nap" aria-pressed="false">Sieste</button>
+    <button id="o-kid" aria-pressed="false">Enfant</button>
+    <button id="o-sheet" aria-pressed="false">Fiche</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <button class="close" id="sheet-close">Fermer</button>
+  <h2>Fiche technique</h2>
+  <dl>
+    <dt>Architecture</dt><dd>Trike couché, roue avant directrice devant l'étrave, 2 roues arrière motrices, 20 pouces</dd>
+    <dt>Gabarit route</dt><dd>3,15 × 0,89 × 1,40 m, capote en place (coque 2,60 m)</dd>
+    <dt>Envergure sur l'eau</dt><dd>1,50 m, foils déployés</dd>
+    <dt>Masse visée</dt><dd>50 à 55 kg à vide, squelette compris</dd>
+    <dt>Volume de coque</dt><dd>≈ 350 L, soit ≈ 220 L de réserve avec un pilote de 80 kg</dd>
+    <dt>Tirant d'eau</dt><dd>≈ 14 cm tout relevé, ≈ 30 cm moteur à mi-course, ≈ 65 cm foils déployés</dd>
+  </dl>
+  <h3>Version série (étude de style)</h3>
+  <ul>
+    <li>Monocoque en fibre de lin et carbone au tissage apparent sous vernis, plat-bord et ponts en frêne. Le squelette est moulé dedans.</li>
+    <li>Roues à flasques pleins, garde-boue carbone, courroie à la place des chaînes, câbles intégrés.</li>
+    <li>Verrière en polycarbonate avec cellules solaires intégrées, portée par les foils repliés et par un arceau arrière. Elle reste en place sur l'eau et ne se range que pour voler.</li>
+    <li>Ailes avant repliées logées dans une gorge rembourrée sous la verrière. Chaussettes élastiques sombres sur les mâts.</li>
+    <li>Phares annulaires, siège en maille tendue, écran de bord étanche, sélecteur unique Route, Eau, Vol avec vérins.</li>
+    <li>Régulation d'altitude automatique des foils, deux batteries amovibles sur une seule tension.</li>
+    <li>Prix visé, à l'estime : 18 000 à 25 000 € en petite série. Rien de cette version n'est dimensionné.</li>
+  </ul>
+  <p style="font-size:14px;margin:14px 0 0;color:var(--ink-soft)">Les sections suivantes décrivent le prototype.</p>
+  <h3>Version avec siège enfant</h3>
+  <ul>
+    <li>Siège amovible clipsé sur le pont arrière, face à la route, avec harnais, poignées et dossier haut. Le caisson étanche arrière est conservé.</li>
+    <li>Les pieds reposent sur une tablette placée derrière le siège du pilote. Elle capote aussi l'arbre transversal et la batterie.</li>
+    <li>Les roues arrière reculent de 54 cm, sur des bras tournés vers l'arrière. Sans cela, le poids de l'enfant déchargerait la roue avant. L'empattement passe de 1,91 à 2,45 m.</li>
+    <li>Un arceau arrière porte le toit, qui reste en place sur l'eau moteur descendu.</li>
+    <li>Gabarit visé : enfant jusqu'à 1,20 m et 25 kg environ. La place pour les genoux est comptée.</li>
+    <li>Pas de vol sur foils ni de sieste avec un enfant à bord : le siège se retire pour voler seul.</li>
+    <li>À vérifier : assiette sur l'eau avec ce poids à l'arrière, freinage, protection des mains côté roues.</li>
+  </ul>
+  <h3>Squelette porteur</h3>
+  <ul>
+    <li>Poutre de quille en caisson d'épicéa et contreplaqué, de l'étrave au tableau arrière. Elle porte le siège et abrite la chaîne.</li>
+    <li>Deux couples porteurs en U, en contreplaqué doublé : un au droit des foils avant, un au droit de l'axe arrière, avec ses paliers.</li>
+    <li>Étrave et tableau arrière pleins, liés à la poutre, pour la fourche avant et le foil arrière.</li>
+    <li>Un sabot de verrouillage en bas de chaque flanc reprend l'effort qui cherche à replier le foil en vol.</li>
+    <li>La coque en lattes et toile n'est plus qu'un carénage flottant accroché à ce squelette. Surpoids estimé : 4 à 6 kg.</li>
+  </ul>
+  <h3>Coque low-tech</h3>
+  <ul>
+    <li>Ossature en lattes d'épicéa : 7 lisses et 13 couples, ligaturés ou collés.</li>
+    <li>Peau en toile polyester thermo-rétractée puis vernie, la technique des kayaks « skin-on-frame ». Environ 9 à 10 kg pour la coque.</li>
+    <li>Deux caissons étanches, avant et arrière, derrière des cloisons en contreplaqué.</li>
+  </ul>
+  <h3>Transmission</h3>
+  <ul>
+    <li>La chaîne du pédalier entraîne un arbre transversal placé sur l'axe de pivot des bras arrière : les roues se relèvent sans détendre la chaîne.</li>
+    <li>Une chaînette et une roue libre par roue arrière, sans différentiel.</li>
+    <li>Assistance sur route par un moteur de pédalier 250 W, au sec dans la coque.</li>
+    <li>La roue avant, sans transmission, pivote au-dessus du pont avant.</li>
+  </ul>
+  <h3>Propulsion et direction sur l'eau</h3>
+  <ul>
+    <li>Moteur électrique immergé d'environ 1 kW au pied du foil arrière, hélice sous tuyère. Plus d'arbre d'hélice ni de crabot.</li>
+    <li>Le mât arrière pivote d'environ 30° de chaque côté : gouvernail et poussée orientée, comme un hors-bord. Marche arrière par inversion du moteur.</li>
+    <li>Les deux leviers commandent la roue avant sur route et, par câbles, le mât arrière sur l'eau. Gâchette d'accélérateur sur le levier droit, coupe-circuit à cordon.</li>
+    <li>En rivière peu profonde, le mât reste incliné à mi-course. En vol, virages larges et à plat, rayon de 10 à 15 m au minimum.</li>
+  </ul>
+  <h3>Foils carbone</h3>
+  <ul>
+    <li>Deux foils avant en L pivotent sur le plat-bord. Repliés, ils se rejoignent au-dessus du pilote et servent d'arceau de toit.</li>
+    <li>Un foil arrière en T, relevable comme un safran, porte le moteur et sert de gouvernail. Relevé, il fait mât de signalisation.</li>
+  </ul>
+  <h3>Éclairage et batterie</h3>
+  <ul>
+    <li>Deux phares ronds à LED sur le pont avant, avec paupières, et un feu rouge au tableau arrière.</li>
+    <li>Batterie lithium d'environ 1 kWh (ordre de grandeur : 6 kg), en caisson étanche au fond de la coque derrière le siège, au plus près des roues motrices. Elle alimente le moteur du pédalier, le moteur immergé et l'éclairage. À 1 kW en vol, l'autonomie reste sous une heure.</li>
+  </ul>
+  <h3>Détails de caractère</h3>
+  <ul>
+    <li>Garde-boue en bois cintré sur les trois roues, rétroviseur rond, sonnette en laiton.</li>
+    <li>Fanion orange à l'arrière et sac de voyage roulé, sanglé sur le pont arrière.</li>
+  </ul>
+  <h3>Housses de foils</h3>
+  <ul>
+    <li>En mode route, les bords de fuite et les bouts d'aile sont à hauteur de piéton. Chaque mât et chaque aile reçoit une housse rembourrée orange à bande réfléchissante.</li>
+    <li>Les housses des ailes avant servent aussi de fourreaux pour tenir la capote.</li>
+    <li>À retirer avant de déployer. Rangement dans un sac filet qui s'égoutte.</li>
+    <li>Bords de fuite et bouts d'aile légèrement arrondis à la fabrication.</li>
+  </ul>
+  <h3>Capote solaire</h3>
+  <ul>
+    <li>Panneau semi-flexible en deux moitiés de 78 × 70 cm reliées par une charnière, soit environ 1,1 m² et de l'ordre de 180 à 200 W crête.</li>
+    <li>Il repose sur l'arceau des foils latéraux repliés et sur le foil arrière relevé. Fixation par sangles, sans percer le carbone.</li>
+    <li>Pare-brise en film transparent, de l'arceau au pont avant.</li>
+    <li>Dès que le moteur arrière descend dans l'eau (rivière ou foils), le panneau perd son appui arrière : il se range plié, cellules vers l'extérieur, sanglé à plat sur le pont arrière avec le pare-brise roulé. La moitié du dessus continue de charger. Le sac passe dans le caisson arrière.</li>
+  </ul>
+  <h3>Mode sieste</h3>
+  <ul>
+    <li>L'assise coulisse de 20 cm vers l'avant et le dossier s'incline d'environ 50° à 24°, tenu par une béquille à crans.</li>
+    <li>Le coulissement évite que le dossier bute sur la cloison arrière et sur l'arbre transversal.</li>
+    <li>Disponible en configuration route : à l'arrêt à terre, ou amarré avec le moteur relevé et la capote en place.</li>
+  </ul>
+  <h3>Points durs à valider</h3>
+  <ul>
+    <li>Structure dimensionnée à l'estime, sans calcul. Essai statique à faire avant de naviguer : suspendre l'engin par ses points de foil avec 2 à 3 fois la charge.</li>
+    <li>Voler demande de l'ordre de 1 kW à l'hélice vers 20 km/h, d'où le moteur immergé dédié. Puissance et autonomie à confirmer par essai.</li>
+    <li>Vitesse réglementée sur l'Erdre : limites à vérifier avant de voler à 20 km/h.</li>
+    <li>Étanchéité des deux paliers de l'arbre transversal, une dizaine de centimètres au-dessus de la flottaison.</li>
+    <li>Trike non inclinable et roue avant peu chargée : vitesse modérée en virage.</li>
+    <li>Stabilité en roulis à l'arrêt avec une coque de 0,74 m de large.</li>
+    <li>Régulation d'altitude des foils (palpeurs ou foils en V) non représentée.</li>
+  </ul>
+</div>
+
+<div id="caplabel"></div>
+<div class="err" id="err" hidden>La 3D n'a pas pu démarrer sur cet appareil (WebGL indisponible).</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+if(!window.THREE){document.getElementById('err').hidden=false;return;}
+const canvas=document.getElementById('c');
+const CAP=location.hash==='#capture';if(CAP)document.body.classList.add('cap');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:CAP});}
+catch(e){document.getElementById('err').hidden=false;return;}
+renderer.setPixelRatio(CAP?1:Math.min(window.devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xe4ebea,45,230);
+const camera=new THREE.PerspectiveCamera(38,1,0.05,200);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f86,0.7));
+const sun=new THREE.DirectionalLight(0xfff4e0,0.75);
+sun.position.set(2.5,5,3);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+Object.assign(sun.shadow.camera,{left:-3,right:3,top:3,bottom:-3,near:0.5,far:14});
+sun.shadow.bias=-0.0015;
+scene.add(sun);scene.add(sun.target);
+
+/* ---------- matériaux ---------- */
+const M={
+  skin:new THREE.MeshPhysicalMaterial({color:0xece3c8,roughness:0.55,transparent:true,opacity:0.42,side:THREE.DoubleSide,depthWrite:false}),
+  wood:new THREE.MeshStandardMaterial({color:0xb7864f,roughness:0.7}),
+  ply:new THREE.MeshStandardMaterial({color:0xcfa873,roughness:0.75,side:THREE.DoubleSide}),
+  carbon:new THREE.MeshStandardMaterial({color:0x17191d,roughness:0.32,metalness:0.45}),
+  tyre:new THREE.MeshStandardMaterial({color:0x202224,roughness:0.9}),
+  alu:new THREE.MeshStandardMaterial({color:0xb9bfc4,roughness:0.35,metalness:0.8}),
+  rider:new THREE.MeshStandardMaterial({color:0x6c7b8a,roughness:0.85}),
+  accent:new THREE.MeshStandardMaterial({color:0xe2572b,roughness:0.5})
+};
+
+const P=[],S=[],skinMeshes=[],guards=[];let variant='proto',pvMat=null,childOn=false;
+
+/* ---------- helpers ---------- */
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+function cyl(a,b,r,mat,seg){
+  const d=b.clone().sub(a),len=d.length();
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg||10),mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());
+  m.castShadow=true;return m;
+}
+function tube(pts,r,mat){
+  const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*3,r,6,false),mat);
+  m.castShadow=true;return m;
+}
+function airfoil(chord,thick,span){
+  // profil symétrique type NACA, bord d'attaque vers +x, extrudé le long de +z
+  const up=[],lo=[],N=14;
+  for(let i=0;i<=N;i++){
+    const u=Math.pow(i/N,1.6);
+    const yt=5*thick*chord*(0.2969*Math.sqrt(u)-0.126*u-0.3516*u*u+0.2843*u*u*u-0.1036*u*u*u*u);
+    const x=chord*(0.5-u);
+    up.push(new THREE.Vector2(x,yt));lo.push(new THREE.Vector2(x,-yt));
+  }
+  const sh=new THREE.Shape(up.concat(lo.reverse().slice(1,-1)));
+  return new THREE.ExtrudeGeometry(sh,{depth:span,bevelEnabled:false,curveSegments:1});
+}
+
+/* ---------- coque : forme paramétrique ---------- */
+const HL=1.3; // demi-longueur
+const hb=t=>t>=0?0.37*Math.pow(Math.max(0,1-Math.pow(t,2.4)),0.7):0.37*(1-0.35*Math.pow(-t,3));
+const yb=t=>0.14+(t>=0?0.24*Math.pow(t,3):0.12*Math.pow(-t,3));
+const yg=t=>0.46+0.05*t*t;
+const sec=(t,th)=>{const g=yg(t),k=yb(t);return V(t*HL,g-(g-k)*Math.pow(Math.sin(th),0.6),hb(t)*Math.cos(th));};
+const deckPt=(t,u)=>V(t*HL,yg(t)+0.045*(1-u*u),hb(t)*u);
+const T_AFT=-0.62,T_FWD=0.78; // limites du cockpit
+
+function gridGeo(nx,ny,fn){
+  const pos=[],idx=[],uv=[];
+  for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++){const p=fn(i/nx,j/ny);pos.push(p.x,p.y,p.z);uv.push(i/nx,j/ny);}
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+    const a=i*(ny+1)+j,b=a+1,c=a+ny+1,d=c+1;idx.push(a,c,b,b,c,d);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();return g;
+}
+function capGeo(t){
+  const ring=[];
+  for(let j=0;j<=16;j++)ring.push(sec(t,Math.PI*j/16));
+  for(let j=1;j<10;j++)ring.push(deckPt(t,-1+2*j/10));
+  const c=V(t*HL,(yg(t)+yb(t))/2,0),pos=[c.x,c.y,c.z],idx=[];
+  ring.forEach(p=>pos.push(p.x,p.y,p.z));
+  for(let i=1;i<=ring.length;i++)idx.push(0,i,i%ring.length+1);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setIndex(idx);g.computeVertexNormals();return g;
+}
+
+const craft=new THREE.Group();scene.add(craft);
+const hull=new THREE.Group();craft.add(hull);
+const addP=m=>{craft.add(m);P.push(m);return m;},addHP=m=>{hull.add(m);P.push(m);return m;};
+
+const skinParts=[
+  gridGeo(52,16,(a,b)=>sec(-1+2*a,Math.PI*b)),
+  gridGeo(10,10,(a,b)=>deckPt(-1+(T_AFT+1)*a,-1+2*b)),
+  gridGeo(8,10,(a,b)=>deckPt(T_FWD+(1-T_FWD)*a,-1+2*b)),
+  capGeo(-1)
+];
+skinParts.forEach(g=>{const m=new THREE.Mesh(g,M.skin);m.castShadow=true;m.renderOrder=2;hull.add(m);skinMeshes.push(m);});
+// masque de profondeur : empêche l'eau d'apparaître à l'intérieur de la coque
+const lid=new THREE.Mesh(gridGeo(40,2,(a,b)=>{const t=-1+1.99*a,g=yg(t),k=yb(t),yl=0.4;
+  const sn=Math.min(1,Math.pow(Math.max(0,(g-yl)/(g-k)),1/0.6)),w=hb(t)*Math.sqrt(1-sn*sn);
+  return V(t*HL,yl,w*(-1+2*b));}),new THREE.MeshBasicMaterial({colorWrite:false,transparent:true,side:THREE.DoubleSide}));
+lid.renderOrder=2.5;hull.add(lid);
+// cloisons étanches
+[T_AFT,T_FWD].forEach(t=>{const m=new THREE.Mesh(capGeo(t),M.ply);m.castShadow=true;hull.add(m);});
+// lisses
+[0,0.2,0.36,0.5,0.64,0.8,1].forEach(f=>{
+  const pts=[];for(let i=0;i<=30;i++)pts.push(sec(-1+1.985*i/30,Math.PI*f));
+  const m=tube(pts,(f===0||f===1)?0.011:0.008,M.wood);hull.add(m);if(f>0&&f<1)P.push(m);
+});
+// couples
+for(let t=-0.9;t<=0.91;t+=0.15){
+  const pts=[];for(let j=0;j<=16;j++)pts.push(sec(t,Math.PI*j/16));
+  addHP(tube(pts,0.007,M.wood));
+}
+// barrots de pont
+[-0.92,-0.78,0.9].forEach(t=>{
+  const pts=[];for(let j=0;j<=8;j++)pts.push(deckPt(t,-1+2*j/8));
+  addHP(tube(pts,0.006,M.wood));
+});
+
+/* ---------- châssis Moskitos ---------- */
+/* ---------- squelette porteur ---------- */
+const structM=new THREE.MeshStandardMaterial({color:0x8a5a30,roughness:0.75,side:THREE.DoubleSide});
+(function(){
+  const addS=g=>{const m=new THREE.Mesh(g,structM);m.castShadow=true;craft.add(m);return m;};
+  // poutre de quille en caisson, de l'étrave au tableau arrière (la chaîne passe dedans)
+  const kt=a=>-0.985+1.945*a,kz=t=>Math.min(0.07,hb(t)*0.8),ky=t=>yb(t)+0.015;
+  [-1,1].forEach(s=>addS(gridGeo(40,1,(a,b)=>{const t=kt(a);return V(t*HL,ky(t)+0.075*b,s*kz(t));})));
+  addS(gridGeo(40,1,(a,b)=>{const t=kt(a);return V(t*HL,ky(t),kz(t)*(-1+2*b));}));
+  // couples porteurs en U : foils avant, axe arrière
+  const uframe=x0=>{
+    const t=x0/HL,g=yg(t),out=th=>{const p=sec(t,th);return V(0,p.y+0.004,p.z*0.985);},
+      inn=th=>{const p=sec(t,th);return V(0,g-(g-p.y)*0.7,p.z*0.74);};
+    [-0.018,0.018].forEach(dx=>addS(gridGeo(24,1,(a,b)=>{const p=out(Math.PI*a),q=inn(Math.PI*a);
+      return V(x0+dx,p.y+(q.y-p.y)*b,p.z+(q.z-p.z)*b);})));
+    addS(gridGeo(24,1,(a,b)=>{const q=inn(Math.PI*a);return V(x0-0.018+0.036*b,q.y,q.z);}));
+  };
+  uframe(0.1);uframe(-0.62);
+  // tableau arrière et étrave pleins
+  addS(capGeo(-0.985));
+  addS(gridGeo(8,1,(a,b)=>{const t=0.8+0.195*a,y0=yb(t)+0.015;return V(t*HL,y0+(yg(t)+0.02-y0)*b,0);}));
+  // paliers de l'arbre arrière, sabots de verrouillage des foils
+  [-1,1].forEach(s=>{
+    const bo=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.05,14),M.alu);bo.rotation.x=Math.PI/2;bo.position.set(-0.62,0.36,s*0.345);craft.add(bo);
+    const sb=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.03,0.12),M.alu);sb.position.set(0.1,0.22,s*0.345);craft.add(sb);
+  });
+})();
+function plank(a,b,w,mat){
+  const d=b.clone().sub(a),len=d.length();
+  const m=new THREE.Mesh(new THREE.BoxGeometry(len,0.02,w),mat);
+  m.position.copy(a).add(b).multiplyScalar(0.5);m.rotation.z=Math.atan2(d.y,d.x);m.castShadow=true;return m;
+}
+// pédalier
+craft.add(cyl(V(0.95,0.2,0),V(0.95,0.5,0),0.016,M.wood));
+craft.add(cyl(V(0.95,0.5,-0.09),V(0.95,0.5,0.09),0.012,M.alu));
+craft.add(cyl(V(0.95,0.5,0.09),V(0.86,0.5,0.09),0.008,M.alu));
+craft.add(cyl(V(0.95,0.5,-0.09),V(1.04,0.5,-0.09),0.008,M.alu));
+// leviers de direction
+[-1,1].forEach(s=>craft.add(cyl(V(-0.2,0.26,s*0.27),V(-0.25,0.54,s*0.27),0.01,M.alu)));
+
+/* ---------- roues ---------- */
+function wheel(){
+  const g=new THREE.Group();
+  const ty=new THREE.Mesh(new THREE.TorusGeometry(0.228,0.022,10,44),M.tyre);ty.castShadow=true;g.add(ty);
+  g.add(new THREE.Mesh(new THREE.TorusGeometry(0.2,0.008,6,44),M.alu));
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.07,10),M.alu);hub.rotation.x=Math.PI/2;g.add(hub);
+  for(let i=0;i<12;i++){
+    const a=i*Math.PI/6;
+    const sp=cyl(V(Math.cos(a)*0.02,Math.sin(a)*0.02,0),V(Math.cos(a)*0.2,Math.sin(a)*0.2,0),0.0025,M.alu,4);g.add(sp);P.push(sp);
+  }
+  const dc=new THREE.Mesh(new THREE.CylinderGeometry(0.203,0.203,0.014,32),M.carbon);dc.rotation.x=Math.PI/2;g.add(dc);S.push(dc);
+  return g;
+}
+const disc=r=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.006,20),M.alu);m.rotation.x=Math.PI/2;return m;};
+const PIV=V(-0.62,0.36,0);
+// roue avant directrice : fourche relevable devant l'étrave
+const fork=new THREE.Group();fork.position.set(1.27,0.53,0);craft.add(fork);
+const fw=wheel();fw.position.set(0.29,-0.28,0);fork.add(fw);
+[-1,1].forEach(s=>fork.add(cyl(V(0,0,s*0.045),V(0.29,-0.28,s*0.045),0.011,M.alu)));
+fork.add(cyl(V(0,0,-0.07),V(0,0,0.07),0.02,M.alu));
+fork.add(cyl(V(0.29,-0.28,-0.05),V(0.29,-0.28,0.05),0.008,M.alu));
+// roues arrière motrices sur bras tirés vers l'avant, pivot = arbre intermédiaire
+const rw=[];
+const mkArms=dx=>[-1,1].map(s=>{
+  const a=new THREE.Group();a.position.set(PIV.x,PIV.y,s*0.425);
+  const w=wheel();w.position.set(dx,-0.11,0);a.add(w);rw.push(w);
+  a.add(cyl(V(0,0,-s*0.03),V(dx,-0.11,-s*0.03),0.014,M.wood));
+  a.add(cyl(V(0,0,-s*0.048),V(dx,-0.11,-s*0.048),0.005,M.tyre,6));
+  const s1=disc(0.045);s1.position.set(0,0,-s*0.048);a.add(s1);
+  const s2=disc(0.04);s2.position.set(dx,-0.11,-s*0.048);a.add(s2);
+  craft.add(a);return a;
+});
+const arms=mkArms(0.27),armsB=mkArms(-0.27);   // armsB : roues reculées pour la version enfant
+craft.add(cyl(V(PIV.x,PIV.y,-0.42),V(PIV.x,PIV.y,0.42),0.02,M.alu));
+// chaîne pédalier -> arbre intermédiaire, sous le siège
+const ch=[V(0.95,0.5,0),V(0.3,0.17,0),V(-0.5,0.17,0),V(PIV.x,PIV.y,0)];
+for(let i=0;i<3;i++)craft.add(cyl(ch[i],ch[i+1],0.009,M.tyre,6));
+[0.06,0.03,0.03,0.045].forEach((r,i)=>{const d=disc(r);d.position.copy(ch[i]);craft.add(d);});
+const motor=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.1,16),M.carbon);motor.rotation.x=Math.PI/2;motor.position.set(0.9,0.43,0);craft.add(motor);
+
+
+/* ---------- foils ---------- */
+const DEPTH=0.85;
+const fronts=[-1,1].map(s=>{
+  const g=new THREE.Group();g.position.set(0.1,0.47,s*0.385);
+  const strut=new THREE.Mesh(airfoil(0.12,0.13,DEPTH),M.carbon);strut.rotation.x=Math.PI/2;strut.castShadow=true;g.add(strut);
+  const wing=new THREE.Mesh(airfoil(0.18,0.11,0.37),M.carbon);
+  wing.position.set(0,-DEPTH,s>0?0:-0.37);wing.castShadow=true;g.add(wing);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.012,8,6),M.accent);tip.position.set(0,-DEPTH,s*0.37);g.add(tip);
+  const hinge=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.2,10),M.alu);hinge.rotation.z=Math.PI/2;g.add(hinge);
+  craft.add(g);return {g,s};
+});
+const rear=new THREE.Group();rear.position.set(-1.335,0.5,0);craft.add(rear);
+const steerG=new THREE.Group();rear.add(steerG);   // le mât entier pivote : gouvernail et poussée orientée
+const PY=-DEPTH+0.08;
+(function(){
+  const mast=new THREE.Mesh(airfoil(0.11,0.14,DEPTH+0.02),M.carbon);mast.rotation.x=Math.PI/2;mast.castShadow=true;steerG.add(mast);
+  const wing=new THREE.Mesh(airfoil(0.11,0.11,0.6),M.carbon);wing.position.set(0,-DEPTH-0.02,-0.3);wing.castShadow=true;steerG.add(wing);
+  const pod=new THREE.Mesh(new THREE.CylinderGeometry(0.046,0.03,0.27,14),M.alu);
+  pod.rotation.z=Math.PI/2;pod.position.set(-0.03,PY,0);steerG.add(pod);
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.046,14,10),M.alu);nose.position.set(0.105,PY,0);steerG.add(nose);
+  const duct=new THREE.Mesh(new THREE.CylinderGeometry(0.097,0.09,0.085,24,1,true),new THREE.MeshStandardMaterial({color:0x17191d,roughness:0.35,metalness:0.4,side:THREE.DoubleSide}));
+  duct.rotation.z=Math.PI/2;duct.position.set(-0.18,PY,0);steerG.add(duct);
+  for(let i=0;i<3;i++){const a=i*2.094+0.5;steerG.add(cyl(V(-0.15,PY,0),V(-0.16,PY+Math.cos(a)*0.093,Math.sin(a)*0.093),0.004,M.alu,5));}
+  steerG.add(cyl(V(0,0.03,-0.13),V(0,0.03,0.13),0.008,M.alu,8));     // palonnier
+  const br=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.1,0.07),M.alu);br.position.set(0.02,-0.02,0);rear.add(br);
+})();
+const prop=new THREE.Group();prop.position.set(-0.18,PY,0);steerG.add(prop);
+[0,1].forEach(i=>{
+  const b=new THREE.Mesh(new THREE.BoxGeometry(0.006,0.15,0.035),M.accent);
+  b.rotation.x=i*Math.PI/2;b.rotation.order='XYZ';prop.add(b);
+});
+// housses de foils pour le mode route
+const coverM=new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.92});
+const bandM=new THREE.MeshStandardMaterial({color:0xeef2f3,emissive:0xcfd6d8,emissiveIntensity:0.5,roughness:0.4});
+const covF=[],covFW=[],covR=[];
+fronts.forEach(f=>{
+  const sl=new THREE.Mesh(airfoil(0.145,0.22,DEPTH-0.1),coverM);sl.rotation.x=Math.PI/2;sl.position.y=-0.06;sl.castShadow=true;f.g.add(sl);covF.push(sl);
+  [-0.3,-0.6].forEach(y=>{const b=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.035,0.036),bandM);b.position.y=y;f.g.add(b);covF.push(b);});
+  const wc=new THREE.Mesh(airfoil(0.205,0.17,0.39),coverM);wc.position.set(0,-DEPTH,f.s>0?-0.01:-0.38);wc.castShadow=true;f.g.add(wc);covFW.push(wc);
+  const wb=new THREE.Mesh(new THREE.BoxGeometry(0.21,0.04,0.035),bandM);wb.position.set(0,-DEPTH,f.s*0.3);f.g.add(wb);covFW.push(wb);
+});
+(function(){
+  const sl=new THREE.Mesh(airfoil(0.135,0.22,DEPTH-0.25),coverM);sl.rotation.x=Math.PI/2;sl.position.y=-0.08;sl.castShadow=true;steerG.add(sl);covR.push(sl);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.035,0.034),bandM);b.position.y=-0.35;steerG.add(b);covR.push(b);
+  const wc=new THREE.Mesh(airfoil(0.135,0.17,0.62),coverM);wc.position.set(0,-DEPTH-0.02,-0.31);wc.castShadow=true;steerG.add(wc);covR.push(wc);
+  [-0.22,0.22].forEach(z=>{const wb=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.03,0.035),bandM);wb.position.set(0,-DEPTH-0.02,z);steerG.add(wb);covR.push(wb);});
+})();
+function showCovers(stow,rstow){
+  const f=stow>0.97,r=rstow>0.97;
+  covF.forEach(o=>{o.visible=f;});covFW.forEach(o=>{o.visible=f&&variant==='proto';});covR.forEach(o=>{o.visible=r;});
+}
+// câbles de direction leviers -> palonnier, câble batterie -> moteur, gâchette, coupe-circuit
+[-1,1].forEach(s=>addP(tube([V(-0.2,0.27,s*0.27),V(-0.45,0.4,s*0.31),V(-0.8,0.45,s*0.27),V(-1.2,0.47,s*0.16),V(-1.33,0.52,s*0.13)],0.003,M.tyre)));
+addP(tube([V(-0.795,0.3,0),V(-1.0,0.33,0),V(-1.26,0.44,0),V(-1.32,0.5,0)],0.005,M.tyre));
+(function(){
+  const trig=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.05,0.016),M.accent);trig.position.set(-0.228,0.5,0.288);trig.rotation.z=0.2;craft.add(trig);
+  const redM=new THREE.MeshStandardMaterial({color:0xd8261c,roughness:0.5});
+  const kill=new THREE.Mesh(new THREE.CylinderGeometry(0.016,0.016,0.03,12),redM);kill.position.set(-0.08,0.49,0.355);craft.add(kill);
+  craft.add(tube([V(-0.08,0.5,0.355),V(-0.14,0.44,0.3),V(-0.2,0.47,0.24),V(-0.26,0.42,0.17)],0.003,redM));
+})();
+
+/* ---------- phares, batterie, détails ---------- */
+const bagG=new THREE.Group();craft.add(bagG);
+(function(){
+  const lensM=new THREE.MeshStandardMaterial({color:0xfff6d8,emissive:0xffe9a8,emissiveIntensity:0.9,roughness:0.2});
+  const redM=new THREE.MeshStandardMaterial({color:0xd8261c,emissive:0xc21a12,emissiveIntensity:0.8,roughness:0.3});
+  const lidM=new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.6,side:THREE.DoubleSide});
+  const brass=new THREE.MeshStandardMaterial({color:0xc9a23f,roughness:0.3,metalness:0.85});
+  const batM=new THREE.MeshStandardMaterial({color:0x1f6f6a,roughness:0.5});
+  const bagM=new THREE.MeshStandardMaterial({color:0x6f7f4a,roughness:0.95});
+  // phares : deux yeux ronds sur le pont avant
+  [-1,1].forEach(s=>{
+    const g=new THREE.Group();g.position.set(1.1,0.63,s*0.095);g.rotation.z=0.08;
+    const shell=new THREE.Mesh(new THREE.SphereGeometry(0.052,18,14),M.ply);shell.scale.x=0.85;shell.castShadow=true;g.add(shell);
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.043,24),lensM);lens.rotation.y=Math.PI/2;lens.position.x=0.034;g.add(lens);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.045,0.005,6,24),M.alu);ring.rotation.y=Math.PI/2;ring.position.x=0.032;g.add(ring);
+    const lid=new THREE.Mesh(new THREE.SphereGeometry(0.058,18,8,0,Math.PI*2,0,Math.PI*0.36),lidM);lid.rotation.z=-0.5;g.add(lid);
+    addP(g);
+    craft.add(cyl(V(1.1,0.54,s*0.095),V(1.1,0.6,s*0.095),0.009,M.alu,8));
+  });
+  // feu arrière
+  const tail=new THREE.Mesh(new THREE.CircleGeometry(0.035,20),redM);tail.rotation.y=-Math.PI/2;tail.position.set(-1.304,0.4,0);craft.add(tail);
+  const tr=new THREE.Mesh(new THREE.TorusGeometry(0.037,0.005,6,20),M.alu);tr.rotation.y=Math.PI/2;tr.position.set(-1.304,0.4,0);craft.add(tr);
+  // batterie au fond de la coque, derrière le siège
+  const bat=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.09,0.36),batM);bat.position.set(-0.735,0.3,0);bat.castShadow=true;craft.add(bat);
+  const bstripe=new THREE.Mesh(new THREE.BoxGeometry(0.124,0.02,0.364),lidM);bstripe.position.set(-0.735,0.325,0);craft.add(bstripe);
+  addP(tube([V(-0.675,0.3,0.12),V(-0.5,0.26,0.11),V(0.2,0.2,0.1),V(0.7,0.22,0.09),V(0.88,0.4,0.04)],0.005,M.tyre));
+  // garde-boue en bois cintré
+  const guard=(parent,cx,cy,rot)=>{
+    const m=new THREE.Mesh(new THREE.TorusGeometry(0.272,0.006,4,26,2.3),M.wood);
+    m.scale.z=5;m.position.set(cx,cy,0);m.rotation.z=rot;m.castShadow=true;parent.add(m);guards.push(m);
+  };
+  arms.forEach(a=>guard(a,0.27,-0.11,0.42));armsB.forEach(a=>guard(a,-0.27,-0.11,0.42));
+  guard(fork,0.29,-0.28,0.75);
+  // rétroviseur, sonnette
+  craft.add(cyl(V(0.45,0.47,-0.365),V(0.5,0.7,-0.4),0.005,M.alu,6));
+  const mir=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.008,20),M.alu);mir.rotation.z=Math.PI/2;mir.position.set(0.5,0.72,-0.4);craft.add(mir);
+  const bell=new THREE.Mesh(new THREE.SphereGeometry(0.024,14,10),brass);bell.position.set(-0.25,0.565,0.27);addP(bell);
+  // sac roulé sanglé sur le pont arrière
+  const bag=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.34,16),bagM);bag.rotation.x=Math.PI/2;bag.position.set(-1.0,0.6,0);bag.castShadow=true;bagG.add(bag);
+  [-0.09,0.09].forEach(z=>{const st=new THREE.Mesh(new THREE.TorusGeometry(0.072,0.006,6,20),M.tyre);st.position.set(-1.0,0.6,z);bagG.add(st);});
+})();
+// fanion
+const flag=new THREE.Group();flag.position.set(-0.82,1.0,0.365);addP(flag);
+addP(cyl(V(-0.82,0.47,0.365),V(-0.82,1.0,0.365),0.005,M.alu,6));
+(function(){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,0,-0.13,0,-0.22,-0.065,0],3));g.setIndex([0,1,2]);g.computeVertexNormals();
+  flag.add(new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.8,side:THREE.DoubleSide})));
+})();
+
+/* ---------- capote solaire ---------- */
+const roofG=new THREE.Group();craft.add(roofG);
+const stowG=new THREE.Group();craft.add(stowG);
+const shieldM=new THREE.MeshPhysicalMaterial({color:0xd6ecf2,roughness:0.1,side:THREE.DoubleSide,transparent:true,opacity:0.3,depthWrite:false});
+(function(){
+  const pc=document.createElement('canvas');pc.width=pc.height=256;const cx=pc.getContext('2d');
+  cx.fillStyle='#dfe3e6';cx.fillRect(0,0,256,256);
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){
+    cx.fillStyle='#17264a';cx.fillRect(8+i*61,8+j*61,57,57);
+    cx.strokeStyle='rgba(190,205,230,.4)';cx.lineWidth=1;
+    for(let q=1;q<4;q++){cx.beginPath();cx.moveTo(8+i*61,8+j*61+q*14.25);cx.lineTo(65+i*61,8+j*61+q*14.25);cx.stroke();}
+  }
+  const pvM=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(pc),roughness:0.25,metalness:0.3});
+  pvMat=pvM;
+  const eM=new THREE.MeshStandardMaterial({color:0xdedcd4,roughness:0.6});
+  const half=()=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.77,0.012,0.70),[eM,eM,pvM,eM,eM,eM]);m.castShadow=true;return m;};
+  // en place : deux moitiés posées sur l'arceau et sur le foil arrière
+  const pan=new THREE.Group();pan.position.set(-0.605,1.368,0);pan.rotation.z=-0.0355;roofG.add(pan);
+  [-1,1].forEach(s=>{const h=half();h.position.x=s*0.3875;pan.add(h);});
+  const hinge=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.7,8),M.alu);hinge.rotation.x=Math.PI/2;pan.add(hinge);
+  const shield=new THREE.Mesh(gridGeo(8,6,(a,b)=>{const u=-1+2*b,w=0.35-0.13*a;
+    return V(0.17+0.85*a+0.04*(1-u*u)*Math.sin(Math.PI*a),1.332-0.772*a+0.07*Math.sin(Math.PI*a),w*u);}),shieldM);
+  shield.renderOrder=5;roofG.add(shield);
+  [-1,1].forEach(s=>roofG.add(cyl(V(0.17,1.332,s*0.35),V(1.02,0.56,s*0.22),0.004,M.tyre,5)));
+  // rangée : pliée cellules vers l'extérieur, sanglée sur le pont arrière
+  const top=half();top.position.set(-1.1,0.603,0);stowG.add(top);
+  const bot=half();bot.position.set(-1.1,0.589,0);bot.rotation.x=Math.PI;stowG.add(bot);
+  [-0.95,-1.27].forEach(x=>{const st=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.004,0.72),M.tyre);st.position.set(x,0.611,0);stowG.add(st);});
+  const roll=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.6,12),new THREE.MeshStandardMaterial({color:0xe6f0f2,roughness:0.3,transparent:true,opacity:0.8}));
+  roll.rotation.x=Math.PI/2;roll.position.set(-1.455,0.635,0);stowG.add(roll);
+})();
+let canopyOn=true;
+function showCanopy(stow,rstow){
+  const ser=variant==='serie';
+  roofG.visible=!ser&&canopyOn&&stow>0.95&&(rstow>0.95||childOn);
+  roofS.visible=ser&&canopyOn&&stow>0.95;
+  stowG.visible=canopyOn&&(stow<0.6||(!ser&&!childOn&&rstow<0.6));
+  bagG.visible=!ser&&!childOn&&!stowG.visible;
+}
+
+/* ---------- version série ---------- */
+const roofS=new THREE.Group();craft.add(roofS);
+const mkTex=(w,h,draw,rx,ry)=>{const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'));
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t;};
+const shellM=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.38,clearcoat:1,clearcoatRoughness:0.15,side:THREE.DoubleSide,
+  map:mkTex(16,16,x=>{x.fillStyle='#9a7a52';x.fillRect(0,0,16,16);x.fillStyle='#84663e';x.fillRect(0,0,8,8);x.fillRect(8,8,8,8);},90,22)});
+const deckM=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.55,side:THREE.DoubleSide,
+  map:mkTex(8,64,x=>{x.fillStyle='#dcc8a0';x.fillRect(0,0,8,64);x.fillStyle='#8b7350';for(let i=0;i<8;i++)x.fillRect(0,i*8,8,1);},1,1)});
+const meshSeatM=new THREE.MeshStandardMaterial({color:0x2b3036,roughness:0.9,side:THREE.DoubleSide});
+let seatMat=M.ply;
+(function(){
+  const sm=(a,b,t)=>{const u=Math.min(1,Math.max(0,(t-a)/(b-a)));return u*u*(3-2*u);};
+  const prof=new THREE.CatmullRomCurve3([V(1.02,0.57,0),V(0.75,0.97,0),V(0.42,1.25,0),V(0.1,1.37,0),V(-0.5,1.42,0),V(-1.2,1.4,0)]);
+  const wAt=a=>0.22+0.14*sm(0,0.5,a)-0.03*sm(0.6,1,a);
+  const surf=(a0,a1)=>(a,b)=>{const t=a0+(a1-a0)*a,p=prof.getPoint(t),u=-1+2*b;return V(p.x,p.y+0.05*(1-u*u),wAt(t)*u);};
+  const glass=new THREE.Mesh(gridGeo(14,8,surf(0,0.52)),new THREE.MeshPhysicalMaterial({color:0xcfe6ee,roughness:0.05,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false}));
+  glass.renderOrder=5;roofS.add(glass);
+  const pvT=pvMat.map.clone();pvT.wrapS=pvT.wrapT=THREE.RepeatWrapping;pvT.repeat.set(2,1);pvT.needsUpdate=true;
+  const solar=new THREE.Mesh(gridGeo(14,8,surf(0.52,1)),new THREE.MeshStandardMaterial({map:pvT,roughness:0.2,metalness:0.3,side:THREE.DoubleSide}));
+  solar.castShadow=true;roofS.add(solar);
+  [-1,1].forEach(s=>{
+    const pts=[];for(let i=0;i<=20;i++){const t=i/20,p=prof.getPoint(t);pts.push(V(p.x,p.y,s*wAt(t)));}
+    roofS.add(tube(pts,0.011,M.carbon));
+    roofS.add(cyl(V(-1.15,0.5,s*0.27),V(-1.15,1.4,s*0.335),0.013,M.carbon,8));   // arceau arrière
+  });
+  roofS.add(cyl(V(-1.2,1.4,-0.33),V(-1.2,1.4,0.33),0.011,M.carbon,8));
+  const ringM=new THREE.MeshStandardMaterial({color:0xfff6d8,emissive:0xffedb8,emissiveIntensity:1,roughness:0.2});
+  [-1,1].forEach(s=>{   // phares annulaires
+    const g=new THREE.Group();g.position.set(1.1,0.63,s*0.095);
+    const r=new THREE.Mesh(new THREE.TorusGeometry(0.043,0.009,8,28),ringM);r.rotation.y=Math.PI/2;g.add(r);
+    const b=new THREE.Mesh(new THREE.SphereGeometry(0.046,16,12),M.carbon);b.scale.x=0.6;b.position.x=-0.02;g.add(b);
+    craft.add(g);S.push(g);
+  });
+  const scr=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.085,0.012),new THREE.MeshStandardMaterial({color:0x0f2a2c,emissive:0x1f8f8a,emissiveIntensity:0.7,roughness:0.3}));
+  scr.position.set(0.22,0.6,-0.3);scr.rotation.y=-1.15;craft.add(scr);S.push(scr);
+  const st=cyl(V(0.22,0.47,-0.345),V(0.22,0.56,-0.3),0.006,M.alu,6);craft.add(st);S.push(st);
+})();
+function setVariant(v){
+  variant=v;const ser=v==='serie';
+  P.forEach(o=>{o.visible=!ser;});S.forEach(o=>{o.visible=ser;});
+  skinMeshes.forEach((m,i)=>{m.material=ser?((i===1||i===2)?deckM:shellM):M.skin;m.renderOrder=ser?0:2;});
+  guards.forEach(m=>{m.material=ser?M.carbon:M.wood;});
+  seatMat=ser?meshSeatM:M.ply;napShown=-1;coverM.color.set(ser?0x30353a:0xd9622b);kidSeat.forEach(m=>{m.material=ser?meshSeatM:M.ply;});
+  ['proto','serie'].forEach(k=>document.getElementById('v-'+k).setAttribute('aria-pressed',String(k===v)));
+  setMode(mode);
+}
+
+/* ---------- siège enfant amovible ---------- */
+const kidG=new THREE.Group();craft.add(kidG);
+const kid=new THREE.Group();kidG.add(kid);
+const kidHoop=new THREE.Group();kidG.add(kidHoop);
+const kidSeat=[];
+(function(){
+  const addK=m=>{kidG.add(m);kidSeat.push(m);return m;};
+  addK(plank(V(-0.86,0.585,0),V(-1.14,0.585,0),0.3,M.ply));          // assise sur le pont arrière
+  addK(plank(V(-1.13,0.6,0),V(-1.215,1.0,0),0.3,M.ply));             // dossier haut
+  [-1,1].forEach(s=>{
+    addK(plank(V(-0.95,0.66,s*0.155),V(-1.17,0.66,s*0.155),0.012,M.ply)).scale.y=7;   // joues latérales
+    kidG.add(cyl(V(-0.9,0.6,s*0.17),V(-0.92,0.73,s*0.19),0.008,M.alu,6));             // poignées
+    kidG.add(cyl(V(-0.92,0.73,s*0.19),V(-1.02,0.73,s*0.19),0.008,M.alu,6));
+    kidHoop.add(cyl(V(-1.15,0.5,s*0.27),V(-1.15,1.385,s*0.33),0.012,M.alu,8));
+  });
+  kidHoop.add(cyl(V(-1.15,1.385,-0.33),V(-1.15,1.385,0.33),0.01,M.alu,8));
+  const foot=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.015,0.32),M.ply);foot.position.set(-0.71,0.4,0);foot.castShadow=true;kidG.add(foot);
+  // enfant : environ 1,15 m
+  const kM=new THREE.MeshStandardMaterial({color:0x8ea1b3,roughness:0.85});
+  const hip=V(-1.05,0.63,0),sh=V(-1.125,0.982,0);
+  const torso=cyl(hip,sh,0.085,kM,12);torso.scale.z=1.3;kid.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.085,16,12),kM);head.position.set(-1.135,1.12,0);head.castShadow=true;kid.add(head);
+  const helmet=new THREE.Mesh(new THREE.SphereGeometry(0.097,16,10,0,Math.PI*2,0,Math.PI*0.52),new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.5}));
+  helmet.position.set(-1.135,1.125,0);helmet.rotation.z=0.15;kid.add(helmet);
+  [-1,1].forEach(s=>{
+    const h=V(hip.x,hip.y,s*0.065),k=V(-0.784,0.677,s*0.075),f=V(-0.714,0.416,s*0.07);
+    kid.add(cyl(h,k,0.042,kM));kid.add(cyl(k,f,0.034,kM));
+    const s0=V(sh.x+0.01,sh.y-0.02,s*0.125),e=V(-1.02,0.8,s*0.19),ha=V(-0.96,0.74,s*0.19);
+    kid.add(cyl(s0,e,0.028,kM));kid.add(cyl(e,ha,0.025,kM));
+  });
+})();
+function showKid(stow){
+  const on=childOn&&stow>0.97&&mode!=='film';
+  kidG.visible=on;kid.visible=rider.visible;kidHoop.visible=variant==='proto';
+}
+
+/* ---------- siège inclinable et pilote ---------- */
+const seatG=new THREE.Group();craft.add(seatG);
+const rider=new THREE.Group();craft.add(rider);
+const lerp=(a,b,n)=>a+(b-a)*n;
+function clearG(g){while(g.children.length){const c=g.children[0];g.remove(c);if(c.geometry)c.geometry.dispose();}}
+let napShown=-1,napOn=false,napCur=0;
+function buildSeat(n){
+  if(Math.abs(n-napShown)<0.002)return;napShown=n;
+  clearG(seatG);clearG(rider);
+  const d=0.2*n,beta=lerp(49.4,24,n)*Math.PI/180;
+  const piv=V(-0.36+d,0.25,0),top=V(piv.x-0.645*Math.cos(beta),piv.y+0.645*Math.sin(beta),0);
+  seatG.add(plank(piv,V(-0.02+d,0.28,0),0.38,seatMat));
+  seatG.add(plank(piv,top,0.38,seatMat));
+  const mid=V(piv.x-0.42*Math.cos(beta),piv.y+0.42*Math.sin(beta)-0.012,0);
+  [-1,1].forEach(s=>seatG.add(cyl(V(mid.x,mid.y,s*0.15),V(mid.x+0.12,0.215,s*0.07),0.008,M.alu,6)));
+  const hip=V(-0.28+d,0.36,0),tb=beta-0.026;
+  const sh=V(hip.x-0.566*Math.cos(tb),hip.y+0.566*Math.sin(tb),0);
+  const torso=cyl(hip,sh,0.12,M.rider,14);torso.scale.z=1.35;rider.add(torso);
+  const ha2=beta+0.23,head=new THREE.Mesh(new THREE.SphereGeometry(0.105,18,14),M.rider);
+  head.position.set(sh.x-0.192*Math.cos(ha2),sh.y+0.192*Math.sin(ha2),0);head.castShadow=true;rider.add(head);
+  [-1,1].forEach(s=>{
+    const h=V(hip.x,hip.y,s*0.1),f=V(0.84,0.5,s*0.09);
+    const dx=f.x-h.x,dy=f.y-h.y,dd=Math.hypot(dx,dy),a=0.555,b=0.628;
+    const al=(a*a-b*b+dd*dd)/(2*dd),hh=Math.sqrt(Math.max(0,a*a-al*al));
+    const k=V(h.x+al*dx/dd-hh*dy/dd,h.y+al*dy/dd+hh*dx/dd,s*0.12);
+    rider.add(cyl(h,k,0.06,M.rider));rider.add(cyl(k,f,0.045,M.rider));
+    const kn=new THREE.Mesh(new THREE.SphereGeometry(0.06,10,8),M.rider);kn.position.copy(k);rider.add(kn);
+    const s0=V(sh.x+0.02,sh.y-0.02,s*0.19);
+    const ha=V(lerp(-0.25,hip.x+0.14,n),lerp(0.54,hip.y+0.16,n),s*lerp(0.27,0.07,n));
+    const e=V((s0.x+ha.x)/2+0.02,(s0.y+ha.y)/2-0.07,s*lerp(0.28,0.24,n));
+    rider.add(cyl(s0,e,0.04,M.rider));rider.add(cyl(e,ha,0.035,M.rider));
+  });
+}
+buildSeat(0);
+
+/* ---------- sol, eau ---------- */
+const ground=new THREE.Mesh(new THREE.CircleGeometry(7,72),new THREE.MeshStandardMaterial({color:0x9d9a8e,roughness:0.95,transparent:true}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const lane=new THREE.Group();scene.add(lane);
+const laneMat=new THREE.MeshBasicMaterial({color:0xf6f4ec,transparent:true});
+for(let x=-6;x<=6;x+=1.2){const d=new THREE.Mesh(new THREE.PlaneGeometry(0.6,0.07),laneMat);d.rotation.x=-Math.PI/2;d.position.set(x,0.002,0.95);lane.add(d);}
+const water=new THREE.Mesh(new THREE.CircleGeometry(320,72),new THREE.MeshPhysicalMaterial({color:0x2f8aa3,roughness:0.12,metalness:0.1,transparent:true,opacity:0,depthWrite:false}));
+water.rotation.x=-Math.PI/2;water.renderOrder=3;scene.add(water);
+const bed=new THREE.Mesh(new THREE.CircleGeometry(320,48),new THREE.MeshBasicMaterial({color:0x2c5560,transparent:true,opacity:0}));
+bed.rotation.x=-Math.PI/2;bed.position.y=-1.3;scene.add(bed);
+
+/* ---------- décor du film : cale, berges, arbres ---------- */
+const film=new THREE.Group();film.visible=false;scene.add(film);
+(function(){
+  const stone=new THREE.MeshStandardMaterial({color:0xa8a497,roughness:0.95});
+  const slipM=new THREE.MeshStandardMaterial({color:0x8f8c82,roughness:0.9});
+  const grass=new THREE.MeshStandardMaterial({color:0x7a8750,roughness:1});
+  const box=(x0,x1,y0,y1,z0,z1,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,y1-y0,z1-z0),mat);
+    m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.receiveShadow=true;film.add(m);return m;};
+  box(-90,-1.9,-2,0.9,2,160,grass);box(-90,-1.9,-2,0.9,-160,-2,grass);box(-90,-9,-2,0.9,-2,2,stone);
+  box(-1.9,-1.45,-2,0.93,2,160,stone);box(-1.9,-1.45,-2,0.93,-160,-2,stone);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute([-9,0.9,-2,-9,0.9,2,8,-1.225,-2,8,-1.225,2],3));
+  g.setIndex([0,1,2,2,1,3]);g.computeVertexNormals();
+  const slip=new THREE.Mesh(g,slipM);slip.receiveShadow=true;film.add(slip);
+  box(70,130,-2,0.8,-200,200,grass);box(69.5,70,-2,0.85,-200,200,stone);
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  const cols=[0xc9822b,0xd9a441,0x7f8f3a,0xa64b2a,0x5f7a3a,0xb8963a].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:1,flatShading:true}));
+  const trunkM=new THREE.MeshStandardMaterial({color:0x5a4634,roughness:1});
+  const can=new THREE.IcosahedronGeometry(1,1),tr=new THREE.CylinderGeometry(0.1,0.14,1,6);
+  function tree(x,z,base,sc,shadow){
+    const t=new THREE.Mesh(tr,trunkM);t.scale.set(sc,sc*1.6,sc);t.position.set(x,base+sc*0.8,z);film.add(t);
+    const c=new THREE.Mesh(can,cols[Math.floor(rnd()*cols.length)]);
+    c.scale.set(sc*(1+rnd()*0.4),sc*(1.3+rnd()*0.5),sc*(1+rnd()*0.4));c.position.set(x,base+sc*2.4,z);c.castShadow=!!shadow;film.add(c);
+  }
+  for(let i=0;i<70;i++){const z=(3.8+rnd()*60)*(rnd()<0.5?-1:1);tree(-4.5-rnd()*45,z,0.9,1.4+rnd()*1.6,Math.abs(z)<12);}
+  for(let i=0;i<110;i++)tree(73+rnd()*30,-170+rnd()*340,0.8,3+rnd()*2.5,false);
+  // manoir sur la rive d'en face
+  const wallM=new THREE.MeshStandardMaterial({color:0xdad1bf,roughness:0.9}),roofM=new THREE.MeshStandardMaterial({color:0x4b5661,roughness:0.8});
+  box(73,81,0.8,7.5,-4,10,wallM);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(8,4.5,4),roofM);roof.rotation.y=Math.PI/4;roof.scale.z=1.5;roof.position.set(77,9.7,3);film.add(roof);
+  // bateaux amarrés
+  const navy=new THREE.MeshStandardMaterial({color:0x26405c,roughness:0.6}),white=new THREE.MeshStandardMaterial({color:0xf1efe8,roughness:0.6}),green=new THREE.MeshStandardMaterial({color:0x35523f,roughness:0.6});
+  box(-1.2,1.3,-0.3,0.75,9,18,navy);box(-0.8,0.9,0.75,1.6,11,16,white);
+  box(-1.2,1.1,-0.3,0.6,-27,-17,green);box(-0.8,0.7,0.6,1.3,-25,-20,white);
+})();
+
+/* ---------- états ---------- */
+const MODES={
+  route:{wheels:0,stow:1,rstow:1,y:0,water:0,spin:0,
+    txt:'<b>Route.</b> Roues arrière motrices, roue avant directrice devant l\'étrave, foils repliés en arceau qui porte la capote solaire. Largeur 0,89 m.'},
+  float:{wheels:1,stow:1,rstow:0.3,y:-0.28,water:1,spin:8,
+    txt:'<b>Rivière.</b> Roues relevées, moteur arrière orientable descendu à mi-course : tirant d\'eau ≈ 30 cm, ou 14 cm moteur relevé. Capote pliée.'},
+  foil:{wheels:1,stow:0,rstow:0,y:0.12,water:1,spin:26,
+    txt:'<b>Vol sur foils.</b> Trois foils carbone déployés, coque ≈ 25 cm au-dessus de l\'eau à partir de ≈ 20 km/h. Panneau solaire plié sur le pont arrière.'},
+  film:{txt:'<b>Film.</b> Mise à l\'eau par la cale.'}
+};
+let mode='route',filmT0=0,manual=false;
+const cur={wheels:0,stow:1,rstow:1,y:0,water:0,spin:0};
+const stateEl=document.getElementById('state');
+function setMode(m){
+  mode=m;stateEl.innerHTML=((variant==='serie'&&MODES[m].txtS)||MODES[m].txt)+(childOn?(m==='foil'?' Siège enfant retiré : on vole seul.':m==='film'?'':' Siège enfant en place, roues arrière reculées.'):'');filmT0=performance.now();
+  ['route','float','foil','film'].forEach(k=>document.getElementById('m-'+k).setAttribute('aria-pressed',String(k===m)));
+}
+['route','float','foil','film'].forEach(k=>document.getElementById('m-'+k).addEventListener('click',()=>setMode(k)));
+MODES.route.txtS='<b>Route, version série.</b> Monocoque lin et carbone, roues à flasques, verrière solaire. Largeur 0,89 m.';
+MODES.float.txtS='<b>Rivière, version série.</b> Moteur arrière à mi-course. La verrière reste en place grâce à son arceau arrière.';
+MODES.foil.txtS='<b>Vol sur foils, version série.</b> Altitude régulée automatiquement. Verrière rangée sur le pont arrière.';
+['proto','serie'].forEach(k=>document.getElementById('v-'+k).addEventListener('click',()=>setVariant(k)));
+setMode('route');setVariant('proto');
+
+function toggle(id,fn){
+  const b=document.getElementById(id);
+  b.addEventListener('click',()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(on));fn(on);});
+}
+toggle('o-skin',on=>{M.skin.opacity=on?0.97:0.42;M.skin.depthWrite=on;M.skin.needsUpdate=true;});
+toggle('o-rider',on=>{rider.visible=on;});
+toggle('o-canopy',on=>{canopyOn=on;});
+toggle('o-nap',on=>{napOn=on;});
+toggle('o-kid',on=>{childOn=on;setMode(mode);});
+const sheet=document.getElementById('sheet'),dock=document.getElementById('dock'),bSheet=document.getElementById('o-sheet');
+function showSheet(on){sheet.hidden=!on;dock.style.visibility=on?'hidden':'visible';bSheet.setAttribute('aria-pressed',String(on));}
+bSheet.addEventListener('click',()=>showSheet(true));
+document.getElementById('sheet-close').addEventListener('click',()=>showSheet(false));
+
+/* ---------- caméra orbitale ---------- */
+const orb={th:-0.9,ph:1.2,r:6,auto:true,target:V(0,0.5,0)};
+function fit(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  const hf=Math.atan(Math.tan(camera.fov*Math.PI/360)*camera.aspect);
+  orb.r=Math.min(14,Math.max(3.8,1.3/Math.tan(hf)));
+  orb.target.y=camera.aspect<1?0.8:0.5;
+}
+window.addEventListener('resize',fit);fit();
+const ptr=new Map();let pinch=0;
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});orb.auto=false;pinch=0;});
+canvas.addEventListener('pointermove',e=>{
+  const p=ptr.get(e.pointerId);if(!p)return;
+  const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+  if(ptr.size===1){orb.th-=dx*0.008;orb.ph=Math.min(1.75,Math.max(0.15,orb.ph-dy*0.006));}
+  else if(ptr.size===2){
+    const a=[...ptr.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+    if(pinch)orb.r=Math.min(20,Math.max(1.6,orb.r*pinch/d));
+    pinch=d;
+  }
+});
+const up=e=>{ptr.delete(e.pointerId);pinch=0;};
+canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('wheel',e=>{e.preventDefault();orb.auto=false;orb.r=Math.min(20,Math.max(1.6,orb.r*Math.exp(e.deltaY*0.001)));},{passive:false});
+
+/* ---------- film : état déterministe en fonction du temps ---------- */
+const ss=(a,b,t)=>{const u=Math.min(1,Math.max(0,(t-a)/(b-a)));return u*u*(3-2*u);};
+const FILM_LEN=21,capLabel=document.getElementById('caplabel');
+function pose(wheels,stow,rstow){
+  arms.forEach(a=>{a.rotation.z=1.2*wheels;a.visible=!childOn;});armsB.forEach(a=>{a.rotation.z=-1.2*wheels;a.visible=childOn;});
+  fork.rotation.z=1.75*wheels;
+  fronts.forEach(f=>{f.g.rotation.x=-f.s*Math.PI*stow;});
+  rear.rotation.z=-Math.PI*rstow;
+  showCanopy(stow,rstow);showCovers(stow,rstow);showKid(stow);
+  flag.rotation.y=Math.sin(performance.now()*0.004)*0.25;
+}
+function applyFilm(t){
+  let x=-6.5,pa=0;const dt=1/60;
+  for(let u=0;u<t;u+=dt){
+    x+=(1.1*ss(0.5,2,u)-0.25*ss(7,8.5,u)+4.8*ss(13.5,17.5,u))*dt;
+    pa+=(7*ss(6.5,8,u)+24*ss(13.5,15.5,u))*dt;
+  }
+  const ys=0.9-0.125*(x+9),fl=ss(-0.4,1.6,x),rise=ss(15.3,17.5,t);
+  const yF=-0.28+0.4*rise+Math.sin(t*1.7)*0.012*(1-rise);
+  craft.position.set(x,ys+(yF-ys)*fl,0);
+  craft.rotation.z=-Math.atan(0.125)*(1-fl)+0.035*rise+Math.sin(t*1.2)*0.008*fl*(1-rise);
+  pose(ss(8,10,t),1-ss(11,13.5,t),1-0.7*ss(8,10,t)-0.3*ss(11,13.5,t));steerG.rotation.y=0;napCur=0;buildSeat(0);
+  prop.rotation.x=pa;
+  const roll=-(Math.min(x,0.8)+6.5)/0.25;fw.rotation.z=roll;rw.forEach(w=>{w.rotation.z=roll;});
+  film.visible=true;ground.visible=false;lane.visible=false;
+  water.visible=true;water.material.opacity=0.74;bed.visible=true;bed.material.opacity=1;
+  sun.position.set(x+2.5,5,3);sun.target.position.set(x,0,0);
+  const az=0.55+1.0*ss(3,10,t)+1.0*ss(11,17,t);
+  const R=(6.2-1.4*ss(5,10,t)+0.8*ss(14,19,t))*Math.max(1,1.15/camera.aspect);
+  const h=1.7-0.6*ss(6,12,t)-0.2*ss(14,18,t);
+  const tg=V(x+0.3,craft.position.y+0.5,0);
+  camera.position.set(tg.x+R*Math.cos(az),h,R*Math.sin(az));camera.lookAt(tg);
+  const lab=t<7?'Descente de la cale':t<11?'Flottaison, roues relevées':t<14?'Déploiement des foils':'Décollage sur foils';
+  if(CAP)capLabel.textContent=lab;else if(mode==='film')stateEl.innerHTML='<b>Film.</b> '+lab+'.';
+}
+
+/* ---------- boucle ---------- */
+const still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last=performance.now();
+function frame(now){
+  if(manual)return;
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(mode==='film'){
+    applyFilm(Math.min(FILM_LEN,((now-filmT0)/1000)%(FILM_LEN+2)));
+    renderer.render(scene,camera);requestAnimationFrame(frame);return;
+  }
+  film.visible=false;craft.position.x=0;sun.position.set(2.5,5,3);sun.target.position.set(0,0,0);
+  const tg=MODES[mode],k=still?1:1-Math.exp(-dt*3.2);
+  for(const key in cur)cur[key]+=(tg[key]-cur[key])*k;
+  pose(cur.wheels,cur.stow,cur.rstow);
+  steerG.rotation.y=still?0:Math.sin(now*0.0012)*0.45*cur.water*(1-cur.rstow)*(mode==='foil'?0.35:1);
+  napCur+=(((napOn&&!childOn&&(mode==='route'||(variant==='serie'&&mode==='float')))?1:0)-napCur)*k;buildSeat(napCur<0.003?0:napCur>0.997?1:napCur);
+  prop.rotation.x+=cur.spin*dt;
+  const bob=still?0:Math.sin(now*0.0016)*0.012*cur.water;
+  craft.position.y=cur.y+bob;
+  craft.rotation.z=still?0:Math.sin(now*0.0011)*0.01*cur.water;
+  water.material.opacity=0.62*cur.water;water.visible=cur.water>0.01;
+  bed.material.opacity=cur.water;bed.visible=water.visible;
+  ground.material.opacity=1-cur.water;ground.visible=cur.water<0.99;
+  laneMat.opacity=1-cur.water;lane.visible=ground.visible;
+
+  if(orb.auto&&!still)orb.th+=dt*0.18;
+  const sp=Math.sin(orb.ph);
+  camera.position.set(orb.target.x+orb.r*sp*Math.cos(orb.th),orb.target.y+orb.r*Math.cos(orb.ph),orb.target.z+orb.r*sp*Math.sin(orb.th));
+  camera.lookAt(orb.target);
+  renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__film=t=>{manual=true;applyFilm(t);renderer.render(scene,camera);};
+window.__setMode=setMode;
+})();
+</script>
+</body>
+</html>

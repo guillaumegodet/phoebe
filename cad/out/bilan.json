@@ -1,0 +1,21 @@
+{
+ "longueur_coque_mm": 2580,
+ "largeur_mm": 740.0,
+ "volume_sous_plat_bord_L": 416,
+ "volume_total_avec_pont_L": 464,
+ "volume_solide_STEP_L": 464,
+ "tirant_eau_mm": {
+  "135 kg": 154,
+  "165 kg": 174
+ },
+ "contreplaque_m2_par_epaisseur": {
+  "6 mm": 0.55,
+  "9 mm": 0.69,
+  "12 mm": 0.51,
+  "18 mm": 0.23
+ },
+ "masse_contreplaque_kg": 9.9,
+ "lisses_m": 18.3,
+ "masse_lisses_kg": 2.7,
+ "nb_pieces_3D": 27
+}
