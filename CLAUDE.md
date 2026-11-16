@@ -85,3 +85,11 @@ Estimés à la main, à confirmer :
 - Les cotes des pièces du commerce (paliers UCP205, platine de mât 165 × 90, moyeu de 110 mm) sont notées de mémoire : les vérifier sur les fiches des fournisseurs avant de découper.
 - `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter.
 - Langue du projet : français. Messages de commit en français.
+
+## Identité graphique et site
+
+- Site public (GitHub Pages, branche `main`, racine du dépôt) : https://guillaumegodet.github.io/phoebe/. Page d'accueil `index.html`, styles communs `assets/phoebe.css`, charte `identite/index.html`. Pas de build : fichiers statiques, `.nojekyll`.
+- Logo : un croissant orange (la coque, et la lune de Phoebé) porté par un foil au-dessus d'une vague. Fichiers SVG dans `identite/`, mot « phoebe » vectorisé en Bricolage Grotesque gras.
+- Couleurs : encre `#16252b`, Erdre `#0f6f86`, housse (orange) `#d9622b`, toile `#f6f3ea`, ciel `#dfe9ec`, écume `#7cc4d6`, okoumé `#cfa873`. Polices : Bricolage Grotesque (titres), Barlow (texte).
+- Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés.
+- Le site reprend les chiffres de référence et les points durs de ce fichier : les mettre à jour ensemble. `assets/cao-apercu.png` et `assets/cao-gabarits.png` sont des recadrages de `cad/out/phoebe-apercu.png`.

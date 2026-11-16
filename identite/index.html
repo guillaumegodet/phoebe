@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoebe : identité graphique</title>
+<meta name="description" content="Logo, couleurs, typographie et ton du projet Phoebe.">
+<meta name="theme-color" content="#0f6f86">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/phoebe.css">
+<style>
+.intro{padding:clamp(40px,7vw,88px) 0 0}
+.intro h1{font-size:clamp(2.4rem,6vw,4.2rem);margin-bottom:20px}
+.bloc{padding:clamp(40px,6vw,72px) 0;border-top:1px solid var(--ligne);margin-top:clamp(40px,6vw,72px)}
+.bloc h2{font-size:clamp(1.7rem,3.4vw,2.4rem);margin-bottom:12px}
+.bloc > .cadre > p{max-width:42em;color:var(--encre-doux)}
+.grille{display:grid;gap:18px;margin-top:28px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+@media (min-width:821px) and (max-width:1020px){.g4{grid-template-columns:repeat(2,1fr)}}
+.case{border:1px solid var(--ligne);border-radius:var(--rayon);background:var(--papier);overflow:hidden;margin:0}
+.case .vue{display:grid;place-items:center;padding:36px;min-height:190px}
+.case .vue img{max-height:110px;width:auto}
+.case .vue.sombre{background:var(--encre)}
+.case .vue.blanc{background:#fff}
+.case .vue.eau{background:var(--erdre)}
+.case figcaption{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:12px 16px;border-top:1px solid var(--ligne);font-size:.95rem}
+.case figcaption a{font-weight:600;white-space:nowrap}
+.sens{display:grid;grid-template-columns:auto 1fr;gap:clamp(24px,5vw,56px);align-items:center;margin-top:28px}
+.sens img{width:clamp(160px,24vw,260px)}
+.sens dl{margin:0;display:grid;gap:14px}
+.sens dt{font:700 1.15rem var(--titre)}
+.sens dd{margin:2px 0 0;color:var(--encre-doux)}
+.sens .p{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px}
+@media (max-width:700px){.sens{grid-template-columns:1fr}}
+.teinte{border:1px solid var(--ligne);border-radius:var(--rayon);overflow:hidden;background:var(--papier)}
+.teinte .aplat{height:104px}
+.teinte .t{padding:14px 16px}
+.teinte b{display:block;font:700 1.1rem var(--titre)}
+.teinte code{font:500 .92rem ui-monospace,Menlo,Consolas,monospace;color:var(--encre-doux)}
+.teinte p{margin:6px 0 0;font-size:.92rem;color:var(--encre-doux);line-height:1.4}
+.specimen{border:1px solid var(--ligne);border-radius:var(--rayon);background:var(--papier);padding:28px}
+.specimen .nom{font:600 .8rem var(--texte);letter-spacing:.14em;text-transform:uppercase;color:var(--erdre);margin-bottom:14px}
+.specimen .grand{font:700 clamp(2.2rem,5vw,3.4rem)/1 var(--titre);letter-spacing:-.02em;margin-bottom:14px}
+.specimen .corps{color:var(--encre-doux);margin:0}
+.regles{list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:0 40px;max-width:none}
+.regles li{padding:14px 0;border-top:1px solid var(--ligne)}
+.regles b{font-family:var(--titre)}
+@media (max-width:820px){.regles{grid-template-columns:1fr}}
+.non{color:#8f3a12}
+</style>
+</head>
+<body>
+
+<header class="barre">
+  <div class="cadre">
+    <a class="logo" href="../" aria-label="Phoebe, accueil"><img src="phoebe-logo.svg" alt="Phoebe" width="219" height="64"></a>
+    <nav aria-label="Navigation principale">
+      <a href="../">Le projet</a>
+      <a href="../#maquette">Maquette 3D</a>
+      <a class="bouton bouton-plein" href="../#participer">Participer</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="intro">
+  <div class="cadre">
+    <p class="surtitre">Identité graphique</p>
+    <h1>Une coque, une lune,<br>un foil.</h1>
+    <p class="chapo">Phoebe doit ressembler à ce qu'elle est : un objet fait de bois et de toile, qui va sur l'eau, et auquel on s'attache. Cette page réunit le logo, les couleurs, la typographie et le ton du projet.</p>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="cadre">
+    <h2>Le symbole</h2>
+    <p>Trois traits, trois idées. Il se lit d'un coup d'œil, même en très petit.</p>
+    <div class="sens">
+      <img src="phoebe-symbole.svg" alt="Symbole de Phoebe" width="260" height="260">
+      <dl>
+        <div><dt><span class="p" style="background:var(--orange)"></span>Le croissant</dt><dd>La coque vue de profil, étrave relevée. C'est aussi un croissant de lune : Phoebé, « la brillante », est une divinité lunaire.</dd></div>
+        <div><dt><span class="p" style="background:var(--encre)"></span>Le foil</dt><dd>Un mât et une aile : ce qui porte la coque hors de l'eau, et l'ambition du projet.</dd></div>
+        <div><dt><span class="p" style="background:var(--erdre)"></span>La vague</dt><dd>L'Erdre. La coque est au-dessus, le foil en dessous : le véhicule vole.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="cadre">
+    <h2>Le logo</h2>
+    <p>Le mot « phoebe » est composé en Bricolage Grotesque gras, en minuscules, puis vectorisé : les fichiers n'ont besoin d'aucune police.</p>
+    <div class="grille g2">
+      <figure class="case"><div class="vue"><img src="phoebe-logo.svg" alt="Logo horizontal en couleurs"></div><figcaption><span>Horizontal, version de référence</span><a href="phoebe-logo.svg" download>SVG</a></figure>
+      <figure class="case"><div class="vue sombre"><img src="phoebe-logo-clair.svg" alt="Logo pour fonds sombres"></div><figcaption><span>Sur fond sombre</span><a href="phoebe-logo-clair.svg" download>SVG</a></figure>
+    </div>
+    <div class="grille g4">
+      <figure class="case"><div class="vue"><img src="phoebe-logo-vertical.svg" alt="Logo vertical"></div><figcaption><span>Vertical</span><a href="phoebe-logo-vertical.svg" download>SVG</a></figure>
+      <figure class="case"><div class="vue blanc"><img src="phoebe-logo-mono.svg" alt="Logo en une couleur" style="max-height:64px"></div><figcaption><span>Une couleur</span><a href="phoebe-logo-mono.svg" download>SVG</a></figure>
+      <figure class="case"><div class="vue"><img src="phoebe-symbole.svg" alt="Symbole seul"></div><figcaption><span>Symbole seul</span><a href="phoebe-symbole.svg" download>SVG</a></figure>
+      <figure class="case"><div class="vue blanc"><img src="favicon.svg" alt="Pastille" style="max-height:88px"></div><figcaption><span>Pastille, icône</span><a href="favicon.svg" download>SVG</a></figure>
+    </div>
+    <ul class="regles">
+      <li><b>Zone de protection.</b> Laisser autour du logo un vide égal à la hauteur de la lettre « o ».</li>
+      <li><b>Taille minimale.</b> 90 px de large pour le logo, 16 px pour le symbole ou la pastille.</li>
+      <li><b>Fonds.</b> Version de référence sur toile, ciel ou blanc. Version claire sur encre. Sur le bleu Erdre ou sur une photo, utiliser la pastille ou la version en une couleur.</li>
+      <li><b class="non">À éviter.</b> Déformer, incliner, recolorer, ajouter une ombre, ou séparer le croissant de son foil.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="cadre">
+    <h2>Les couleurs</h2>
+    <p>Elles viennent du véhicule lui-même : l'eau de la rivière, la toile vernie, le bois du squelette, et l'orange des housses qui protègent les foils sur la route.</p>
+    <div class="grille g4">
+      <div class="teinte"><div class="aplat" style="background:#16252b"></div><div class="t"><b>Encre</b><code>#16252B</code><p>Texte, traits, fonds sombres.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#0f6f86"></div><div class="t"><b>Erdre</b><code>#0F6F86</code><p>Couleur principale : liens, eau, éléments actifs.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#d9622b"></div><div class="t"><b>Housse</b><code>#D9622B</code><p>L'accent : la coque du logo, les boutons d'action. Jamais pour du petit texte.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#f6f3ea"></div><div class="t"><b>Toile</b><code>#F6F3EA</code><p>Fond des pages. Texte sur fonds sombres.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#dfe9ec"></div><div class="t"><b>Ciel</b><code>#DFE9EC</code><p>Fonds de section et d'illustration.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#7cc4d6"></div><div class="t"><b>Écume</b><code>#7CC4D6</code><p>La vague et les repères sur fond sombre.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#cfa873"></div><div class="t"><b>Okoumé</b><code>#CFA873</code><p>Le bois, dans les illustrations seulement.</p></div></div>
+      <div class="teinte"><div class="aplat" style="background:#b54c1b"></div><div class="t"><b>Housse foncée</b><code>#B54C1B</code><p>L'accent quand il faut l'écrire : petits textes orange sur fond clair.</p></div></div>
+    </div>
+    <ul class="regles">
+      <li><b>Proportions.</b> Beaucoup de toile, de l'encre pour lire, du bleu pour guider, très peu d'orange : c'est lui qu'on doit remarquer.</li>
+      <li><b>Lisibilité.</b> Sur un bouton orange, le texte est en encre, pas en blanc. Sur le bleu Erdre, le texte est blanc.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="cadre">
+    <h2>La typographie</h2>
+    <p>Deux familles libres, disponibles sur Google Fonts.</p>
+    <div class="grille g2">
+      <div class="specimen">
+        <div class="nom">Bricolage Grotesque · gras · titres</div>
+        <div class="grand">Elle roule, elle flotte, elle vole.</div>
+        <p class="corps">Une linéale au dessin un peu irrégulier, chaleureuse, qui porte bien son nom. Pour les titres et le logo, avec un interlettrage légèrement resserré.</p>
+      </div>
+      <div class="specimen">
+        <div class="nom">Barlow · normal et demi-gras · texte</div>
+        <div class="grand" style="font-family:var(--texte);font-weight:500;letter-spacing:0">2,58 m · 416 L · 15 cm</div>
+        <p class="corps">Une linéale sobre, issue de la signalétique routière : lisible, à l'aise avec les chiffres et les unités. C'est aussi la police de la maquette 3D.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="cadre">
+    <h2>Le ton</h2>
+    <p>Phoebe se raconte comme on parle d'un bateau qu'on construit dans son garage : avec envie, et sans rien cacher.</p>
+    <ul class="regles">
+      <li><b>« Je vais en Phoebe. »</b> La phrase signature. Elle s'utilise seule, sans explication : le jeu de mots fait le reste.</li>
+      <li><b>Elle.</b> Phoebe est au féminin : elle roule, elle flotte, elle vole.</li>
+      <li><b>Dire où on en est.</b> C'est une étude de concept. Ne jamais laisser croire que le véhicule existe, navigue ou vole.</li>
+      <li><b>Un chiffre, une source.</b> Distinguer ce qui sort du modèle CAO de ce qui est estimé à la main.</li>
+      <li><b>Concret.</b> Des cotes, des matériaux, des verbes. Pas de superlatifs ni de promesses.</li>
+      <li><b>Accueillant.</b> Chaque difficulté est présentée comme une question ouverte, à laquelle le lecteur peut répondre.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="pied" style="margin-top:clamp(40px,6vw,72px)">
+  <div class="cadre">
+    <img src="phoebe-logo-clair.svg" alt="Phoebe" width="219" height="64">
+    <p><a href="../">Retour au site</a> · <a href="https://github.com/guillaumegodet/phoebe/tree/main/identite">Tous les fichiers sur GitHub</a></p>
+    <p class="bas">Polices Bricolage Grotesque et Barlow sous licence SIL Open Font License.</p>
+  </div>
+</footer>
+</body>
+</html>

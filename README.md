@@ -1,4 +1,8 @@
+<p align="center"><img src="identite/phoebe-logo.svg" alt="Phoebe" width="320"></p>
+
 # Phoebe
+
+**[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/) · [Participer](https://guillaumegodet.github.io/phoebe/#participer)
 
 Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils. Inspiré du trike open-source [Moskitos](https://moskitos.org/).
 
