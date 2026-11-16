@@ -20,6 +20,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
 - Direction sur l'eau par le mât arrière orientable (poussée orientée).
 - Équipements voulus : phares, batterie, capote faisant panneau solaire et rangeable pour voler, siège inclinable (mode sieste), housses de foils pour la route, squelette porteur.
+- Les foils avant repliés servent de montants avant à la capote solaire : ils basculent vers l'avant (environ 35° au-dessus de l'horizontale), passent le long du plat-bord à l'écart du pilote, et le toit repose sur eux et sur un arceau arrière. Montré sur le visuel d'accueil du site ; pas encore dans la CAO (la charnière n'a que deux positions, repliée à la verticale et déployée) ni dans la maquette 3D.
 - Variantes demandées : une version de série au design haut de gamme, une version avec siège enfant à l'arrière.
 - Conception en CAO paramétrique (CadQuery), versionnée dans ce dépôt.
 
@@ -104,6 +105,7 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
+- Charnière des foils avant : ajouter la position repliée inclinée vers l'avant qui porte la capote, et vérifier que le foil replié ne gêne ni les genoux ni les mains sur les leviers.
 - Choisir une licence pour le dépôt.
 - Essai statique, puis calcul de structure, avant toute construction.
 
