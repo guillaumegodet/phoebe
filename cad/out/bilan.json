@@ -10,12 +10,12 @@
  },
  "contreplaque_m2_par_epaisseur": {
   "6 mm": 0.55,
-  "9 mm": 0.69,
-  "12 mm": 0.51,
+  "9 mm": 1.06,
+  "12 mm": 0.52,
   "18 mm": 0.23
  },
- "masse_contreplaque_kg": 9.9,
+ "masse_contreplaque_kg": 11.6,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 27
+ "nb_pieces_3D": 71
 }

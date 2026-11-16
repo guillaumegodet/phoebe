@@ -30,6 +30,19 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 - Deux foils avant repliables sur le plat-bord, un foil arrière orientable qui porte le moteur immergé.
 - Moteur de pédalier 250 W pour la route, moteur immergé d'environ 1 kW pour l'eau.
 
+## Interfaces modélisées
+
+| Interface | Principe | Pièces du commerce supposées |
+|---|---|---|
+| Charnières des foils avant | Deux joues alu de 6 mm prennent le couple porteur en sandwich (4 vis M8). Une chape pivote autour d'un axe de 12 mm et se verrouille par goupille, repliée ou déployée. | Mât de foil à platine (entraxe 165 × 90 à vérifier) |
+| Arbre arrière | Arbre de 25 mm, paliers à semelle vissés sur la face avant du couple porteur, contre-plaques alu à l'arrière. | Paliers type UCP205 |
+| Direction avant | Console pivotante entre deux joues alu boulonnées sur l'étrave, verrouillée par goupille. Elle porte un jeu de direction classique et une fourche de 20 pouces. | Fourche et jeu de direction 1 1/8 |
+| Siège | Deux rails alu posés sur les varangues, assise et dossier en contreplaqué de 9 mm. | |
+
+Dans l'assemblage STEP, le foil bâbord est déployé et le foil tribord replié.
+
+Non modélisé à ce stade : bras de roues arrière et leur relevage, commande de direction (leviers vers la fourche et vers le mât arrière), support orientable du foil arrière, étanchéité des sorties d'arbre, visserie.
+
 ## Avertissement
 
 Ce dépôt décrit un prototype non construit. Avant toute navigation : calcul ou essai statique de la structure, vérification de la flottabilité, et respect des règles de circulation et de navigation locales.

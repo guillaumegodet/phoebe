@@ -20,7 +20,7 @@ Dépendances : cadquery, shapely, ezdxf, matplotlib
 import math, sys, os, json
 from dataclasses import dataclass, field
 import numpy as np
-from shapely.geometry import Polygon, LineString, box
+from shapely.geometry import Polygon, LineString, Point, box
 from shapely import affinity
 from shapely.ops import unary_union
 
@@ -52,7 +52,7 @@ class Params:
     t_plate: float = 18.0       # tableau arrière, étrave, gousset arrière
     floor_half: float = 100.0   # demi-largeur des varangues
     floor_over: float = 25.0    # matière au-dessus de la poutre (couples courants)
-    floor_over_U: float = 40.0  # idem couples porteurs
+    floor_over_U: float = 25.0  # idem couples porteurs
     # (x, type) : closed = avec barrot de pont, open = cockpit, bulk = cloison étanche, U = couple porteur
     stations: tuple = ((-1170, 'closed'), (-975, 'closed'), (-806, 'bulk'), (-620, 'U'),
                        (-440, 'open'), (-260, 'open'), (-80, 'open'), (100, 'U'),
@@ -73,8 +73,47 @@ class Params:
     z_ref: float = 400.0        # ligne de référence gravée sur chaque couple
     rho_ply: float = 500.0      # kg/m3, okoumé
     rho_spruce: float = 450.0
+    # ---------------- interfaces (cotes des pièces du commerce à vérifier sur leurs fiches) ----------------
+    x_frame_foil: float = 100.0     # couple porteur des foils avant
+    x_frame_axle: float = -620.0    # couple porteur de l'arbre arrière
+    # charnières des foils avant
+    hinge_y: float = 440.0          # axe de pivot (parallèle à X)
+    hinge_z: float = 487.0
+    hinge_e: float = 58.0           # déport pivot -> mât
+    hinge_lock_r: float = 35.0      # rayon de la goupille de verrouillage
+    t_cheek: float = 6.0            # joues en aluminium
+    plate_L: float = 190.0          # platine de mât (entraxe courant 165 x 90, à vérifier)
+    plate_W: float = 110.0
+    mast_len: float = 850.0
+    mast_chord: float = 120.0
+    mast_thk: float = 16.0
+    wing_span: float = 370.0
+    wing_chord: float = 180.0
+    # arbre arrière et paliers à semelle vissés sur la face avant du couple
+    shaft_d: float = 25.0
+    shaft_z: float = 360.0
+    brg_y: float = 265.0            # centre des paliers
+    brg_h: float = 36.5             # hauteur d'axe du palier (type UCP205)
+    brg_J: float = 105.0            # entraxe des vis du palier
+    brg_bolt: float = 10.5
+    arm_y: float = 425.0            # plan des bras de roue
+    # direction avant relevable
+    fork_px: float = 1305.0         # pivot de relevage (parallèle à Y)
+    fork_pz: float = 495.0
+    fork_kz: float = 425.0          # goupille de verrouillage
+    axle_x: float = 1560.0
+    wheel_r: float = 250.0
+    head_angle: float = 72.0
+    rake: float = 35.0
+    # siège
+    seat_x: float = -360.0
+    seat_w: float = 380.0
+    seat_back: float = 645.0
+    seat_angle: float = 49.4
 
 P = Params()
+HINGE_BOLTS = [(300, 315), (325, 360), (300, 405), (325, 438)]          # (y, z) dans le couple porteur des foils
+STEM_BOLTS = [(1200, 435), (1200, 500), (1262, 440), (1262, 500)]        # (x, z) dans l'étrave
 
 # ----------------------------------------------------------------------------
 # FORMES DE COQUE
@@ -160,6 +199,10 @@ def frame_poly(x, kind):
         body = outer.difference(inner)
         zf = beam_top(x) + (P.floor_over_U if kind == 'U' else P.floor_over)
         body = body.union(box(-P.floor_half, 0, P.floor_half, zf).intersection(outer))
+        if abs(x - P.x_frame_axle) < 1:          # surépaisseurs pour les paliers
+            for sg in (1, -1):
+                y0, y1 = sorted((sg * (P.brg_y - 78), sg * 400))
+                body = body.union(box(y0, P.shaft_z - 40, y1, P.shaft_z + 40).intersection(outer))
     # encoches de lisses
     for (c, n, tg) in stringer_frames(t):
         h = (s + tol) / 2
@@ -182,7 +225,11 @@ def frame_poly(x, kind):
         seg = STEM.intersection(LineString([(x, 0), (x, 2000)]))
         zb, zt = seg.bounds[1], seg.bounds[3]
         body = body.difference(box(-P.t_plate / 2 - tol, 0, P.t_plate / 2 + tol, (zb + zt) / 2))
-    return biggest(body.buffer(0)).simplify(0.2)
+    holes = []
+    if abs(x - P.x_frame_foil) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in HINGE_BOLTS]
+    if abs(x - P.x_frame_axle) < 1: holes += [(sg * (P.brg_y + d), P.shaft_z, P.brg_bolt) for sg in (1, -1) for d in (-P.brg_J / 2, P.brg_J / 2)]
+    for yy, zz, d in holes: body = body.difference(Point(yy, zz).buffer(d / 2, 16))
+    return biggest(body.buffer(0)).simplify(0.1)
 
 def stem_with_slots():
     g = STEM
@@ -191,7 +238,8 @@ def stem_with_slots():
             seg = STEM.intersection(LineString([(x, 0), (x, 2000)]))
             zm = (seg.bounds[1] + seg.bounds[3]) / 2
             g = g.difference(box(x - P.t_frame / 2 - P.tol, zm, x + P.t_frame / 2 + P.tol, 2000))
-    return biggest(g.buffer(0)).simplify(0.2)
+    for xx, zz in STEM_BOLTS: g = g.difference(Point(xx, zz).buffer(4.25, 16))
+    return biggest(g.buffer(0)).simplify(0.1)
 
 # ----------------------------------------------------------------------------
 # HYDROSTATIQUE (intégration numérique des sections)
@@ -218,8 +266,24 @@ def build(outdir):
     V = cq.Vector
     def solid(poly, to3d, vec):
         def wire(ring):
-            pts = [V(*to3d(a, b)) for a, b in list(ring.coords)[:-1]]
-            return cq.Wire.makePolygon(pts + [pts[0]])
+            """contour -> fil : cercles vrais, courbes en splines, angles vifs conservés (STEP léger)"""
+            c2 = np.array(ring.coords)[:-1]; n = len(c2)
+            pts = [V(*to3d(a, b)) for a, b in c2]
+            d0 = c2 - np.roll(c2, 1, axis=0); d1 = np.roll(c2, -1, axis=0) - c2
+            turn = np.abs(np.degrees(np.arctan2(d0[:, 0] * d1[:, 1] - d0[:, 1] * d1[:, 0], (d0 * d1).sum(axis=1))))
+            corners = [i for i in range(n) if turn[i] > 15]
+            if not corners:
+                cen = c2.mean(axis=0); r = np.hypot(*(c2 - cen).T)
+                if n >= 16 and r.std() < 0.02 * r.mean():
+                    o = V(*to3d(0, 0)); nrm = (V(*to3d(1, 0)) - o).cross(V(*to3d(0, 1)) - o)
+                    return cq.Wire.makeCircle(float(r.mean()), V(*to3d(*cen)), nrm)
+                return cq.Wire.assembleEdges([cq.Edge.makeSpline(pts, periodic=True)])
+            edges = []
+            for k, i in enumerate(corners):
+                j = corners[(k + 1) % len(corners)]
+                run = [pts[m % n] for m in range(i, (j if j > i else j + n) + 1)]
+                edges.append(cq.Edge.makeLine(run[0], run[1]) if len(run) == 2 else cq.Edge.makeSpline(run))
+            return cq.Wire.assembleEdges(edges)
         return cq.Solid.extrudeLinear(wire(poly.exterior), [wire(r) for r in poly.interiors], V(*vec))
 
     parts = []   # (nom, solide, couleur)
@@ -260,6 +324,88 @@ def build(outdir):
     parts.append(("gousset_arriere", solid(KNEE, lambda a, b: (a, -P.t_plate / 2, b), (0, P.t_plate, 0)), (0.54, 0.35, 0.19)))
     flats.append(("gousset_arriere", P.t_plate, 1, KNEE, []))
 
+    # ======================================================== INTERFACES
+    ALU = (0.72, 0.75, 0.78); STEEL = (0.35, 0.37, 0.4); CARB = (0.12, 0.13, 0.15); ENV = (0.25, 0.25, 0.27)
+    def bx(x0, x1, y0, y1, z0, z1): return cq.Solid.makeBox(x1 - x0, y1 - y0, z1 - z0, V(x0, y0, z0))
+    def cyl(p0, p1, r):
+        d = V(*p1) - V(*p0); return cq.Solid.makeCylinder(r, d.Length, V(*p0), d)
+    def circ(a, b, d): return Point(a, b).buffer(d / 2, 16)
+
+    # --- 1. charnières des foils avant : deux joues alu prennent le couple porteur en sandwich
+    hx, hy, hz, tU = P.x_frame_foil, P.hinge_y, P.hinge_z, P.t_U
+    cheek = unary_union([box(278, 295, 340, hz + 18), box(278, 464, hy + 38, hz + 21)])
+    for yy, zz in HINGE_BOLTS: cheek = cheek.difference(circ(yy, zz, 8.5))
+    cheek = cheek.difference(circ(hy, hz, 12.5)).difference(circ(hy - P.hinge_lock_r, hz, 10.5))
+    flats.append(("joue_charniere_foil", P.t_cheek, 4, cheek, [], 'ALU'))
+    def hinge_side(mirror, folded, tag):
+        out = []
+        for i, x0 in enumerate((hx - tU - P.t_cheek, hx + tU)):
+            out.append((f"joue_charniere_{i + 1}_{tag}", solid(cheek, lambda a, b, x0=x0: (x0, a, b), (P.t_cheek, 0, 0)), ALU))
+        out.append((f"axe_charniere_{tag}", cyl((hx - tU - 10, hy, hz), (hx + tU + 10, hy, hz), 6), STEEL))
+        yl = hy - P.hinge_lock_r
+        out.append((f"goupille_verrou_{tag}", cyl((hx - tU - 10, yl, hz), (hx + tU + 10, yl, hz), 5), STEEL))
+        ym = hy + P.hinge_e; zt = hz - 21
+        mov = [("chape_pivotante", bx(hx - tU + 1, hx + tU - 1, hy - 45, hy + 70, zt, hz + 13), ALU),
+               ("platine_de_mat", bx(hx - P.plate_L / 2, hx + P.plate_L / 2, ym - P.plate_W / 2, ym + P.plate_W / 2, zt - 8, zt), ALU),
+               ("mat_foil_encombrement", bx(hx - P.mast_chord / 2, hx + P.mast_chord / 2, ym - P.mast_thk / 2, ym + P.mast_thk / 2, zt - 8 - P.mast_len, zt - 8), CARB),
+               ("aile_foil_encombrement", bx(hx - P.wing_chord / 2, hx + P.wing_chord / 2, ym, ym + P.wing_span, zt - 16 - P.mast_len, zt - P.mast_len), CARB)]
+        for nm, sd, c in mov:
+            if folded: sd = sd.rotate(V(0, hy, hz), V(1, hy, hz), 180)
+            out.append((f"{nm}_{tag}", sd, c))
+        return [(nm, sd.mirror("XZ") if mirror else sd, c) for nm, sd, c in out]
+    parts += hinge_side(False, False, "babord_deploye") + hinge_side(True, True, "tribord_replie")
+
+    # --- 2. arbre arrière : paliers à semelle vissés sur la face avant du couple porteur
+    xf = P.x_frame_axle + tU; xa = xf + P.brg_h
+    parts.append(("arbre_arriere", cyl((xa, -P.arm_y - 30, P.shaft_z), (xa, P.arm_y + 30, P.shaft_z), P.shaft_d / 2), STEEL))
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        yc = sg * P.brg_y
+        parts.append((f"palier_semelle_{tag}", bx(xf, xf + 15, yc - 70, yc + 70, P.shaft_z - 19, P.shaft_z + 19), ALU))
+        parts.append((f"palier_corps_{tag}", cyl((xa, yc - 17, P.shaft_z), (xa, yc + 17, P.shaft_z), 32), ALU))
+        parts.append((f"contre_plaque_palier_{tag}", bx(P.x_frame_axle - tU - 5, P.x_frame_axle - tU, yc - 75, yc + 75, P.shaft_z - 25, P.shaft_z + 25), ALU))
+        parts.append((f"moyeu_bras_{tag}", cyl((xa, sg * (P.arm_y - 20), P.shaft_z), (xa, sg * (P.arm_y + 20), P.shaft_z), 22), STEEL))
+
+    # --- 3. direction avant relevable : console pivotante + jeu de direction + fourche
+    ang = math.radians(P.head_angle); u = (-math.cos(ang), math.sin(ang)); wv = (math.sin(ang), math.cos(ang))
+    A = (P.axle_x, P.wheel_r); Q = (A[0] - P.rake * wv[0], A[1] - P.rake * wv[1])
+    at = lambda sv: (Q[0] + u[0] * sv, Q[1] + u[1] * sv)
+    C = at(P.wheel_r + 20); H = at(P.wheel_r + 90)
+    p3 = lambda q, y=0.0: (q[0], y, q[1])
+    fcheek = box(1185, 405, P.fork_px + 30, 520)
+    for xx, zz in STEM_BOLTS: fcheek = fcheek.difference(circ(xx, zz, 8.5))
+    fcheek = fcheek.difference(circ(P.fork_px, P.fork_pz, 12.5)).difference(circ(P.fork_px, P.fork_kz, 10.5))
+    flats.append(("joue_direction", 5.0, 2, fcheek, [], 'ALU'))
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        y0 = 20 if sg > 0 else -25
+        parts.append((f"joue_direction_{tag}", solid(fcheek, lambda a_, b_, y0=y0: (a_, y0, b_), (0, 5, 0)), ALU))
+        parts.append((f"cale_direction_{tag}", bx(1185, 1278, 9 if sg > 0 else -20, 20 if sg > 0 else -9, 405, 520), (0.81, 0.66, 0.45)))
+    parts.append(("axe_relevage_direction", cyl((P.fork_px, -32, P.fork_pz), (P.fork_px, 32, P.fork_pz), 6), STEEL))
+    parts.append(("goupille_direction", cyl((P.fork_px, -32, P.fork_kz), (P.fork_px, 32, P.fork_kz), 5), STEEL))
+    parts.append(("console_direction_patte", bx(P.fork_px - 18, P.fork_px + 18, -18, 18, P.fork_kz - 18, P.fork_pz + 18), ALU))
+    parts.append(("console_direction_bras", cyl(p3((P.fork_px, P.fork_pz)), p3(H), 18), ALU))
+    parts.append(("douille_direction", cyl(p3(at(P.wheel_r + 30)), p3(at(P.wheel_r + 150)), 22), ALU))
+    parts.append(("pivot_fourche", cyl(p3(C), p3(at(P.wheel_r + 170)), 14.3), STEEL))
+    parts.append(("te_fourche", cyl(p3(C, -55), p3(C, 55), 14), STEEL))
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        parts.append((f"fourreau_fourche_{tag}", cyl(p3(C, sg * 55), p3(A, sg * 55), 10), STEEL))
+    parts.append(("axe_roue_avant", cyl(p3(A, -60), p3(A, 60), 5), STEEL))
+    parts.append(("roue_avant_encombrement", cyl(p3(A, -20), p3(A, 20), P.wheel_r), ENV))
+
+    # --- 4. siège sur deux rails posés sur les varangues
+    zr = max(beam_top(x) for x in (-440, -260, -80, 100)) + P.floor_over
+    def slab(p0, p1, th):
+        dx, dz = p1[0] - p0[0], p1[1] - p0[1]; L = math.hypot(dx, dz); n = (-dz / L * th, dx / L * th)
+        return Polygon([p0, p1, (p1[0] + n[0], p1[1] + n[1]), (p0[0] + n[0], p0[1] + n[1])])
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        parts.append((f"rail_siege_{tag}", bx(-440, 110, sg * 50 - 10, sg * 50 + 10, zr, zr + 20), ALU))
+    zs = zr + 20; sa = math.radians(P.seat_angle)
+    pan = slab((P.seat_x, zs), (P.seat_x + 340, zs + 30), 9)
+    back = slab((P.seat_x, zs), (P.seat_x - P.seat_back * math.cos(sa), zs + P.seat_back * math.sin(sa)), 9)
+    for nm, pl, L in (("siege_assise", pan, 341.3), ("siege_dossier", back, P.seat_back)):
+        parts.append((nm, solid(pl, lambda a_, b_: (a_, -P.seat_w / 2, b_), (0, P.seat_w, 0)), (0.86, 0.78, 0.6)))
+        flats.append((nm, 9.0, 1, box(0, 0, L, P.seat_w), []))
+    flats[:] = [f if len(f) == 6 else f + ('CONTREPLAQUE',) for f in flats]
+
     # lisses (lofts de sections carrées)
     xs = np.linspace(P.x_transom - P.t_plate / 2, 1255, 42); h = P.stringer / 2
     n_str = len(stringer_frames(0)); str_len = 0.0
@@ -292,10 +438,10 @@ def build(outdir):
     doc = ezdxf.new('R2010'); doc.units = 4; msp = doc.modelspace()
     for nm, col in (('DECOUPE', 7), ('GRAVURE', 1), ('TEXTE', 3)): doc.layers.add(nm, color=col)
     placed = []; cy = 0.0
-    for th in sorted({f[1] for f in flats}):
+    for mat, th in sorted({(f[5], f[1]) for f in flats}, key=lambda k: (k[0] != 'CONTREPLAQUE', k[1])):
         cx = 0.0; rowh = 0.0
-        msp.add_text(f"CONTREPLAQUE {th:g} mm", dxfattribs={'layer': 'TEXTE', 'height': 40}).set_placement((0, cy - 70))
-        for nm, t_, q, poly, eng in [f for f in flats if f[1] == th]:
+        msp.add_text(f"{mat} {th:g} mm", dxfattribs={'layer': 'TEXTE', 'height': 40}).set_placement((0, cy - 70))
+        for nm, t_, q, poly, eng, _m in [f for f in flats if (f[5], f[1]) == (mat, th)]:
             x0, y0, x1, y1 = poly.bounds
             if cx > 0 and cx + (x1 - x0) > 2500: cx = 0; cy += rowh + 60; rowh = 0
             dx, dy = cx - x0, cy - y0
@@ -313,7 +459,8 @@ def build(outdir):
 
     # ------------------------------------------------------------ bilan
     area = {}
-    for nm, t_, q, poly, _ in flats: area[t_] = area.get(t_, 0) + q * poly.area / 1e6
+    for nm, t_, q, poly, _, m_ in flats:
+        if m_ == 'CONTREPLAQUE': area[t_] = area.get(t_, 0) + q * poly.area / 1e6
     m_ply = sum(a * t_ / 1000 * P.rho_ply for t_, a in area.items())
     m_str = str_len / 1000 * (P.stringer / 1000) ** 2 * P.rho_spruce
     rep = {
@@ -334,14 +481,14 @@ def build(outdir):
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     fig = plt.figure(figsize=(16, 14))
-    for k, (el, az) in enumerate(((22, -58), (8, -90))):
+    for k, (el, az) in enumerate(((20, -55), (4, -90))):
         ax = fig.add_subplot(2, 2, k + 1, projection='3d')
         for nm, s, col in parts:
             vs, tr = s.tessellate(1.5)
             v = np.array([(p.x, p.y, p.z) for p in vs])
             ax.add_collection3d(Poly3DCollection(v[np.array(tr)], facecolor=col, edgecolor=(0, 0, 0, 0.15), linewidths=0.1))
-        ax.set_xlim(-1300, 1300); ax.set_ylim(-1300, 1300); ax.set_zlim(-1000, 1600); ax.view_init(el, az); ax.set_axis_off()
-        ax.set_box_aspect((1, 1, 1), zoom=1.5)
+        ax.set_xlim(-1400, 1900); ax.set_ylim(-1650, 1650); ax.set_zlim(-1150, 2150); ax.view_init(el, az); ax.set_axis_off()
+        ax.set_box_aspect((1, 1, 1), zoom=1.9)
     ax = fig.add_subplot(2, 1, 2)
     for poly, lab, th in placed:
         ax.fill(*poly.exterior.xy, color='#d8b98a', ec='k', lw=0.5)
@@ -349,6 +496,7 @@ def build(outdir):
         ax.text(poly.bounds[0], poly.bounds[3] + 8, lab.split('  ')[0], fontsize=5)
     ax.set_aspect('equal'); ax.set_title('Gabarits de découpe (mm)'); ax.grid(alpha=0.2)
     fig.tight_layout(); fig.savefig(os.path.join(outdir, "phoebe-apercu.png"), dpi=110)
+    return parts, hull
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "."
