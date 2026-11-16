@@ -4,7 +4,7 @@
 
 **[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/) · [Participer](https://guillaumegodet.github.io/phoebe/#participer)
 
-Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils. Inspiré du trike open-source [Moskitos](https://moskitos.org/).
+Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils.
 
 Le nom vient de la titanide Phoebé, fille d'Ouranos et de Gaïa : « je vais en Phoebe » = amphibie.
 

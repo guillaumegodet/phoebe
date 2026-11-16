@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phoebe - véhicule amphibie à foils, inspiré du trike open-source Moskitos.
+Phoebe - véhicule amphibie à foils.
 Modèle paramétrique de la coque et du squelette porteur.
 
 Sorties :

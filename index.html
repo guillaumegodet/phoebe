@@ -37,7 +37,8 @@
 .scene .bras{transform-origin:250px 244px}
 .scene .avant{transform-origin:506px 230px}
 .scene .foilav{transform-origin:336px 231px;transform:scaleY(-1)}
-.scene .foilar{transform-origin:128px 238px;transform:rotate(155deg)}
+.scene .foilar{transform-origin:128px 238px;transform:rotate(180deg)}
+.scene .capote{opacity:1;transform:translateY(0)}
 .scene .eau{opacity:0}
 .scene .ombre{opacity:.16}
 .scene .housse{opacity:1}
@@ -55,6 +56,7 @@
 .scene.m-vol .foilav{transform:scaleY(1)}
 .scene.m-vol .foilar{transform:rotate(0deg)}
 .scene.m-vol .housse{opacity:0}
+.scene.m-vol .capote{opacity:0;transform:translateY(-14px)}
 .scene.m-vol .sillage{opacity:.9}
 .scene .houle{animation:houle 7s linear infinite}
 @keyframes houle{to{transform:translateX(-80px)}}
@@ -239,6 +241,13 @@
             <circle cx="278" cy="186" r="13" fill="#e9c9a8"/>
             <path d="M264 186a14 14 0 0 1 28-3Z" fill="#d9622b"/>
             <circle cx="428" cy="230" r="11" fill="none" stroke="#16252b" stroke-width="4"/>
+            <!-- Capote solaire : deux arceaux et un toit de cellules, rangée pour voler -->
+            <g class="mob capote">
+              <path d="M240 236 236 156M436 229 440 150" stroke="#b9bfc4" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M222 158Q332 132 456 146L455 155Q332 142 224 167Z" fill="#1f3a4d" stroke="#16252b" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M252 150.500 254 160M282 145 284 155M312 141 313 151M342 139 343 149M372 139 372 149M402 140 402 150M430 142 429 152" stroke="#7cc4d6" stroke-opacity=".55" stroke-width="1.500"/>
+              <path d="M226 159Q332 134 452 148" stroke="#7cc4d6" stroke-opacity=".7" stroke-width="1.500" fill="none"/>
+            </g>
             <!-- Coque en lattes et toile -->
             <path d="M134 234 500 226q16 0 10 10c-40 40-110 48-190 48s-150-8-184-22Z" fill="#efe6cc"/>
             <g clip-path="url(#c-coque)" fill="none" stroke="#b7864f" stroke-opacity=".5" stroke-width="2">
@@ -284,7 +293,7 @@
         <button type="button" data-mode="eau" aria-pressed="false">Rivière</button>
         <button type="button" data-mode="vol" aria-pressed="false">Vol</button>
       </div>
-      <p class="legende" id="legende">Sur route : foils repliés sous leurs housses, trois roues de 20 pouces, un pédalier assisté.</p>
+      <p class="legende" id="legende">Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.</p>
     </div>
   </div>
 </section>
@@ -399,7 +408,7 @@
           <a href="cad/out/phoebe-gabarits.dxf" download>Gabarits <small>DXF</small></a>
           <a href="cad/out/bilan.json">Bilan <small>JSON</small></a>
         </div>
-        <p class="note">Phoebe est partie du trike open source <a href="https://moskitos.org/">Moskitos</a>, dont elle s'est ensuite éloignée. La licence du dépôt reste à choisir : votre avis compte.</p>
+        <p class="note">La licence du dépôt reste à choisir : votre avis compte.</p>
       </div>
     </div>
   </div>
@@ -518,7 +527,6 @@
           <li><a href="https://github.com/guillaumegodet/phoebe">Dépôt GitHub</a></li>
           <li><a href="maquette/">Maquette 3D</a></li>
           <li><a href="identite/">Identité graphique</a></li>
-          <li><a href="https://moskitos.org/">Moskitos, le trike d'origine</a></li>
         </ul>
       </div>
       <div>
@@ -536,9 +544,9 @@
   var scene=document.getElementById('scene'),legende=document.getElementById('legende');
   var boutons=[].slice.call(document.querySelectorAll('.modes button'));
   var textes={
-    route:"Sur route : foils repliés sous leurs housses, trois roues de 20 pouces, un pédalier assisté.",
-    eau:"Sur la rivière : roues relevées, 15 cm de tirant d'eau, le moteur immergé à mi-course.",
-    vol:"En vol : les trois foils déployés portent la coque au-dessus de l'eau. C'est l'objectif."
+    route:"Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.",
+    eau:"Sur la rivière : roues relevées, 15 cm de tirant d'eau, le moteur immergé à mi-course, toujours à l'abri de la capote.",
+    vol:"En vol : capote rangée, les trois foils déployés portent la coque au-dessus de l'eau. C'est l'objectif."
   };
   var ordre=['route','eau','vol'],i=0,minuteur=null;
   function montrer(m){

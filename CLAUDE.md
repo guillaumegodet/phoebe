@@ -4,9 +4,9 @@ Ce fichier garde l'état du projet d'une session de travail à l'autre : décisi
 
 ## Le projet
 
-Phoebe est un véhicule amphibie personnel imaginé par Guillaume Godet (Nantes) : un trike couché à assistance électrique qui roule, flotte et vole sur foils, pensé pour passer de la route à la rivière (l'Erdre). Point de départ : le trike open-source [Moskitos](https://moskitos.org/), dont le projet s'est ensuite éloigné.
+Phoebe est un véhicule amphibie personnel imaginé par Guillaume Godet (Nantes) : un trike couché à assistance électrique qui roule, flotte et vole sur foils, pensé pour passer de la route à la rivière (l'Erdre).
 
-Le nom vient de la titanide Phoebé : « je vais en Phoebe » = amphibie. Ancien nom de travail : Moskitos Amphibie.
+Le nom vient de la titanide Phoebé : « je vais en Phoebe » = amphibie.
 
 Intentions de départ : carrosserie low-tech, très légère mais solide ; passage facile de la route à l'eau ; un véhicule attachant.
 
@@ -14,7 +14,8 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 
 ## Décisions prises par Guillaume
 
-- Roues arrière motrices et roue avant directrice placée devant l'étrave, plutôt que la roue avant motrice du Moskitos qui aurait traversé la coque.
+- Roues arrière motrices et roue avant directrice placée devant l'étrave, plutôt qu'une roue avant motrice, qui aurait traversé la coque.
+- Le projet ne se présente pas comme dérivé d'un autre véhicule : aucune référence à un projet d'origine, ni dans le dépôt ni sur le site.
 - Assistance sur route par un moteur de pédalier (au sec), pas par des moteurs-roues.
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
 - Direction sur l'eau par le mât arrière orientable (poussée orientée).
