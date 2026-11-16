@@ -12,6 +12,7 @@ Le nom vient de la titanide Phoebé, fille d'Ouranos et de Gaïa : « je vais en
 |---|---|
 | `cad/phoebe_cad.py` | Modèle paramétrique CadQuery : coque, squelette, interfaces |
 | `cad/out/` | Fichiers générés : assemblage STEP, gabarits DXF à l'échelle 1, aperçu, bilan |
+| `CLAUDE.md` | Mémoire du projet : décisions, chiffres de référence, points ouverts |
 | `maquette/index.html` | Maquette 3D interactive (three.js), à ouvrir dans un navigateur |
 
 ## Régénérer les fichiers
