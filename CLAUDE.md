@@ -1,6 +1,6 @@
 # Phoebe : mémoire du projet
 
-Ce fichier garde l'état du projet d'une session de travail à l'autre : décisions prises, chiffres de référence, points ouverts. À mettre à jour à chaque évolution notable. Dernière mise à jour : 16 novembre 2026.
+Ce fichier garde l'état du projet d'une session de travail à l'autre : décisions prises, chiffres de référence, points ouverts. À mettre à jour à chaque évolution notable. Dernière mise à jour : 17 novembre 2026.
 
 ## Le projet
 
@@ -20,9 +20,14 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
 - Direction sur l'eau par le mât arrière orientable (poussée orientée).
 - Équipements voulus : phares, batterie, capote faisant panneau solaire et rangeable pour voler, siège inclinable (mode sieste), housses de foils pour la route, squelette porteur.
-- Les foils avant repliés servent de montants avant à la capote solaire : ils basculent vers l'avant (environ 35° au-dessus de l'horizontale), passent le long du plat-bord à l'écart du pilote, et le toit repose sur eux et sur un arceau arrière. Montré sur le visuel d'accueil du site ; pas encore dans la CAO (la charnière n'a que deux positions, repliée à la verticale et déployée) ni dans la maquette 3D.
 - Variantes demandées : une version de série au design haut de gamme, une version avec siège enfant à l'arrière.
 - Conception en CAO paramétrique (CadQuery), versionnée dans ce dépôt.
+- Position du pédalier confirmée le 17 novembre 2026 : sur sa potence, à x = 470, z = 570 (voir « Pédalier reculé »).
+- **Le projet n'est pas open source** (17 novembre 2026). Ce véhicule n'existe pas dans le commerce, des brevets sont envisagés et une commercialisation doit rester possible. Tous droits réservés : voir `LICENCE.md`. Ne plus écrire « projet ouvert », « plans ouverts » ni inviter à participer ; ne pas proposer de téléchargement du modèle ou des plans ; ne pas ajouter de détail technique nouveau sur le site sans l'accord de Guillaume.
+- Une seule tension à bord : 48 V, pour le moteur de pédalier comme pour le moteur immergé, donc une seule batterie.
+- Changement de vitesses avec des pièces standard du commerce (voir « Pistes retenues »).
+- Sur l'eau, la poussée du moteur immergé doit suivre le pédalage plutôt qu'une manette : conduite plus amusante (voir « Pistes retenues »).
+- Foils avant repliés basculés vers l'avant pour porter la capote : **abandonné**. Guillaume ne le voulait que si la charnière et la position n'en étaient pas compliquées, or il faut tourner l'axe de charnière de 90° (joues à refaire, hors du plan du couple porteur) et retourner les ailes vers l'intérieur, sans quoi elles dépassent à 1,74 m de large sur route. Le visuel d'accueil du site est revenu aux foils repliés à la verticale.
 
 ## Architecture retenue
 
@@ -72,9 +77,23 @@ Le modèle précédent plaçait le pédalier sur l'étrave, à x = 950, z = 480.
 - la hanche du pilote est vers x = −280 : il fallait des jambes de 1,18 m (la maquette web trichait ainsi) ;
 - les talons passaient sous le niveau des varangues.
 
-Le pédalier a donc été reculé de 48 cm et monté de 9 cm, sur une potence. Il est réglé pour Guillaume, qui mesure 1,85 m : siège presque en butée arrière, à sa position d'origine. Demande de Guillaume : le siège doit coulisser d'avant en arrière pour s'adapter au pilote. Il avance donc de 180 mm au plus sur ses rails pour les pilotes plus petits (environ 5 cm par 10 cm de taille). Les tailles sont estimées avec un rapport jambe / taille de 0,503 (`leg_ratio`), à vérifier sur un gabarit. Les leviers et le centrage des masses ne changent pas pour Guillaume ; un pilote petit se retrouve plus en avant des leviers, qui restent fixes. L'alternative, avancer le siège de 35 cm en gardant le pédalier près de l'étrave, chargerait mieux la roue avant mais déplacerait le centre de gravité : **c'est une décision d'architecture à confirmer par Guillaume**. Tout suit `bb_x` et `bb_z` dans `Params`.
+Le pédalier a donc été reculé de 48 cm et monté de 9 cm, sur une potence. Il est réglé pour Guillaume, qui mesure 1,85 m : siège presque en butée arrière, à sa position d'origine. Demande de Guillaume : le siège doit coulisser d'avant en arrière pour s'adapter au pilote. Il avance donc de 180 mm au plus sur ses rails pour les pilotes plus petits (environ 5 cm par 10 cm de taille). Les tailles sont estimées avec un rapport jambe / taille de 0,503 (`leg_ratio`), à vérifier sur un gabarit. Les leviers et le centrage des masses ne changent pas pour Guillaume ; un pilote petit se retrouve plus en avant des leviers, qui restent fixes. L'alternative, avancer le siège de 35 cm en gardant le pédalier près de l'étrave, a été écartée : Guillaume a confirmé le pédalier sur potence le 17 novembre 2026. Tout suit `bb_x` et `bb_z` dans `Params`.
 
 Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongement de l'étrave vers l'arrière (x = 840 à 1014) ne sert plus au pédalier.
+
+## Pistes retenues, pas encore modélisées (17 novembre 2026)
+
+**Changement de vitesses : un moyeu à vitesses intégrées monté en renvoi.** Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alfine 8, plage de 307 %) est fixé par son axe entre deux platines, sous le dossier du siège. La chaîne primaire entraîne son pignon au lieu de celui de l'arbre ; un pignon vissé sur sa fixation de disque (pignon à six trous du commerce) entraîne l'arbre transversal par une chaîne courte, du côté bâbord. Commande par une poignée tournante sur le levier de direction droit. Avec 42 → 18 dents, puis 18 → 24 : de 1,45 à 4,44 m par tour de pédalier, soit 7 à 21 km/h à 80 tr/min. Le rapport d'entrée de 2,33 respecte la limite de couple habituelle de ces moyeux. À faire : l'implanter dans la CAO (place sous le dossier, entre le couple −440 et l'arbre, et galets arrière à déplacer), vérifier les dentures disponibles. Le moyeu gauche garde sa roue libre inversée. Variante pour la série : un bloc moteur et boîte de vitesses intégrés dans le pédalier, en 48 V.
+
+**Une seule tension, 48 V.** Des moteurs de pédalier de 250 W existent en 48 V (par exemple Bafang BBS01B ou Tongsheng TSDZ2B ; références à vérifier sur les fiches). Pour rester un vélo à assistance : 250 W nominaux et assistance coupée à 25 km/h. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V.
+
+**Poussée liée au pédalage.** Le variateur du moteur immergé reçoit le signal d'un capteur de pédalage du commerce au lieu de la seule gâchette (les variateurs de type VESC ont un mode d'assistance au pédalage ; à vérifier). Limite connue : roues relevées, la transmission tourne presque à vide, donc on mesure une cadence et pas une puissance. Deux niveaux : (1) poussée proportionnelle à la cadence, ou mieux à la vitesse de l'arbre transversal, pour que les vitesses du moyeu servent aussi sur l'eau ; (2) pour une vraie puissance de pédalage, il faut une charge qui résiste (génératrice), à étudier plus tard. Sur l'eau l'assistance du pédalier est coupée. La gâchette reste en secours et pour la marche arrière, le coupe-circuit à cordon aussi.
+
+## Propriété intellectuelle
+
+- Le dépôt GitHub et le site sont **publics** depuis novembre 2026. En droit européen des brevets, ce qui a été rendu public ne peut plus être breveté (pas de délai de grâce) : ne rien publier de nouveau qui pourrait l'être avant d'avoir vu un conseil en propriété industrielle.
+- Pistes à voir avec un conseil ou l'INPI : enveloppe e-Soleau pour dater les créations, dépôt de la marque Phoebe (disponibilité à vérifier), dessins et modèles pour l'apparence (délai de grâce de 12 mois après divulgation), brevet pour ce qui n'est pas encore divulgué.
+- Décision en attente de Guillaume : passer le dépôt en privé (le site GitHub Pages demande alors une offre payante, ou un hébergement séparé).
 
 ## Points durs connus
 
@@ -85,28 +104,27 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 5. **Roue arrière relevée proche de l'eau** : environ 3 cm au-dessus de la flottaison à 135 kg.
 6. **Moyeu gauche** : roue libre inversée nécessaire.
 7. **Mât arrière** : le verrouillage par goupille suppose de percer le carbone ; un collier serait préférable.
-8. **Tensions électriques** : pédalier en 36 V, moteur immergé en 48 V ou plus. Deux batteries ou un pédalier 48 V.
+8. **Tension électrique** : décidé, 48 V partout et une seule batterie. Reste à choisir le moteur de pédalier 48 V et à placer la batterie.
 9. **Étanchéité** des sorties d'arbre et du passage des joues à l'étrave.
 10. **Réglementation** : vitesse limitée sur l'Erdre, statut de vélo à assistance sur route, marquage CE des bateaux à vérifier.
 11. **Pédalier haut** : 30 cm au-dessus de l'assise pour que les talons passent au-dessus des varangues (pédale au plus bas à z = 400). À valider sur un gabarit grandeur ; des manivelles plus courtes le feraient descendre.
 12. **Lumières dans la semelle haute de la poutre** : deux de 20 mm de large pour la chaîne (environ 170 et 145 mm de long) et une pour la potence. Elles affaiblissent la poutre là où elle travaille en compression : à renforcer ou à calculer.
 13. **Ancrage de la potence de pédalier** : l'effort de chaîne (jusqu'à 1,8 kN) tire à 35 cm au-dessus de la poutre. Collage dans le caisson à valider par essai.
-14. **Un seul rapport** : 4,12 m par tour, c'est long pour sortir de l'eau sur une cale. Piste : moyeu à vitesses intégrées en renvoi, ou plateau plus petit.
+14. **Un seul rapport** : 4,12 m par tour, c'est long pour sortir de l'eau sur une cale. Piste retenue : moyeu à huit vitesses en renvoi (voir « Pistes retenues »).
 15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
 16. **Ligne de chaîne** : le caisson impose y = −35, le moteur de pédalier donne environ 50 mm. Le boîtier est décalé de 15 mm vers bâbord, donc les pédales aussi.
 17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
 
 ## Ce qui reste à faire
 
-- Confirmer la position du pédalier (voir « Pédalier reculé »).
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
-- Changement de vitesses, carters de chaîne, chaînes des bras arrière.
+- Modéliser le changement de vitesses (moyeu en renvoi), puis les carters de chaîne et les chaînes des bras arrière.
+- Commande du moteur immergé par le pédalage : choisir capteur et variateur.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
-- Charnière des foils avant : ajouter la position repliée inclinée vers l'avant qui porte la capote, et vérifier que le foil replié ne gêne ni les genoux ni les mains sur les leviers.
-- Choisir une licence pour le dépôt.
+- Propriété intellectuelle : décider de la visibilité du dépôt, consulter un conseil (voir « Propriété intellectuelle »).
 - Essai statique, puis calcul de structure, avant toute construction.
 
 ## Travailler dans ce dépôt
@@ -127,5 +145,5 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Site public (GitHub Pages, branche `main`, racine du dépôt) : https://guillaumegodet.github.io/phoebe/. Page d'accueil `index.html`, styles communs `assets/phoebe.css`, charte `identite/index.html`. Pas de build : fichiers statiques, `.nojekyll`.
 - Logo : un croissant orange (la coque, et la lune de Phoebé) porté par un foil au-dessus d'une vague. Fichiers SVG dans `identite/`, mot « phoebe » vectorisé en Bricolage Grotesque gras.
 - Couleurs : encre `#16252b`, Erdre `#0f6f86`, housse (orange) `#d9622b`, toile `#f6f3ea`, ciel `#dfe9ec`, écume `#7cc4d6`, okoumé `#cfa873`. Polices : Bricolage Grotesque (titres), Barlow (texte).
-- Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés.
+- Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés. Projet personnel, tous droits réservés : pas d'appel à participer, pas de lien vers le dépôt, pas de fichiers à télécharger.
 - Le site reprend les chiffres de référence et les points durs de ce fichier : les mettre à jour ensemble. `assets/cao-apercu.png` et `assets/cao-gabarits.png` sont des recadrages de `cad/out/phoebe-apercu.png`.

@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Phoebe : le trike qui roule, flotte et vole</title>
-<meta name="description" content="Phoebe est un projet ouvert de véhicule amphibie léger : un trike couché à assistance électrique, en bois et toile, qui roule, flotte et vole sur foils. Étude de concept, à Nantes. Venez y participer.">
+<meta name="description" content="Phoebe est un projet de véhicule amphibie léger : un trike couché à assistance électrique, en bois et toile, qui roule, flotte et vole sur foils. Étude de concept, à Nantes.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Phoebe : le trike qui roule, flotte et vole">
-<meta property="og:description" content="Un projet ouvert de véhicule amphibie léger, en bois et toile. Étude de concept, à Nantes. Venez y participer.">
+<meta property="og:description" content="Un projet de véhicule amphibie léger, en bois et toile. Étude de concept, à Nantes.">
 <meta property="og:image" content="https://guillaumegodet.github.io/phoebe/identite/phoebe-og.png">
 <meta property="og:url" content="https://guillaumegodet.github.io/phoebe/">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,8 +36,7 @@
 .scene .veh{transform:translateY(0)}
 .scene .bras{transform-origin:250px 244px}
 .scene .avant{transform-origin:506px 230px}
-/* Repliés, les foils avant basculent vers l'avant et deviennent les montants avant de la capote. */
-.scene .foilav{transform-origin:336px 231px;transform:rotate(-125deg)}
+.scene .foilav{transform-origin:336px 231px;transform:scaleY(-1)}
 .scene .foilar{transform-origin:128px 238px;transform:rotate(180deg)}
 .scene .capote{opacity:1;transform:translateY(0)}
 .scene .eau{opacity:0}
@@ -54,7 +53,7 @@
 .scene.m-eau .ombre,.scene.m-vol .ombre{opacity:0}
 /* Vol : tout déployé, la coque sort de l'eau */
 .scene.m-vol .veh{transform:translateY(-26px)}
-.scene.m-vol .foilav{transform:rotate(0deg)}
+.scene.m-vol .foilav{transform:scaleY(1)}
 .scene.m-vol .foilar{transform:rotate(0deg)}
 .scene.m-vol .housse{opacity:0}
 .scene.m-vol .capote{opacity:0;transform:translateY(-14px)}
@@ -179,7 +178,7 @@
       <a href="#maquette">Maquette 3D</a>
       <a href="#fabrication">Fabrication</a>
       <a href="#etat">Où en est-on</a>
-      <a class="bouton bouton-plein" href="#participer">Participer</a>
+      <a class="bouton bouton-plein" href="#chantiers">Les chantiers</a>
     </nav>
   </div>
 </header>
@@ -190,11 +189,11 @@
 <section class="ouverture">
   <div class="cadre">
     <div>
-      <p class="surtitre">Projet ouvert · Nantes · étude de concept</p>
+      <p class="surtitre">Projet personnel · Nantes · étude de concept</p>
       <h1>Je vais<br><em>en&nbsp;Phoebe</em>.</h1>
-      <p class="chapo">Un trike couché à assistance électrique qui roule jusqu'à la rivière, y flotte, puis vole sur ses foils. Une coque en bois et en toile, des plans ouverts, et encore beaucoup de questions à résoudre ensemble.</p>
+      <p class="chapo">Un trike couché à assistance électrique qui roule jusqu'à la rivière, y flotte, puis vole sur ses foils. Une coque en bois et en toile, des pièces de vélo du commerce, et encore beaucoup de questions à résoudre.</p>
       <div class="actions">
-        <a class="bouton bouton-plein" href="#participer">Participer au projet</a>
+        <a class="bouton bouton-plein" href="#chantiers">Voir les chantiers</a>
         <a class="bouton bouton-trait" href="#maquette">Voir la maquette 3D</a>
       </div>
       <p class="clin">Dites-le à voix haute : <b>en Phoebe</b>, amphibie. Phoebé est aussi une titanide, fille du Ciel et de la Terre.</p>
@@ -231,14 +230,6 @@
               <path d="M101 359v23" stroke="#d9622b" stroke-width="4" stroke-linecap="round"/>
               <rect x="106" y="380" width="46" height="8" rx="4" fill="#1d2226"/>
             </g>
-            <!-- Foil avant en L, côté opposé : il passe derrière le pilote et la coque -->
-            <g class="mob foilav">
-              <rect x="330.500" y="231" width="11" height="153" rx="5" fill="#1d2226"/>
-              <rect x="324" y="377" width="24" height="10" rx="5" fill="#1d2226"/>
-              <rect class="mob housse" x="326" y="246" width="20" height="146" rx="10" fill="#d9622b"/>
-              <path class="mob housse" d="M331 262v118" stroke="#f6f3ea" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="336" cy="232" r="7" fill="#b9bfc4" stroke="#16252b" stroke-width="2"/>
-            </g>
             <!-- Pilote -->
             <g fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path d="M294 246 266 196" stroke="#b7864f" stroke-width="7"/>
@@ -250,9 +241,12 @@
             <circle cx="278" cy="186" r="13" fill="#e9c9a8"/>
             <path d="M264 186a14 14 0 0 1 28-3Z" fill="#d9622b"/>
             <circle cx="428" cy="230" r="11" fill="none" stroke="#16252b" stroke-width="4"/>
-            <!-- Capote solaire : arceau arrière ; le toit est posé plus bas, sur les foils repliés -->
+            <!-- Capote solaire : deux arceaux et un toit de cellules, rangée pour voler -->
             <g class="mob capote">
-              <path d="M240 236 235 156" stroke="#b9bfc4" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M240 236 236 156M436 229 440 150" stroke="#b9bfc4" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M222 158Q332 132 456 146L455 155Q332 142 224 167Z" fill="#1f3a4d" stroke="#16252b" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M252 150.500 254 160M282 145 284 155M312 141 313 151M342 139 343 149M372 139 372 149M402 140 402 150M430 142 429 152" stroke="#7cc4d6" stroke-opacity=".55" stroke-width="1.500"/>
+              <path d="M226 159Q332 134 452 148" stroke="#7cc4d6" stroke-opacity=".7" stroke-width="1.500" fill="none"/>
             </g>
             <!-- Coque en lattes et toile -->
             <path d="M134 234 500 226q16 0 10 10c-40 40-110 48-190 48s-150-8-184-22Z" fill="#efe6cc"/>
@@ -262,13 +256,12 @@
             </g>
             <path d="M134 234 500 226q16 0 10 10c-40 40-110 48-190 48s-150-8-184-22Z" fill="none" stroke="#16252b" stroke-width="3" stroke-linejoin="round"/>
             <path d="M135 234 503 226" stroke="#b7864f" stroke-width="6" stroke-linecap="round"/>
-            <!-- Toit de cellules solaires, porté par l'arceau arrière et par les foils avant repliés -->
-            <g class="mob capote">
-              <path d="M218 151Q340 121 476 132L475 142Q340 131 220 160Z" fill="#1f3a4d" stroke="#16252b" stroke-width="2.500" stroke-linejoin="round"/>
-              <path d="M250 143.500 252 154M282 136 284 146M314 131 315 141M346 128 347 138M378 127 378 137M410 127 410 137M442 128 441 138" stroke="#7cc4d6" stroke-opacity=".55" stroke-width="1.500"/>
-              <path d="M222 152Q340 123 472 134" stroke="#7cc4d6" stroke-opacity=".7" stroke-width="1.500" fill="none"/>
-              <!-- Arceau avant, côté proche : il cache le foil replié, qui sert de montant -->
-              <path d="M338 229 462 140" stroke="#b9bfc4" stroke-width="5" stroke-linecap="round"/>
+            <!-- Foil avant en L -->
+            <g class="mob foilav">
+              <rect x="330.500" y="231" width="11" height="153" rx="5" fill="#1d2226"/>
+              <rect x="312" y="379" width="48" height="9" rx="4.500" fill="#1d2226"/>
+              <rect class="mob housse" x="306" y="373" width="60" height="21" rx="10" fill="#d9622b"/>
+              <circle cx="336" cy="232" r="7" fill="#b9bfc4" stroke="#16252b" stroke-width="2"/>
             </g>
             <!-- Roue arrière sur son bras relevable -->
             <g class="mob bras">
@@ -300,7 +293,7 @@
         <button type="button" data-mode="eau" aria-pressed="false">Rivière</button>
         <button type="button" data-mode="vol" aria-pressed="false">Vol</button>
       </div>
-      <p class="legende" id="legende">Sur route : les foils avant, repliés dans leurs housses, portent la capote solaire. Mât arrière relevé, pédalier assisté.</p>
+      <p class="legende" id="legende">Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.</p>
     </div>
   </div>
 </section>
@@ -318,13 +311,13 @@
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 26C14 38 42 38 52 20 40 30 16 32 4 26Z" fill="#d9622b"/><circle cx="14" cy="42" r="7" stroke="#16252b" stroke-width="3.200"/><circle cx="44" cy="42" r="7" stroke="#16252b" stroke-width="3.200"/><path d="M2 52h52" stroke="#0f6f86" stroke-width="3.200"/></svg>
         <span class="num">01</span>
         <h3>Elle roule</h3>
-        <p>Trois roues de 20&nbsp;pouces, les deux roues arrière motrices, et un moteur de pédalier de 250&nbsp;W. Foils repliés, elle mesure 1,00&nbsp;m de large.</p>
+        <p>Trois roues de 20&nbsp;pouces, les deux roues arrière motrices, et un moteur de pédalier de 250&nbsp;W en 48&nbsp;V. Foils repliés, elle mesure 1,00&nbsp;m de large.</p>
       </article>
       <article class="carte">
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 26C14 38 42 38 52 20 40 30 16 32 4 26Z" fill="#d9622b"/><path d="M2 36q6.500-4 13 0t13 0 13 0 13 0M2 47q6.500-4 13 0t13 0 13 0 13 0" stroke="#0f6f86" stroke-width="3.200"/></svg>
         <span class="num">02</span>
         <h3>Elle flotte</h3>
-        <p>Roues relevées, la coque de 416&nbsp;litres ne s'enfonce que de 15&nbsp;cm avec son pilote. Un moteur immergé, au pied du foil arrière, prend le relais du pédalier.</p>
+        <p>Roues relevées, la coque de 416&nbsp;litres ne s'enfonce que de 15&nbsp;cm avec son pilote. Un moteur immergé, au pied du foil arrière, prend le relais. L'idée&nbsp;: qu'il pousse d'autant plus que l'on pédale.</p>
       </article>
       <article class="carte">
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 16C14 28 42 28 52 10 40 20 16 22 4 16Z" fill="#d9622b"/><path d="M21 26v20M12 46h18" stroke="#16252b" stroke-width="3.200"/><path d="M2 39q6.500-4 13 0t13 0 13 0 13 0" stroke="#0f6f86" stroke-width="3.200"/></svg>
@@ -352,7 +345,7 @@
       </button>
     </div>
     <div class="sous-maquette">
-      <span>Maquette de communication : elle montre le concept, pas des cotes. Elle a un peu de retard sur le modèle CAO.</span>
+      <span>Maquette de communication : elle montre le concept, pas des cotes. Elle a été réalignée sur le modèle CAO en novembre 2026.</span>
       <a href="maquette/">Ouvrir en plein écran</a>
     </div>
   </div>
@@ -388,7 +381,7 @@
         <h2>Du bois, de la toile, du vernis.</h2>
         <p class="chapo" style="margin-top:16px">La coque reprend la technique des kayaks traditionnels, dite <i>skin-on-frame</i> : une ossature légère, habillée d'une toile tendue. Peu d'outillage, des matériaux courants, un résultat réparable.</p>
         <ul class="liste">
-          <li>Squelette en contreplaqué d'okoumé : une poutre de quille en caisson et 13&nbsp;couples, soit environ 11,6&nbsp;kg.</li>
+          <li>Squelette en contreplaqué d'okoumé : une poutre de quille en caisson et 13&nbsp;couples, soit environ 12,3&nbsp;kg.</li>
           <li>18&nbsp;mètres de lattes d'épicéa de 18&nbsp;×&nbsp;18&nbsp;mm, pour moins de 3&nbsp;kg.</li>
           <li>Une toile tendue puis vernie par-dessus.</li>
           <li>Autour : des pièces de vélo du commerce, des foils de série et quelques platines en aluminium.</li>
@@ -406,16 +399,10 @@
         <figcaption>Les gabarits de découpe, produits à l'échelle 1 par le même script.</figcaption>
       </figure>
       <div>
-        <p class="surtitre">Plans ouverts</p>
+        <p class="surtitre">Conception</p>
         <h2>Tout le véhicule tient dans un script.</h2>
         <p class="chapo" style="margin-top:16px">Phoebe est dessinée en CAO paramétrique, avec CadQuery. Changez une cote en tête du fichier : l'assemblage 3D, les gabarits et le bilan de masse et de flottabilité se recalculent.</p>
-        <div class="liens-fichiers">
-          <a href="https://github.com/guillaumegodet/phoebe/blob/main/cad/phoebe_cad.py">Le script <small>Python</small></a>
-          <a href="cad/out/phoebe-assemblage.step" download>Assemblage 3D <small>STEP, 11&nbsp;Mo</small></a>
-          <a href="cad/out/phoebe-gabarits.dxf" download>Gabarits <small>DXF</small></a>
-          <a href="cad/out/bilan.json">Bilan <small>JSON</small></a>
-        </div>
-        <p class="note">La licence du dépôt reste à choisir : votre avis compte.</p>
+        <p class="note">Le modèle et les plans ne sont pas diffusés. Phoebe est un projet personnel, tous droits réservés.</p>
       </div>
     </div>
   </div>
@@ -426,7 +413,7 @@
   <div class="cadre">
     <div class="entete-section">
       <p class="surtitre">Où en est-on</p>
-      <h2>Rien n'est encore construit. C'est le bon moment pour arriver.</h2>
+      <h2>Rien n'est encore construit.</h2>
       <p class="chapo">Phoebe est une étude de concept : aucune pièce n'a été découpée, calculée ni essayée. Tout peut encore être remis en question, et aucun essai sur l'eau n'aura lieu avant la validation de la structure.</p>
     </div>
     <ol class="etapes">
@@ -440,81 +427,68 @@
   </div>
 </section>
 
-<!-- ============ Participer ============ -->
-<section class="section" id="participer">
+<!-- ============ Chantiers ============ -->
+<section class="section" id="chantiers">
   <div class="cadre">
     <div class="entete-section">
-      <p class="surtitre">Participer</p>
-      <h2>Huit chantiers ouverts. Lequel est le vôtre ?</h2>
-      <p class="chapo">Voici les points durs du projet, tels qu'ils sont aujourd'hui. Si l'un d'eux touche à votre métier ou à votre passion, votre avis vaut de l'or : chaque carte ouvre une discussion sur GitHub.</p>
+      <p class="surtitre">Les chantiers</p>
+      <h2>Neuf questions à résoudre avant de construire.</h2>
+      <p class="chapo">Voici les points durs du projet, tels qu'ils sont aujourd'hui.</p>
     </div>
     <div class="chantiers">
       <article class="chantier">
         <span class="metier">Structure · calcul</span>
         <h3>Charnières de foils et verrous de bras</h3>
         <p>Environ 3&nbsp;kN par vis dans le contreplaqué à trois fois la charge. Comment le valider par un essai statique simple, puis par le calcul&nbsp;?</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Structure : charnières des foils avant et verrous des bras arrière">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Hydrodynamique · foil</span>
         <h3>Régulation d'altitude en vol</h3>
         <p>Palpeurs mécaniques, foils en V ou volets pilotés&nbsp;? Rien n'est conçu. Le choix des profils et des surfaces est ouvert lui aussi.</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Foils : régulation d'altitude en vol">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Électricité · batteries</span>
-        <h3>Une ou deux tensions à bord</h3>
-        <p>Le pédalier travaille en 36&nbsp;V, le moteur immergé en 48&nbsp;V ou plus. Deux batteries, ou un pédalier en 48&nbsp;V&nbsp;? Et quelle place pour la capote solaire&nbsp;?</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Électricité : tensions, batteries et capote solaire">En discuter</a>
+        <h3>Une seule tension à bord</h3>
+        <p>Tout passe en 48&nbsp;V&nbsp;: il existe des moteurs de pédalier de 250&nbsp;W dans cette tension, celle du moteur immergé. Une seule batterie, donc. Reste à lui trouver sa place, et celle de la capote solaire.</p>
       </article>
       <article class="chantier">
         <span class="metier">Mécanique vélo</span>
-        <h3>Transmission et largeur</h3>
-        <p>Le moyeu gauche demande une roue libre inversée, et les moyeux standards imposent 1,00&nbsp;m de large. Des roues en porte-à-faux feraient-elles mieux&nbsp;?</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Transmission : moyeu gauche et largeur hors tout">En discuter</a>
+        <h3>Changer de vitesse</h3>
+        <p>Un seul rapport aujourd'hui, trop long pour remonter une cale. La piste&nbsp;: un moyeu de vélo à huit vitesses monté en renvoi, entre la chaîne du pédalier et l'arbre des roues. Le moyeu gauche demande toujours une roue libre inversée.</p>
       </article>
       <article class="chantier">
         <span class="metier">Construction navale</span>
         <h3>Étanchéité et entoilage</h3>
         <p>Deux sorties d'arbre et le passage des joues à l'étrave traversent la toile. Si vous avez construit un kayak en toile, vos conseils sont attendus.</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Coque : étanchéité des traversées et entoilage">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Composites</span>
         <h3>Verrouiller le mât arrière</h3>
         <p>Une goupille oblige à percer le carbone du mât. Un collier serait préférable&nbsp;: lequel, et comment le rendre orientable et relevable&nbsp;?</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Foil arrière : verrouillage du mât sans percer le carbone">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Réglementation</span>
         <h3>Un vélo, un bateau, ou les deux</h3>
         <p>Statut de vélo à assistance sur route, vitesse limitée sur l'Erdre, marquage CE des bateaux&nbsp;: que faut-il respecter, et dans quel ordre&nbsp;?</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Réglementation : route, navigation et marquage CE">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Code · Python, three.js</span>
         <h3>CAO et maquette web</h3>
-        <p>Réaligner la maquette web sur le modèle CAO, modéliser la version à siège enfant, la capote, les housses et l'éclairage.</p>
-        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="CAO et maquette : ">En discuter</a>
+        <p>Modéliser le changement de vitesses, la version à siège enfant, la capote, les housses et l'éclairage.</p>
       </article>
-    </div>
-
-    <div class="aussi">
-      <div><h3>Racontez votre expérience</h3><p>Vélo couché, kayak en toile, foil, bateau électrique : un retour de terrain évite des mois d'erreurs.</p></div>
-      <div><h3>Relisez, critiquez</h3><p>Une cote douteuse, une hypothèse fragile, une idée plus simple ? Dites-le, c'est exactement ce qui manque.</p></div>
-      <div><h3>Du côté de Nantes ?</h3><p>Un atelier, une découpeuse, un coup de main pour l'essai statique ou une cale de mise à l'eau : faites signe.</p></div>
+      <article class="chantier">
+        <span class="metier">Commande · électronique</span>
+        <h3>Pédaler aussi sur l'eau</h3>
+        <p>La poussée du moteur immergé suivrait le pédalage plutôt qu'une manette&nbsp;: un capteur de pédalage du commerce commande son variateur. Les roues relevées n'offrent presque pas de résistance&nbsp;: comment rendre l'effort réel&nbsp;?</p>
+      </article>
     </div>
   </div>
 </section>
 
 <section class="section appel">
   <div class="cadre">
-    <h2>Embarquez avant la première découpe.</h2>
-    <p>Le projet vit sur GitHub : le modèle, les décisions et les questions ouvertes y sont publics.</p>
-    <div class="actions">
-      <a class="bouton bouton-plein" href="https://github.com/guillaumegodet/phoebe/issues/new" data-sujet="">Proposer une idée</a>
-      <a class="bouton bouton-clair" href="https://github.com/guillaumegodet/phoebe">Voir le dépôt GitHub</a>
-    </div>
+    <h2>Je vais en Phoebe.</h2>
+    <p>Un projet personnel de Guillaume Godet, à Nantes. Étude de concept&nbsp;: rien n'est encore construit.</p>
   </div>
   <svg class="vague" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30q50-24 100 0t100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0V60H0Z" fill="#fff"/></svg>
 </section>
@@ -531,7 +505,6 @@
       <div>
         <h3>Le projet</h3>
         <ul>
-          <li><a href="https://github.com/guillaumegodet/phoebe">Dépôt GitHub</a></li>
           <li><a href="maquette/">Maquette 3D</a></li>
           <li><a href="identite/">Identité graphique</a></li>
         </ul>
@@ -541,7 +514,7 @@
         <p>Ce site décrit un prototype non construit. Les cotes, épaisseurs et sections sont des choix de départ, pas des plans validés.</p>
       </div>
     </div>
-    <p class="bas">Phoebe, étude de concept. Licence du dépôt à choisir.</p>
+    <p class="bas">© 2026 Guillaume Godet. Phoebe, étude de concept. Tous droits réservés&nbsp;: le nom, le logo, les visuels, le modèle et les plans ne peuvent être reproduits ni utilisés sans accord écrit.</p>
   </div>
 </footer>
 
@@ -551,7 +524,7 @@
   var scene=document.getElementById('scene'),legende=document.getElementById('legende');
   var boutons=[].slice.call(document.querySelectorAll('.modes button'));
   var textes={
-    route:"Sur route : les foils avant, repliés dans leurs housses, portent la capote solaire. Mât arrière relevé, pédalier assisté.",
+    route:"Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.",
     eau:"Sur la rivière : roues relevées, 15 cm de tirant d'eau, le moteur immergé à mi-course, toujours à l'abri de la capote.",
     vol:"En vol : capote rangée, les trois foils déployés portent la coque au-dessus de l'eau. C'est l'objectif."
   };
@@ -575,12 +548,6 @@
     var f=document.createElement('iframe');
     f.src='maquette/';f.title='Maquette 3D interactive de Phoebe';f.allow='fullscreen';
     lancer.replaceWith(f);f.focus();
-  });
-
-  // Liens « En discuter » : un ticket GitHub avec le sujet déjà rempli.
-  [].forEach.call(document.querySelectorAll('a[data-sujet]'),function(a){
-    var s=a.dataset.sujet;
-    a.href='https://github.com/guillaumegodet/phoebe/issues/new'+(s?'?title='+encodeURIComponent(s):'');
   });
 })();
 </script>

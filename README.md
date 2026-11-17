@@ -2,7 +2,7 @@
 
 # Phoebe
 
-**[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/) · [Participer](https://guillaumegodet.github.io/phoebe/#participer)
+**[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/)
 
 Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils.
 
@@ -62,7 +62,11 @@ Cotes qui découlent de ces interfaces : largeur hors tout sur route d'environ 1
 
 Chiffres de la transmission et de la direction (voir `cad/out/bilan.json`) : 4,12 m par tour de pédalier, soit 19,8 km/h à 80 tr/min, sur un seul rapport ; 30° de braquage pour 23° de débattement des leviers.
 
-Non modélisé à ce stade : changement de vitesses, carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, implantation exacte du moteur de pédalier, visserie.
+Non modélisé à ce stade : changement de vitesses (piste retenue : un moyeu à huit vitesses monté en renvoi sous le dossier), carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, implantation exacte du moteur de pédalier, visserie.
+
+## Droits
+
+© 2026 Guillaume Godet. Tous droits réservés. Ce projet n'est pas open source : voir [LICENCE.md](LICENCE.md). Le contenu peut être consulté, mais ni copié, ni modifié, ni utilisé pour fabriquer ou vendre quoi que ce soit sans accord écrit.
 
 ## Avertissement
 
