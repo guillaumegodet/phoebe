@@ -51,7 +51,7 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 | Volume de coque sous le plat-bord | 416 L |
 | Tirant d'eau à 135 kg (véhicule et pilote) | 154 mm |
 | Tirant d'eau à 165 kg (avec un enfant) | 174 mm |
-| Contreplaqué du squelette | ≈ 2,4 m², ≈ 12,3 kg en okoumé |
+| Contreplaqué du squelette | ≈ 2,4 m², ≈ 12,4 kg en okoumé |
 | Développement | huit vitesses, de 1,45 à 4,44 m par tour de pédalier : 7,0 à 21,3 km/h à 80 tr/min |
 | Chaîne primaire | 2,99 m, 236 maillons |
 | Chaîne secondaire | 36 maillons, entraxe de 100 mm |
@@ -108,15 +108,27 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 
 Principe : un secteur à gorge, solidaire du foil et centré sur son axe, garde un bras de levier constant sur les 180° de rotation. Le relevage ne porte que le poids du foil ; en vol, l'effort est repris par les charnières et les sabots de verrouillage. Masses supposées, à remplacer par celles des foils réels : 2,3 kg par foil avant (centre de gravité à 0,55 m de l'axe), 6 kg pour le foil arrière avec son moteur (à 0,60 m). Tout suit `lift_*`, `foil_*` et `rud_*` dans `Params`.
 
-- **Foils avant** : secteur de 70 mm de rayon (limité par le plat-bord), vissé sur la platine de mât, devant la joue avant. Couple maximal de 12 N·m, soit 18 kg de traction sans aide, pour 22 cm de bout. Un sandow de rappel compense le poids : attaché au secteur, renvoyé sur un réa de la joue, ancré en bas de la joue, côté cockpit. Il lui faut environ 225 N à mi-course. Le bout passe par deux filoirs sur la joue et file au taquet coinceur sur le plat-bord (x = −120).
+- **Foils avant** : secteur de 70 mm de rayon (limité par le plat-bord), vissé sur la platine de mât, devant la ferrure porteuse (appelée « joue » dans la suite). Couple maximal de 12 N·m, soit 18 kg de traction sans aide, pour 22 cm de bout. Un sandow de rappel compense le poids : attaché au secteur, renvoyé sur un réa de la joue, ancré en bas de la joue, côté cockpit. Il lui faut environ 225 N à mi-course. Le bout passe par deux filoirs sur la joue et file au taquet coinceur sur le plat-bord (x = −120).
 - **Foil arrière** : secteur de 90 mm (limité par le palonnier), claveté sur l'axe de relevage, à bâbord de la tête de safran. L'axe doit donc être solidaire du mât et transmettre 35 N·m. Le bout descend à une poulie sur le tableau, à 15 mm de l'axe de direction pour ne pas gêner le braquage, passe sur le pont arrière et rejoint un palan à six brins le long du plat-bord bâbord. Environ 65 N au garant sans les frottements, pour 1,7 m de cordage à reprendre. Taquet à x = −200. Pas de rappel : un vérin à gaz est à étudier.
 - **Non traité** : départ de la descente (foil replié à la verticale, il faut le décoller de sa butée : ressort ou second bout), tenue du sandow, trajectoires pendant la rotation et pendant le braquage du mât arrière (seules les positions extrêmes sont contrôlées), contact des bouts avec la toile du pont.
+
+## Ferrure porteuse des foils avant (modélisée le 17 novembre 2026)
+
+Le recalcul des charnières a montré deux choses. D'abord le sabot soulage la goupille de charnière, mais pas les vis : 3,3 kN par vis à trois fois la charge, contre 3,6 kN sans lui, soit 17 MPa de pression dans l'okoumé. Ensuite, et surtout, le moment des deux foils doit traverser le fond du couple porteur, entaillé pour la poutre de quille : il n'y restait que 25 mm de contreplaqué, soit environ 130 MPa à une seule fois la charge. Le contreplaqué seul ne pouvait pas porter le vol.
+
+Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les quatre joues de charnière sont donc remplacées par une **ferrure porteuse** : deux tôles d'aluminium de 6 mm, d'un seul tenant d'une charnière à l'autre, plaquées sur les deux faces du couple porteur. Le bois garde la forme et tient les lisses ; l'aluminium porte l'effort concentré. Tout suit `ferrure_poly`, `FERRURE_BOLTS` et `floor_over_foil`.
+
+- **Forme** : le contour du couple, en retrait de 26 mm de la toile pour passer derrière les lisses (aucune encoche), avec les oreilles de charnière au-dessus du plat-bord. 14 vis M8 de couture. Les axes de charnière et de verrou portent directement dans l'aluminium (18 MPa à trois fois la charge).
+- **Varangue haute** : au-dessus de la poutre, tôles et contreplaqué montent à 62 mm au lieu de 25. C'est le maximum : l'assise du siège avancé passe 5 mm au-dessus. Les rails du siège s'arrêtent contre la ferrure, sur une équerre.
+- **Contraintes de flexion, tôles seules** (70 % de 135 kg sur les foils avant) : 42 MPa au milieu à une fois la charge, 125 MPa à trois fois ; 22 MPa dans le bras. À comparer à la limite élastique de l'alliage choisi (de l'ordre de 240 MPa pour du 6061-T6, de mémoire, à vérifier).
+- **Masse** : 2,6 kg pour les deux tôles, soit environ 1,3 kg de plus que les quatre joues.
+- **Non traité** : flambement du bord comprimé des tôles, corrosion et isolation entre aluminium et vis inox, découpe (laser ou jet d'eau, la pièce fait 0,96 m de large). Le couple porteur arrière a la même entaille de 25 mm : sur route c'est l'arbre d'acier de 25 mm qui passe le moment, à vérifier.
 
 ## Sabot de verrouillage et foil à coude arrondi (modélisés le 17 novembre 2026)
 
 En vol, la portance s'applique en dehors de la charnière : elle cherche à replier le foil vers l'extérieur, et le mât tire donc sur la coque. Le sabot le retient 152 mm sous la charnière (goupille à z = 335), au lieu des 35 mm de la goupille de charnière. Tout suit `shoe_*` et `foil_elbow_r` dans `Params`.
 
-- **Sabot** : une console en aluminium sur le flanc, terminée par une chape. Un tenon fixé à la face intérieure du mât y entre quand le foil se déploie ; une goupille de 10 mm les traverse. Le sabot est serré autour du couple porteur par deux tirants M8 qui passent de part et d'autre des joues, jusqu'à une contre-plaque appuyée sur le chant intérieur du couple. Une cale de contreplaqué remplit les 6 mm entre la toile et le couple. Rien n'est vissé dans le chant du contreplaqué.
+- **Sabot** : une console en aluminium sur le flanc, terminée par une chape. Un tenon fixé à la face intérieure du mât y entre quand le foil se déploie ; une goupille de 10 mm les traverse. Le sabot est serré autour du couple porteur par deux tirants M8 qui passent de part et d'autre de la ferrure porteuse, jusqu'à une contre-plaque appuyée sur le chant intérieur du couple. Une cale de contreplaqué remplit les 6 mm entre la toile et le couple. Rien n'est vissé dans le chant du contreplaqué.
 - **Efforts** (hypothèse : 70 % de 135 kg sur les deux foils avant, portance au milieu de l'aile) : 464 N par foil, 113 N·m autour de la charnière, 0,74 kN au sabot, 2,2 kN à trois fois la charge, soit 1,1 kN par tirant. Sans sabot, la goupille de charnière prendrait 9,7 kN à trois fois la charge.
 - **Encombrement** : il dépasse le flanc de 110 mm et reste dans la largeur sur route. Son dessous est à 26 mm de la flottaison à 135 kg, 6 mm à 165 kg : il traîne dans l'eau au clapot.
 - **Foil** : le coude arrondi remplace l'assemblage d'un mât et d'une aile. La corde est constante (150 mm au lieu de 120 pour le mât et 180 pour l'aile) : la surface portante projetée passe de 0,067 à 0,056 m² par foil, à envergure égale (1,74 m). Ce n'est plus un mât de foil du commerce : pièce à faire faire, en carbone ou en profilé d'aluminium cintré (masse à revoir, l'hypothèse de 2,3 kg date du carbone).
@@ -146,7 +158,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Points durs connus
 
-1. **Charnières et sabots des foils avant** : environ 3 kN par vis dans le contreplaqué à trois fois la charge, estimés avant le sabot ; à recalculer, le sabot reprend maintenant le moment (2,2 kN à trois fois la charge). À valider par essai statique. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
+1. **Couple porteur des foils avant** : le contreplaqué seul ne passait pas le moment des foils au-dessus de la poutre. Une ferrure porteuse en aluminium le reprend (125 MPa à trois fois la charge, voir « Ferrure porteuse »). À valider par essai statique, flambement compris. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
 2. **Verrou des bras arrière** : il porte le poids sur route, environ 2,6 kN par vis à trois fois la charge.
 3. **Régulation d'altitude des foils** : non conçue (palpeurs, foils en V ou volets).
 4. **Largeur de 1,00 m**, imposée par les moyeux arrière standard. La réduire demande des roues en porte-à-faux.

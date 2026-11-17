@@ -53,6 +53,7 @@ class Params:
     floor_half: float = 100.0   # demi-largeur des varangues
     floor_over: float = 25.0    # matière au-dessus de la poutre (couples courants)
     floor_over_U: float = 25.0  # idem couples porteurs
+    floor_over_foil: float = 62.0   # couple porteur des foils : varangue haute, limitée par l'assise du siège avancé
     # (x, type) : closed = avec barrot de pont, open = cockpit, bulk = cloison étanche, U = couple porteur
     stations: tuple = ((-1170, 'closed'), (-975, 'closed'), (-806, 'bulk'), (-620, 'U'),
                        (-440, 'open'), (-260, 'open'), (-80, 'open'), (100, 'U'),
@@ -211,6 +212,7 @@ class Params:
 
 P = Params()
 HINGE_BOLTS = [(300, 315), (325, 360), (300, 405), (325, 438)]          # (y, z) dans le couple porteur des foils
+FERRURE_BOLTS = [(270, 250), (190, 228), (82, 215)]                     # (y, z) vis de couture de la ferrure porteuse, le long du couple
 LOCK_BOLTS = [(300, 440), (325, 415)]                                   # (y, z) équerre de verrou des bras
 STEM_BOLTS = [(1200, 435), (1200, 500), (1262, 440), (1262, 500)]        # (x, z) dans l'étrave
 
@@ -296,7 +298,7 @@ def frame_poly(x, kind):
         if not closed and not inner.is_empty:
             inner = unary_union([inner, affinity.translate(inner, yoff=4 * w)]).convex_hull
         body = outer.difference(inner)
-        zf = beam_top(x) + (P.floor_over_U if kind == 'U' else P.floor_over)
+        zf = beam_top(x) + (P.floor_over_foil if abs(x - P.x_frame_foil) < 1 else P.floor_over_U if kind == 'U' else P.floor_over)
         body = body.union(box(-P.floor_half, 0, P.floor_half, zf).intersection(outer))
         if abs(x - P.x_frame_axle) < 1:          # surépaisseurs pour les paliers
             for sg in (1, -1):
@@ -325,12 +327,30 @@ def frame_poly(x, kind):
         zb, zt = seg.bounds[1], seg.bounds[3]
         body = body.difference(box(-P.t_plate / 2 - tol, 0, P.t_plate / 2 + tol, (zb + zt) / 2))
     holes = []
-    if abs(x - P.x_frame_foil) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in HINGE_BOLTS]
+    if abs(x - P.x_frame_foil) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in HINGE_BOLTS + FERRURE_BOLTS]
     if kind == 'transom': holes += [(sg * 30, zz, 8.5) for sg in (1, -1) for zz in P.rud_gz]
     if abs(x - P.x_frame_axle) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in LOCK_BOLTS]
     if abs(x - P.x_frame_axle) < 1: holes += [(sg * (P.brg_y + d), P.shaft_z, P.brg_bolt) for sg in (1, -1) for d in (-P.brg_J / 2, P.brg_J / 2)]
     for yy, zz, d in holes: body = body.difference(Point(yy, zz).buffer(d / 2, 16))
     return biggest(body.buffer(0)).simplify(0.1)
+
+def ferrure_poly():
+    """Ferrure porteuse des foils avant : une tôle d'aluminium d'un seul tenant, d'une charnière à l'autre, plaquée
+    sur chaque face du couple porteur. Elle reprend la flexion que le contreplaqué ne peut pas passer au-dessus de
+    la poutre de quille. En retrait des lisses : aucune encoche."""
+    x = P.x_frame_foil; hy, hz = P.hinge_y, P.hinge_z
+    dedans = hull_poly(x / P.HL, deck=False).buffer(-(P.skin_gap + P.stringer + 2), 24)
+    g = frame_poly(x, 'U').intersection(dedans)
+    for sg in (1, -1):
+        for y0, z0, y1, z1 in ((278, 295, 340, hz + 18), (278, 467, hy + 38, hz + 21)):       # oreilles de charnière, au-dessus du plat-bord
+            g = g.union(box(min(sg * y0, sg * y1), z0, max(sg * y0, sg * y1), z1))
+    g = biggest(g.buffer(0)); plein = Polygon(g.exterior).buffer(-9)
+    for sg in (1, -1):
+        for yy, zz in HINGE_BOLTS + FERRURE_BOLTS:
+            assert plein.contains(Point(sg * yy, zz)), ("vis de ferrure trop près du bord", yy, zz)
+            g = g.difference(Point(sg * yy, zz).buffer(4.25, 16))
+        g = g.difference(Point(sg * hy, hz).buffer(6.25, 16)).difference(Point(sg * (hy - P.hinge_lock_r), hz).buffer(5.25, 16))
+    return biggest(g.buffer(0)).simplify(0.1)
 
 def stem_with_slots():
     g = STEM
@@ -521,14 +541,12 @@ def build(outdir, apercu=True):
 
     # --- 1. charnières des foils avant : deux joues alu prennent le couple porteur en sandwich
     hx, hy, hz, tU = P.x_frame_foil, P.hinge_y, P.hinge_z, P.t_U
-    cheek = unary_union([box(278, 295, 340, hz + 18), box(278, 464, hy + 38, hz + 21)])
-    for yy, zz in HINGE_BOLTS: cheek = cheek.difference(circ(yy, zz, 8.5))
-    cheek = cheek.difference(circ(hy, hz, 12.5)).difference(circ(hy - P.hinge_lock_r, hz, 10.5))
-    flats.append(("joue_charniere_foil", P.t_cheek, 4, cheek, [], 'ALU'))
+    ferr = ferrure_poly()                                    # remplace les quatre joues de charnière
+    flats.append(("ferrure_porteuse_foils", P.t_cheek, 2, ferr, [], 'ALU'))
+    for i, x0 in enumerate((hx - tU - P.t_cheek, hx + tU)):
+        parts.append((f"ferrure_porteuse_foils_{i + 1}", solid(ferr, lambda a, b, x0=x0: (x0, a, b), (P.t_cheek, 0, 0)), ALU))
     def hinge_side(mirror, folded, tag):
         out = []
-        for i, x0 in enumerate((hx - tU - P.t_cheek, hx + tU)):
-            out.append((f"joue_charniere_{i + 1}_{tag}", solid(cheek, lambda a, b, x0=x0: (x0, a, b), (P.t_cheek, 0, 0)), ALU))
         out.append((f"axe_charniere_{tag}", cyl((hx - tU - 10, hy, hz), (hx + tU + 21, hy, hz), 6), STEEL))
         yl = hy - P.hinge_lock_r
         out.append((f"goupille_verrou_{tag}", cyl((hx - tU - 10, yl, hz), (hx + tU + 10, yl, hz), 5), STEEL))
@@ -725,7 +743,9 @@ def build(outdir, apercu=True):
         dx, dz = p1[0] - p0[0], p1[1] - p0[1]; L = math.hypot(dx, dz); n = (-dz / L * th, dx / L * th)
         return Polygon([p0, p1, (p1[0] + n[0], p1[1] + n[1]), (p0[0] + n[0], p0[1] + n[1])])
     for sg, tag in ((1, "babord"), (-1, "tribord")):
-        parts.append((f"rail_siege_{tag}", bx(-440, 110, sg * 50 - 10, sg * 50 + 10, zr, zr + 20), ALU))
+        xr = P.x_frame_foil - P.t_U - P.t_cheek                # les rails s'arrêtent contre la ferrure porteuse, sur une équerre
+        parts.append((f"rail_siege_{tag}", bx(-440, xr - 2, sg * 50 - 10, sg * 50 + 10, zr, zr + 20), ALU))
+        parts.append((f"equerre_rail_siege_{tag}", bx(xr - 30, xr, sg * 50 - 10, sg * 50 + 10, zr - 6, zr), ALU))
     zs = zr + 20; sa = math.radians(P.seat_angle)
     pan = slab((P.seat_x, zs), (P.seat_x + 340, zs + 30), 9)
     back = slab((P.seat_x, zs), (P.seat_x - P.seat_back * math.cos(sa), zs + P.seat_back * math.sin(sa)), 9)
@@ -991,6 +1011,23 @@ def build(outdir, apercu=True):
             "au_dessus_de_la_flottaison_mm": {f"{m} kg": round(P.shoe_z - 15 - P.z_keel - draft_for(m)) for m in (135, 165)},
             "depassement_du_flanc_mm": round(P.shoe_pin_y + 14 - hb(P.x_frame_foil / P.HL)),
         },
+    }
+    # flexion du couple porteur des foils : la portance, à l'extérieur, est équilibrée par le poids, au milieu
+    def haut(g, y): return g.intersection(LineString([(y, 0), (y, 900)])).length
+    def larg(g, z): return g.intersection(LineString([(150, z), (600, z)])).length
+    yL = P.hinge_y + P.hinge_e + P.wing_span / 2; cp = frame_poly(P.x_frame_foil, 'U')
+    def sig(g, ep, n, y=None, z=None):
+        h = haut(g, y) if y is not None else larg(g, z); bras = yL - (y if y is not None else 300.0)
+        return round(Fz * bras / (n * ep * h * h / 6), 1)
+    rep["foils_avant"]["ferrure_porteuse"] = {
+        "principe": "deux tôles d'aluminium de 6 mm, d'une charnière à l'autre, de part et d'autre du couple porteur",
+        "masse_des_deux_toles_kg": round(2 * ferr.area * P.t_cheek * 2.7e-6, 2), "vis_M8": 2 * len(HINGE_BOLTS + FERRURE_BOLTS),
+        "hauteur_au_dessus_de_la_poutre_mm": round(haut(ferr, 0), 1),
+        "contrainte_de_flexion_MPa_a_une_fois_la_charge": {
+            "toles_seules_au_milieu": sig(ferr, P.t_cheek, 2, y=0), "toles_seules_dans_le_bras_z350": sig(ferr, P.t_cheek, 2, z=350),
+            "contreplaque_seul_au_milieu": sig(cp, 2 * P.t_U, 1, y=0), "contreplaque_seul_dans_le_bras_z350": sig(cp, 2 * P.t_U, 1, z=350)},
+        "contrainte_toles_seules_au_milieu_a_trois_fois_la_charge_MPa": round(3 * sig(ferr, P.t_cheek, 2, y=0)),
+        "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": round(3 * math.hypot(Fz, Fs) / (12 * 2 * P.t_cheek), 1),
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)
