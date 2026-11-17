@@ -16,7 +16,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 
 - Roues arrière motrices et roue avant directrice placée devant l'étrave, plutôt qu'une roue avant motrice, qui aurait traversé la coque.
 - Le projet ne se présente pas comme dérivé d'un autre véhicule : aucune référence à un projet d'origine, ni dans le dépôt ni sur le site.
-- Assistance sur route par un moteur de pédalier (au sec), pas par des moteurs-roues.
+- Une seule machine électrique sur l'arbre transversal, au sec (17 novembre 2026) : moteur d'assistance sur route, génératrice sur l'eau. Elle remplace le moteur de pédalier, abandonné. Pas de moteurs-roues.
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
 - Direction sur l'eau par le mât arrière orientable (poussée orientée).
 - Équipements voulus : phares, batterie, capote faisant panneau solaire et rangeable pour voler, siège inclinable (mode sieste), housses de foils pour la route, squelette porteur.
@@ -24,7 +24,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - Conception en CAO paramétrique (CadQuery), versionnée dans ce dépôt.
 - Position du pédalier confirmée le 17 novembre 2026 : sur sa potence, à x = 470, z = 570 (voir « Pédalier reculé »).
 - **Le projet n'est pas open source** (17 novembre 2026). Ce véhicule n'existe pas dans le commerce, des brevets sont envisagés et une commercialisation doit rester possible. Tous droits réservés : voir `LICENCE.md`. Ne plus écrire « projet ouvert », « plans ouverts » ; les liens de discussion vers GitHub restent (voir « Propriété intellectuelle ») ; ne pas proposer de téléchargement du modèle ou des plans ; ne pas ajouter de détail technique nouveau sur le site sans l'accord de Guillaume.
-- Une seule tension à bord : 48 V, pour le moteur de pédalier comme pour le moteur immergé, donc une seule batterie.
+- Une seule tension à bord : 48 V, pour la machine d'arbre comme pour le moteur immergé, donc une seule batterie.
 - Changement de vitesses avec des pièces standard du commerce (voir « Pistes retenues »).
 - Sur l'eau, la poussée du moteur immergé doit suivre le pédalage plutôt qu'une manette : conduite plus amusante (voir « Pistes retenues »).
 - Foils avant repliés basculés vers l'avant pour porter la capote : **abandonné**. Guillaume ne le voulait que si la charnière et la position n'en étaient pas compliquées, or il faut tourner l'axe de charnière de 90° (joues à refaire, hors du plan du couple porteur) et retourner les ailes vers l'intérieur, sans quoi elles dépassent à 1,74 m de large sur route. Le visuel d'accueil du site est revenu aux foils repliés à la verticale.
@@ -95,11 +95,20 @@ Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alf
 - **À vérifier sur les fiches** : largeur de 135 mm, ligne de chaîne de 42 mm, diamètre du corps (104 mm retenus), position de la fixation de disque. Les moyeux Shimano de ce type sont en Center Lock : il faut un adaptateur six trous ou un pignon Center Lock, à trouver dans le commerce. Rondelles anti-rotation à choisir selon l'angle des lumières.
 - Le moyeu gauche des roues garde sa roue libre inversée. Variante pour la série : un bloc moteur et boîte de vitesses intégrés dans le pédalier, en 48 V.
 
+## Machine d'arbre (modélisée le 17 novembre 2026)
+
+Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, noté de mémoire) est en prise permanente sur l'arbre transversal par une chaîne : couronne de 36 dents sur l'arbre, pignon de 11 dents, rapport 3,27, 44 maillons, plan y = −80 (tribord). Il est vissé sur une platine d'aluminium de 6 mm fixée au flanc tribord de la poutre, derrière le couple porteur, au-dessus de la poutre (axe à x = −669, z = 291, 25 mm au-dessus de la poutre). Tout suit `gen_*` et `z_gen*` dans `Params`.
+
+- **Couronne limitée à 36 dents** par le dossier : 14 mm de jeu, siège en butée arrière. 48 dents ne passent pas.
+- La machine ne pouvait pas se visser contre le couple porteur : il est ouvert à cette hauteur. D'où la platine sur la poutre.
+- La gaine du frein arrière tribord, qui traversait au-dessus de l'arbre, passe maintenant au-dessus de la couronne, sous le dossier.
+- Le moteur de pédalier a disparu du modèle ; la ligne de chaîne du pédalier passe de 50 à 45 mm.
+
 ## Pistes retenues, pas encore modélisées (17 novembre 2026)
 
-**Une seule tension, 48 V.** Des moteurs de pédalier de 250 W existent en 48 V (par exemple Bafang BBS01B ou Tongsheng TSDZ2B ; références à vérifier sur les fiches). Pour rester un vélo à assistance : 250 W nominaux et assistance coupée à 25 km/h. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V.
+**Une seule tension, 48 V.** La machine d'arbre et le moteur immergé ont chacun leur variateur (type VESC, à vérifier), sur le même bus 48 V, reliés par bus CAN. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V. Pour rester un vélo à assistance sur route : 250 W nominaux, assistance seulement quand on pédale, coupée à 25 km/h. Avec un moteur bridé par logiciel plutôt qu'un kit marqué 250 W, ce statut est plus discutable : à vérifier.
 
-**Poussée liée au pédalage.** Le variateur du moteur immergé reçoit le signal d'un capteur de pédalage du commerce au lieu de la seule gâchette (les variateurs de type VESC ont un mode d'assistance au pédalage ; à vérifier). Limite connue : roues relevées, la transmission tourne presque à vide, donc on mesure une cadence et pas une puissance. Deux niveaux : (1) poussée proportionnelle à la cadence, ou mieux à la vitesse de l'arbre transversal, pour que les vitesses du moyeu servent aussi sur l'eau ; (2) pour une vraie puissance de pédalage, il faut une charge qui résiste (génératrice), à étudier plus tard. Sur l'eau l'assistance du pédalier est coupée. La gâchette reste en secours et pour la marche arrière, le coupe-circuit à cordon aussi.
+**Pédalier électrique sur l'eau (« pedal-by-wire »).** Aucune chaîne ne peut atteindre le moteur immergé, et roues relevées la transmission tourne à vide. La machine d'arbre sert donc de génératrice : elle oppose une résistance au pédalage, mesure la puissance fournie (tension × courant) et la renvoie sur le bus 48 V. Règle de poussée retenue : poussée = gâchette + k × puissance pédalée, plafonnée ; la gâchette donne la base, les jambes modulent (voler avec k seul demanderait 125 à 200 W en continu). Mesure lissée sur au moins un tour de pédalier ; descente progressive de la poussée sur 1 à 2 s quand on cesse de pédaler, pour ne pas faire retomber la coque. Si le bus CAN ou la génératrice tombe : retour à la gâchette seule. Le coupe-circuit à cordon coupe les deux variateurs. Les huit vitesses du moyeu servent aussi sur l'eau : elles règlent la cadence. Ni roue libre ni crabot au départ : les roues relevées tournent dans le vide. **Risque principal : la sensation sous les pieds.** Sans inertie, la génératrice freine aussi aux points morts ; le freinage doit croître avec la vitesse (comme un home-trainer), pas être constant. À valider d'abord sur un établi (pédalier, machine, variateur), avant toute autre dépense. L'énergie pédalée est consommée aussitôt par le moteur immergé : environ 8 à 10 % de courant en moins, pas une recharge.
 
 ## Propriété intellectuelle
 
@@ -116,7 +125,7 @@ Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alf
 5. **Roue arrière relevée proche de l'eau** : environ 3 cm au-dessus de la flottaison à 135 kg.
 6. **Moyeu gauche** : roue libre inversée nécessaire.
 7. **Mât arrière** : le verrouillage par goupille suppose de percer le carbone ; un collier serait préférable.
-8. **Tension électrique** : décidé, 48 V partout et une seule batterie. Reste à choisir le moteur de pédalier 48 V et à placer la batterie.
+8. **Machine d'arbre** : elle se dimensionne au couple, pas à la puissance. À 80 tr/min de pédalage elle tourne de 241 à 740 tr/min et doit fournir 1,9 à 5,9 N·m pour 150 W pédalés ; sur route, 868 tr/min à 25 km/h. Il faut un moteur lent (de l'ordre de 80 tr/min par volt, type moteur de skate de 63 mm ; à choisir sur fiche). Sur route elle agit après le moyeu, sans profiter des vitesses : peu de couple à basse vitesse pour sortir d'une cale. Batterie à placer.
 9. **Étanchéité** des sorties d'arbre et du passage des joues à l'étrave.
 10. **Réglementation** : vitesse limitée sur l'Erdre, statut de vélo à assistance sur route, marquage CE des bateaux à vérifier.
 11. **Pédalier haut** : 30 cm au-dessus de l'assise pour que les talons passent au-dessus des varangues (pédale au plus bas à z = 400). À valider sur un gabarit grandeur ; des manivelles plus courtes le feraient descendre.
@@ -124,7 +133,7 @@ Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alf
 13. **Ancrage de la potence de pédalier** : l'effort de chaîne (jusqu'à 1,8 kN) tire à 35 cm au-dessus de la poutre. Collage dans le caisson à valider par essai.
 14. **Place du moyeu à vitesses** : 17 mm sous le dossier et 23 mm au-dessus de la poutre, avec des cotes de moyeu notées de mémoire. À valider sur un gabarit avec le moyeu réel ; pas de tendeur sur la chaîne primaire.
 15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
-16. **Ligne de chaîne** : le caisson impose y = −35, le moteur de pédalier donne environ 50 mm. Le boîtier est décalé de 15 mm vers bâbord, donc les pédales aussi.
+16. **Ligne de chaîne** : le caisson impose y = −35, un pédalier courant donne environ 45 mm. Le boîtier est décalé de 10 mm vers bâbord, donc les pédales aussi.
 17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
 
 ## Ce qui reste à faire
@@ -132,9 +141,9 @@ Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alf
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
 - Site et maquette web : ils décrivent encore un seul rapport (4,12 m par tour). À mettre à jour avec l'accord de Guillaume.
-- Commande du moteur immergé par le pédalage : choisir capteur et variateur.
+- Pédalier électrique : essai sur établi de la sensation de pédalage, puis choix de la machine d'arbre, des deux variateurs et de la loi de commande. Placer variateurs et batterie, à l'abri des projections.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
-- Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
+- Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
 - Propriété intellectuelle : consulter un conseil (voir « Propriété intellectuelle »).

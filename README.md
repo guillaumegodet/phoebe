@@ -38,7 +38,7 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 - Pédalier sur une potence encastrée dans la poutre de quille. La chaîne court dans le caisson, sous le siège, jusqu'à l'arbre transversal.
 - Deux leviers de part et d'autre du siège commandent par câbles la fourche avant et la tête de safran arrière.
 - Deux foils avant repliables sur le plat-bord, un foil arrière orientable qui porte le moteur immergé.
-- Moteur de pédalier 250 W pour la route, moteur immergé d'environ 1 kW pour l'eau.
+- Une seule machine électrique sur l'arbre transversal : moteur d'assistance de 250 W sur route, génératrice sur l'eau. Moteur immergé d'environ 1 kW pour l'eau.
 
 ## Interfaces modélisées
 
@@ -63,7 +63,7 @@ Cotes qui découlent de ces interfaces : largeur hors tout sur route d'environ 1
 
 Chiffres de la transmission et de la direction (voir `cad/out/bilan.json`) : huit vitesses, de 1,45 à 4,44 m par tour de pédalier, soit 7 à 21 km/h à 80 tr/min ; 30° de braquage pour 23° de débattement des leviers.
 
-Non modélisé à ce stade : changement de vitesses (piste retenue : un moyeu à huit vitesses monté en renvoi sous le dossier), carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, implantation exacte du moteur de pédalier, visserie.
+Non modélisé à ce stade : variateurs, batterie et capteur de pédalage, carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, implantation exacte du moteur de pédalier, visserie.
 
 ## Droits
 

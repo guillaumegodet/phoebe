@@ -133,7 +133,7 @@ class Params:
     bb_z: float = 570.0
     crank: float = 170.0
     bb_shell: float = 68.0          # largeur du boîtier
-    bb_chainline: float = 50.0      # ligne de chaîne du moteur de pédalier (à vérifier sur sa fiche)
+    bb_chainline: float = 45.0      # ligne de chaîne d'un pédalier courant, sans moteur (à vérifier sur sa fiche)
     chain_y: float = -35.0          # plan de la chaîne primaire : elle passe dans le caisson de quille
     z_ring: int = 42                # dents du plateau
     z_shaft: int = 24               # dents du pignon d'arbre (chaîne secondaire)
@@ -158,6 +158,16 @@ class Params:
     z_hub_in: int = 16              # pignon d'entrée du moyeu
     z_hub_out: int = 16             # pignon vissé sur la fixation de disque
     hub_slot: float = 16.0          # course de tension de la chaîne secondaire
+    # Machine d'arbre : un seul moteur sans balais, en prise permanente sur l'arbre transversal. Moteur
+    # d'assistance sur route, génératrice sur l'eau (elle charge le pédalage et mesure sa puissance, qui sert
+    # de consigne au moteur immergé). Encombrement d'un moteur de 63 mm, noté de mémoire.
+    z_gen_ring: int = 36            # couronne sur l'arbre (la plus grande qui passe sous le dossier)
+    z_gen: int = 11                 # pignon de la machine
+    gen_y: float = -80.0            # plan de sa chaîne, à tribord
+    gen_x: float = -669.0           # axe de la machine, derrière le couple porteur, au-dessus de la poutre
+    gen_z: float = 291.0
+    gen_r: float = 32.0
+    gen_len: float = 74.0
     z_arm: tuple = (16, 16)         # dents arbre -> roue, sur chaque bras
     # ---------------- commande de direction ----------------
     lever_x: float = -230.0         # pivot des leviers (axe parallèle à Y)
@@ -644,7 +654,6 @@ def build(outdir, apercu=True):
     parts.append(("boitier_pedalier", ring((bbx, ybb - hs, bbz), (bbx, ybb + hs, bbz), 21, 12), ALU))
     parts.append(("axe_pedalier", cyl((bbx, ybb - 78, bbz), (bbx, ybb + 78, bbz), 8.5), STEEL))
     parts.append(("plateau", ring((bbx, cy - 1.5, bbz), (bbx, cy + 1.5, bbz), rp(P.z_ring), 30), STEEL))
-    parts.append(("moteur_pedalier_encombrement", cyl((bbx + 68, P.t_plate / 2 + 5, bbz - 60), (bbx + 68, ybb + 77, bbz - 60), 52), ENV))
     for sg, tag in ((-1, "tribord"), (1, "babord")):         # manivelle tribord vers l'avant, bâbord vers l'arrière
         ya, yb_ = sy(sg, abs(ybb + sg * 78), abs(ybb + sg * 78) + 12); xe = bbx - sg * P.crank
         parts.append((f"manivelle_{tag}", bx(min(bbx, xe) - 14, max(bbx, xe) + 14, ya, yb_, bbz - 11, bbz + 11), ALU))
@@ -692,6 +701,24 @@ def build(outdir, apercu=True):
     parts.append(("platine_moyeu_tribord", solid(plm, lambda a, b: (a, yR - 6, b), (0, 6, 0)), ALU))
     parts.append(("platine_moyeu_babord", solid(plm, lambda a, b: (a, yL, b), (0, 6, 0)), ALU))
     parts.append(("cale_platine_moyeu_babord", solid(pied, lambda a, b: (a, P.beam_w / 2, b), (0, yL - P.beam_w / 2, 0)), SPRUCE))
+    # --- 5 ter. machine d'arbre (moteur sur route, génératrice sur l'eau) : platine vissée sur le flanc tribord de la poutre
+    gx, gz_, gy = P.gen_x, P.gen_z, P.gen_y; yf = -P.beam_w / 2      # flanc de la poutre
+    parts.append(("couronne_machine_arbre", ring((xa, gy - 1.5, zS), (xa, gy + 1.5, zS), rp(P.z_gen_ring), P.shaft_d / 2 + 0.1), STEEL))
+    parts.append(("pignon_machine_arbre", ring((gx, gy - 1.5, gz_), (gx, gy + 1.5, gz_), rp(P.z_gen), 5.1), STEEL))
+    parts.append(("machine_arbre_encombrement", cyl((gx, yf, gz_), (gx, yf + P.gen_len, gz_), P.gen_r), ENV))
+    parts.append(("machine_arbre_axe", cyl((gx, gy - 10, gz_), (gx, yf, gz_), 5), STEEL))
+    cg, cs = ((xa, zS), rp(P.z_gen_ring)), ((gx, gz_), rp(P.z_gen))
+    for k, (a, b) in enumerate((tangent(*cg, *cs), tangent(*cs, *cg))):
+        parts.append((f"chaine_machine_brin_{k + 1}", cyl((a[0], gy, a[1]), (b[0], gy, b[1]), 4.5), STEEL))
+    xb = P.x_frame_axle - tU - 4                                      # la platine s'arrête derrière le couple porteur
+    plg = unary_union([box(gx - 44, beam_bot(gx) + 14, xb, beam_top(gx) - 4), Point(gx, gz_).buffer(40)]).convex_hull
+    plg = plg.intersection(box(gx - 60, 0, xb, 1000)).difference(circ(gx, gz_, 30))
+    for k in range(4):
+        a = math.radians(45 + 90 * k); plg = plg.difference(circ(gx + 22 * math.cos(a), gz_ + 22 * math.sin(a), 4.5))
+    for dx in (-36, 26):
+        for dz in (-10, 10): plg = plg.difference(circ(gx + dx, (beam_bot(gx) + beam_top(gx)) / 2 + 5 + dz, 6.5))
+    flats.append(("platine_machine_arbre", 6.0, 1, plg, [], 'ALU'))
+    parts.append(("platine_machine_arbre", solid(plg, lambda a, b: (a, yf - 6, b), (0, 6, 0)), ALU))
     # commande : poignée tournante sur le levier tribord, gaine jusqu'au boîtier de commande du moyeu
     parts.append(("poignee_tournante_vitesses", ring((xl, -yl, zgr - 185), (xl, -yl, zgr - 147), 17, 11.2), RUBBER))
     parts.append(("gaine_vitesses", gaine([(xl - 22, -yl + 6, zgr - 170), (xl - 60, -yl + 25, 400), (-390, -215, 318), (-450, -140, 304),
@@ -733,7 +760,7 @@ def build(outdir, apercu=True):
     out_ = lambda sg: [(-560, sg * 320, 480), (-600, sg * (yin - 5), 520)]     # sortie par-dessus le plat-bord, au pivot du bras
     parts.append(("gaine_frein_arriere_babord", gaine([(xl - 14, yl + 6, zgr - 125), (xl - 40, yl + 8, 468), (-300, 270, 458), (-440, 278, 450)] + out_(1)), RUBBER))
     parts.append(("gaine_frein_arriere_tribord", gaine([(xl - 14, yl - 6, zgr - 125), (xl - 40, yl - 10, 462), (-330, 248, 440), (-440, 244, 420),
-        (-475, 225, 375), (-495, 150, 368), (-500, 0, 372), (-500, -200, 370), (-520, -280, 420)] + out_(-1)), RUBBER))
+        (-490, 225, 400), (-535, 150, 438), (-560, 0, 465), (-560, -200, 462), (-560, -280, 448)] + out_(-1)), RUBBER))
     parts.append(("gaine_frein_avant", gaine([(xl + 14, -yl + 6, zgr - 125), (xl + 50, -yl + 8, 470), (-80, -yl + 8, 452), (100, -256, gz(100, 20)),
         (320, -286, gz(320, 18)), (540, -268, gz(540, 18)), (760, -222, gz(760, 18)), (900, -178, 508), (1014, -98, 538), (1170, -60, 546),
         (1262, -36, 562), (1340, -30, 566), (1420, -36, 480), (1468, -36, 420), (A[0] - 45, -39, A[1] + 87)]), RUBBER))
@@ -810,7 +837,13 @@ def build(outdir, apercu=True):
     }
     ratio = P.z_ring / P.z_hub_in * P.z_hub_out / P.z_shaft * P.z_arm[0] / P.z_arm[1]
     devs = [ratio * g * 2 * math.pi * P.wheel_r / 1000 for g in P.hub_gears]
-    jeu_dossier = -(P.hub_x - P.seat_x) * math.sin(sa) - (P.hub_z - zs) * math.cos(sa) - 9 - P.hub_r
+    sous_dossier = lambda x, z: -(x - P.seat_x) * math.sin(sa) - (z - zs) * math.cos(sa) - 9
+    jeu_dossier = sous_dossier(P.hub_x, P.hub_z) - P.hub_r
+    kg = P.z_gen_ring / P.z_gen; ent_g = math.dist((XA, P.shaft_z), (P.gen_x, P.gen_z))
+    dag = math.asin((rp(P.z_gen_ring) - rp(P.z_gen)) / ent_g)
+    Lg = 2 * ent_g * math.cos(dag) + rp(P.z_gen_ring) * (math.pi + 2 * dag) + rp(P.z_gen) * (math.pi - 2 * dag)
+    arbre_80 = [80 * P.z_ring / P.z_hub_in * g * P.z_hub_out / P.z_shaft for g in P.hub_gears]
+    arbre_25 = 25 / 3.6 / (2 * math.pi * P.wheel_r / 1000) * 60 * P.z_arm[1] / P.z_arm[0]
     course = P.horn * math.sin(math.radians(P.steer_deg)); a_lev = math.asin(course / P.lever_arm)
     rep["transmission"] = {
         "plateau_dents": P.z_ring, "moyeu_pignon_entree_dents": P.z_hub_in, "moyeu_pignon_sortie_dents": P.z_hub_out,
@@ -826,6 +859,17 @@ def build(outdir, apercu=True):
         "lumieres_de_chaine_mm": [round(l[1] - l[0]) for l in CH['lumieres'][:2]],
         "chaine_primaire_mm": round(CH['longueur']), "chaine_primaire_maillons": 2 * math.ceil(CH['longueur'] / PITCH / 2),
         "plan_de_chaine_y_mm": P.chain_y,
+    }
+    rep["machine_d_arbre"] = {
+        "couronne_dents": P.z_gen_ring, "pignon_dents": P.z_gen, "rapport": round(kg, 2),
+        "plan_de_chaine_y_mm": P.gen_y, "axe_x_z_mm": [P.gen_x, P.gen_z],
+        "chaine_entraxe_mm": round(ent_g, 1), "chaine_maillons": round(Lg / PITCH, 1),
+        "arbre_tr_min_a_80_tr_min_de_pedalage": [round(arbre_80[0]), round(arbre_80[-1])],
+        "machine_tr_min_a_80_tr_min_de_pedalage": [round(arbre_80[0] * kg), round(arbre_80[-1] * kg)],
+        "machine_tr_min_a_25_kmh": round(arbre_25 * kg),
+        "couple_machine_Nm_pour_150_W_pedales": [round(150 / (a * kg * 2 * math.pi / 60), 1) for a in (arbre_80[0], arbre_80[-1])],
+        "jeu_couronne_sous_dossier_mm": round(sous_dossier(XA, P.shaft_z) - rp(P.z_gen_ring) - 4.5, 1),
+        "jeu_machine_au_dessus_de_la_poutre_mm": round(P.gen_z - P.gen_r - beam_top(P.gen_x), 1),
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)

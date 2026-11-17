@@ -17,7 +17,7 @@
  "masse_contreplaque_kg": 12.3,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 190,
+ "nb_pieces_3D": 196,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
@@ -72,6 +72,33 @@
   "chaine_primaire_mm": 2986,
   "chaine_primaire_maillons": 236,
   "plan_de_chaine_y_mm": -35.0
+ },
+ "machine_d_arbre": {
+  "couronne_dents": 36,
+  "pignon_dents": 11,
+  "rapport": 3.27,
+  "plan_de_chaine_y_mm": -80.0,
+  "axe_x_z_mm": [
+   -669.0,
+   291.0
+  ],
+  "chaine_entraxe_mm": 119.4,
+  "chaine_maillons": 44.1,
+  "arbre_tr_min_a_80_tr_min_de_pedalage": [
+   74,
+   226
+  ],
+  "machine_tr_min_a_80_tr_min_de_pedalage": [
+   241,
+   740
+  ],
+  "machine_tr_min_a_25_kmh": 868,
+  "couple_machine_Nm_pour_150_W_pedales": [
+   5.9,
+   1.9
+  ],
+  "jeu_couronne_sous_dossier_mm": 14.1,
+  "jeu_machine_au_dessus_de_la_poutre_mm": 24.6
  },
  "reglage_siege": {
   "course_mm": 180.0,
