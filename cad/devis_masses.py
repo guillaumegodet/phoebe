@@ -36,7 +36,7 @@ NON_MODELISE = [
     ("housses de foils", 0.8, 100, 900), ("phare, feu arrière, fanion", 0.6, 900, 600),
     ("garniture du siège", 0.5, -400, 400), ("câbles et petit accastillage", 0.8, -200, 400),
 ]
-BATTERIE = 6.0          # kg, environ 1 kWh en 48 V
+BATTERIE = 12.0         # kg, environ 2 kWh en 48 V (le moteur immergé demande des pointes de plus de 100 A)
 PILOTE = 80.0
 SEGMENTS = {"tronc et tête": 0.58, "bras": 0.10, "cuisses": 0.20, "jambes et pieds": 0.12}
 
@@ -144,12 +144,12 @@ def main():
     c0 = cas(0, -750); c1 = cas(0, 800)
     lcb = carene(P.z_keel + m.draft_for(c0["masse_totale_kg"]), 0.0)[1]
     rep = {
-        "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 6 kg",
+        "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 12 kg",
         "par_categorie_kg": {c: round(somme(L)[0], 1) for c, L in sorted(cats.items())},
         "pieces_les_plus_lourdes_kg": {l[0]: round(l[2], 2) for l in sorted(lignes, key=lambda l: -l[2])[:14]},
         "pilote_cg_x_mm_siege_recule": round(xp), "empattement_mm": round(x_av - x_ar),
         "roue_arriere_relevee": {"bas_z_mm": round(bb_rel.zmin), "haut_z_mm": round(bb_rel.zmax), "arriere_x_mm": round(bb_rel.xmin),
-                                 "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (165, 195)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_a_plat_x_mm": round(lcb),
+                                 "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (170, 200)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_a_plat_x_mm": round(lcb),
         "sur_l_eau": {"batterie derrière le siège": equilibre(c0["masse_totale_kg"], c0["cg_x_mm"]),
                       "batterie à l'avant du cockpit": equilibre(c1["masse_totale_kg"], c1["cg_x_mm"])},
         "cas": {

@@ -102,7 +102,7 @@ class Params:
     shoe_pin_y: float = 465.0
     foil_share: float = 0.75        # part du poids portée par les deux foils avant (72 à 76 % d'après le devis de masses)
     # masses de calcul, d'après le devis de masses (cad/devis_masses.py) : à corriger quand il change
-    mass_ref: float = 165.0         # kg, véhicule, batterie et pilote de 80 kg
+    mass_ref: float = 170.0         # kg, véhicule, batterie de 2 kWh et pilote de 80 kg
     rear_share: float = 0.8         # part du poids sur les deux roues arrière, sur route
     # arbre arrière et paliers à semelle vissés sur la face avant du couple
     shaft_d: float = 25.0
@@ -1091,12 +1091,12 @@ def build(outdir, apercu=True):
     v = math.sqrt(P.foil_share * W / 2 / (500 * CL * S_av))
     rep["vol_a_l_estime"] = {
         "hypotheses": {"masse_kg": P.mass_ref, "coefficient_de_portance_des_foils_avant": CL, "finesse_de_l_ensemble": [8, 12],
-                       "rendement_helice_moteur_variateur": [0.55, 0.65], "batterie_Wh": 1000},
+                       "rendement_helice_moteur_variateur": [0.55, 0.65], "batterie_Wh": 2000},
         "surface_portante_m2": {"un_foil_avant": round(S_av, 4), "foil_arriere": round(S_ar, 4)},
         "vitesse_de_vol_kmh": round(v * 3.6, 1),
         "coefficient_de_portance_du_foil_arriere_a_cette_vitesse": round((1 - P.foil_share) * W / (500 * v * v * S_ar), 2),
         "puissance_electrique_W": [round(W / 12 * v / 0.65, -1), round(W / 8 * v / 0.55, -1)],
-        "autonomie_min": [round(1000 / (W / 8 * v / 0.55) * 60), round(1000 / (W / 12 * v / 0.65) * 60)],
+        "autonomie_min": [round(2000 / (W / 8 * v / 0.55) * 60), round(2000 / (W / 12 * v / 0.65) * 60)],
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)
