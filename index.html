@@ -293,7 +293,7 @@
         <button type="button" data-mode="eau" aria-pressed="false">Rivière</button>
         <button type="button" data-mode="vol" aria-pressed="false">Vol</button>
       </div>
-      <p class="legende" id="legende">Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.</p>
+      <p class="legende" id="legende">Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier, huit vitesses et une assistance électrique.</p>
     </div>
   </div>
 </section>
@@ -311,13 +311,13 @@
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 26C14 38 42 38 52 20 40 30 16 32 4 26Z" fill="#d9622b"/><circle cx="14" cy="42" r="7" stroke="#16252b" stroke-width="3.200"/><circle cx="44" cy="42" r="7" stroke="#16252b" stroke-width="3.200"/><path d="M2 52h52" stroke="#0f6f86" stroke-width="3.200"/></svg>
         <span class="num">01</span>
         <h3>Elle roule</h3>
-        <p>Trois roues de 20&nbsp;pouces, les deux roues arrière motrices, et un moteur de pédalier de 250&nbsp;W en 48&nbsp;V. Foils repliés, elle mesure 1,00&nbsp;m de large.</p>
+        <p>Trois roues de 20&nbsp;pouces, les deux roues arrière motrices, huit vitesses dans un moyeu de vélo, et une assistance électrique de 250&nbsp;W en 48&nbsp;V. Foils repliés, elle mesure 1,00&nbsp;m de large.</p>
       </article>
       <article class="carte">
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 26C14 38 42 38 52 20 40 30 16 32 4 26Z" fill="#d9622b"/><path d="M2 36q6.500-4 13 0t13 0 13 0 13 0M2 47q6.500-4 13 0t13 0 13 0 13 0" stroke="#0f6f86" stroke-width="3.200"/></svg>
         <span class="num">02</span>
         <h3>Elle flotte</h3>
-        <p>Roues relevées, la coque de 416&nbsp;litres ne s'enfonce que de 15&nbsp;cm avec son pilote. Un moteur immergé, au pied du foil arrière, prend le relais. L'idée&nbsp;: qu'il pousse d'autant plus que l'on pédale.</p>
+        <p>Roues relevées, la coque de 416&nbsp;litres ne s'enfonce que de 15&nbsp;cm avec son pilote. Un moteur immergé, au pied du foil arrière, prend le relais. On pédale toujours&nbsp;: le moteur de la route devient génératrice, et le moteur immergé pousse d'autant plus que l'on appuie.</p>
       </article>
       <article class="carte">
         <svg viewBox="0 0 56 56" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M4 16C14 28 42 28 52 10 40 20 16 22 4 16Z" fill="#d9622b"/><path d="M21 26v20M12 46h18" stroke="#16252b" stroke-width="3.200"/><path d="M2 39q6.500-4 13 0t13 0 13 0 13 0" stroke="#0f6f86" stroke-width="3.200"/></svg>
@@ -451,13 +451,13 @@
       <article class="chantier">
         <span class="metier">Électricité · batteries</span>
         <h3>Une seule tension à bord</h3>
-        <p>Tout passe en 48&nbsp;V&nbsp;: il existe des moteurs de pédalier de 250&nbsp;W dans cette tension, celle du moteur immergé. Une seule batterie, donc. Reste à lui trouver sa place, et celle de la capote solaire.</p>
+        <p>Tout passe en 48&nbsp;V&nbsp;: une seule machine sur l'arbre des roues, moteur sur route et génératrice sur l'eau, et le moteur immergé. Une seule batterie, donc. Reste à choisir cette machine, lente et coupleuse, et à placer la batterie et la capote solaire.</p>
         <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Électricité : 48 V, batterie et capote solaire">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Mécanique vélo</span>
         <h3>Changer de vitesse</h3>
-        <p>Un seul rapport aujourd'hui, trop long pour remonter une cale. La piste&nbsp;: un moyeu de vélo à huit vitesses monté en renvoi, entre la chaîne du pédalier et l'arbre des roues. Le moyeu gauche demande toujours une roue libre inversée.</p>
+        <p>Un moyeu de vélo à huit vitesses est monté en renvoi sous le dossier, entre la chaîne du pédalier et l'arbre des roues&nbsp;: de 7 à 21&nbsp;km/h à 80&nbsp;tr/min. Il passe à moins de 2&nbsp;cm du dossier, avec des cotes à vérifier sur un vrai moyeu. Le moyeu gauche des roues demande toujours une roue libre inversée.</p>
         <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Transmission : changement de vitesses et moyeu gauche">En discuter</a>
       </article>
       <article class="chantier">
@@ -481,13 +481,13 @@
       <article class="chantier">
         <span class="metier">Code · Python, three.js</span>
         <h3>CAO et maquette web</h3>
-        <p>Modéliser le changement de vitesses, la version à siège enfant, la capote, les housses et l'éclairage.</p>
+        <p>Modéliser la version à siège enfant, la capote, les housses, l'éclairage, les carters et un tendeur de chaîne.</p>
         <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="CAO et maquette : ">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Commande · électronique</span>
         <h3>Pédaler aussi sur l'eau</h3>
-        <p>La poussée du moteur immergé suivrait le pédalage plutôt qu'une manette&nbsp;: un capteur de pédalage du commerce commande son variateur. Les roues relevées n'offrent presque pas de résistance&nbsp;: comment rendre l'effort réel&nbsp;?</p>
+        <p>Roues relevées, on pédale dans le vide. La génératrice crée la résistance et mesure l'effort, qui commande le moteur immergé. Sans inertie, le pédalage risque d'être saccadé&nbsp;: quelle loi de freinage donne une sensation naturelle&nbsp;? À essayer d'abord sur un établi.</p>
         <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Commande : poussée du moteur immergé liée au pédalage">En discuter</a>
       </article>
     </div>
@@ -544,7 +544,7 @@
   var scene=document.getElementById('scene'),legende=document.getElementById('legende');
   var boutons=[].slice.call(document.querySelectorAll('.modes button'));
   var textes={
-    route:"Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier assisté.",
+    route:"Sur route : foils avant repliés sous leurs housses, mât arrière relevé, capote solaire en place, un pédalier, huit vitesses et une assistance électrique.",
     eau:"Sur la rivière : roues relevées, 15 cm de tirant d'eau, le moteur immergé à mi-course, toujours à l'abri de la capote.",
     vol:"En vol : capote rangée, les trois foils déployés portent la coque au-dessus de l'eau. C'est l'objectif."
   };

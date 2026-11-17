@@ -166,16 +166,18 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h3>Transmission</h3>
   <ul>
     <li>Le pédalier est porté par une potence en contreplaqué encastrée dans la poutre de quille, 30 cm au-dessus de l'assise pour que les talons passent.</li>
-    <li>La chaîne descend du plateau de 42 dents, file dans le caisson de quille sous le siège et remonte au pignon de 16 dents de l'arbre transversal. Brin tendu entre deux galets, brin mou dans un fourreau.</li>
+    <li>La chaîne descend du plateau de 42 dents, file dans le caisson de quille sous le siège et remonte à un moyeu de vélo à huit vitesses, logé sous le dossier. Brin tendu entre deux galets, brin mou dans un fourreau.</li>
+    <li>Une chaîne courte relie le moyeu à l'arbre transversal. Poignée tournante sur le levier droit.</li>
     <li>L'arbre est sur l'axe de pivot des bras arrière : les roues se relèvent sans détendre la chaîne. Une chaînette et une roue libre par roue arrière, sans différentiel.</li>
-    <li>Un seul rapport : 4,1 m par tour de pédalier, soit 20 km/h à 80 tr/min. Changement de vitesses à concevoir.</li>
-    <li>Assistance sur route par un moteur de pédalier 250 W, au sec dans la coque.</li>
+    <li>Huit vitesses : de 1,45 à 4,44 m par tour de pédalier, soit 7 à 21 km/h à 80 tr/min.</li>
+    <li>Une seule machine électrique, au sec dans la coque, en prise sur l'arbre transversal : moteur d'assistance de 250 W sur route, génératrice sur l'eau.</li>
     <li>Freins : tambours dans les deux moyeux arrière, commandés ensemble par le levier gauche ; disque à l'avant, levier droit.</li>
     <li>La roue avant, sans transmission, pivote au-dessus du pont avant.</li>
   </ul>
   <h3>Propulsion et direction sur l'eau</h3>
   <ul>
     <li>Moteur électrique immergé d'environ 1 kW au pied du foil arrière, hélice sous tuyère. Plus d'arbre d'hélice ni de crabot.</li>
+    <li>Sur l'eau on pédale toujours : la génératrice oppose une résistance, mesure l'effort, et la poussée du moteur immergé le suit. La gâchette donne la base, les jambes modulent. À valider d'abord sur un établi.</li>
     <li>Le mât arrière pivote d'environ 30° de chaque côté : gouvernail et poussée orientée, comme un hors-bord. Marche arrière par inversion du moteur.</li>
     <li>Les deux leviers tirent des câbles sous gaine : vers le palonnier de la fourche avant et, en croisant sur le pont arrière, vers celui du mât arrière. Les gaines passent sous le plat-bord puis sur les ponts, sans traverser la coque. Gâchette d'accélérateur sur le levier droit, coupe-circuit à cordon.</li>
     <li>En rivière peu profonde, le mât reste incliné à mi-course. En vol, virages larges et à plat, rayon de 10 à 15 m au minimum.</li>
@@ -188,7 +190,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h3>Éclairage et batterie</h3>
   <ul>
     <li>Deux phares ronds à LED sur le pont avant, avec paupières, et un feu rouge au tableau arrière.</li>
-    <li>Batterie lithium d'environ 1 kWh (ordre de grandeur : 6 kg), en caisson étanche au fond de la coque derrière le siège, au plus près des roues motrices. Elle alimente le moteur du pédalier, le moteur immergé et l'éclairage. À 1 kW en vol, l'autonomie reste sous une heure.</li>
+    <li>Batterie lithium d'environ 1 kWh (ordre de grandeur : 6 kg), en caisson étanche au fond de la coque derrière le siège, au plus près des roues motrices. Elle alimente la machine d'arbre, le moteur immergé et l'éclairage, en 48 V. À 1 kW en vol, l'autonomie reste sous une heure.</li>
   </ul>
   <h3>Détails de caractère</h3>
   <ul>
@@ -221,7 +223,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <li>Voler demande de l'ordre de 1 kW à l'hélice vers 20 km/h, d'où le moteur immergé dédié. Puissance et autonomie à confirmer par essai.</li>
     <li>Vitesse réglementée sur l'Erdre : limites à vérifier avant de voler à 20 km/h.</li>
     <li>Sorties de l'arbre transversal, 5 à 7 cm au-dessus de la flottaison : tube traversant, toile pincée entre deux brides, joint à lèvre. À essayer.</li>
-    <li>Pédalier haut, lumières de chaîne dans la poutre de quille, rapport unique : à valider sur un gabarit grandeur.</li>
+    <li>Pédalier haut, lumières de chaîne dans la poutre de quille : à valider sur un gabarit grandeur.</li>
+    <li>Le moyeu à vitesses et la couronne de la machine passent à moins de 2 cm sous le dossier. Le dossier incliné du mode sieste est à revoir.</li>
     <li>Trike non inclinable et roue avant peu chargée : vitesse modérée en virage.</li>
     <li>Stabilité en roulis à l'arrêt avec une coque de 0,74 m de large.</li>
     <li>Régulation d'altitude des foils (palpeurs ou foils en V) non représentée.</li>
@@ -393,17 +396,16 @@ function plank(a,b,w,mat){
   m.position.copy(a).add(b).multiplyScalar(0.5);m.rotation.z=Math.atan2(d.y,d.x);m.castShadow=true;return m;
 }
 // pédalier sur une potence encastrée dans la poutre de quille (cotes du modèle CAO). z = -y CAO : tribord en z positif.
-const BB=V(0.47,0.57,-0.015),CZ=0.035;   // CZ : plan de la chaîne primaire, dans le caisson
+const BB=V(0.47,0.57,-0.010),CZ=0.035;   // CZ : plan de la chaîne primaire, dans le caisson
 (function(){
   const sh=new THREE.Shape();
   [[0.325,0.165],[0.535,0.178],[0.535,0.295],[0.525,0.62],[0.415,0.62],[0.325,0.282]].forEach((q,i)=>i?sh.lineTo(q[0],q[1]):sh.moveTo(q[0],q[1]));
   const pot=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:0.018,bevelEnabled:false}),structM);pot.position.z=-0.009;pot.castShadow=true;craft.add(pot);
-  craft.add(cyl(V(BB.x,BB.y,-0.093),V(BB.x,BB.y,0.063),0.012,M.alu));
-  [[1,0.069,0.17],[-1,-0.099,-0.2]].forEach(q=>{          // manivelle tribord vers l'avant, bâbord vers l'arrière
+  craft.add(cyl(V(BB.x,BB.y,-0.088),V(BB.x,BB.y,0.068),0.012,M.alu));
+  [[1,0.074,0.175],[-1,-0.094,-0.195]].forEach(q=>{          // manivelle tribord vers l'avant, bâbord vers l'arrière
     const e=V(BB.x+q[0]*0.17,BB.y,q[1]);
     craft.add(cyl(V(BB.x,BB.y,q[1]),e,0.009,M.alu));craft.add(cyl(e,V(e.x,e.y,q[2]),0.008,M.tyre,8));
   });
-  const motor=new THREE.Mesh(new THREE.CylinderGeometry(0.052,0.052,0.078,16),M.carbon);motor.rotation.x=Math.PI/2;motor.position.set(0.538,0.51,-0.053);craft.add(motor);
 })();
 // leviers de direction, sur un longeron fixé aux couples ; poignées de frein
 [-1,1].forEach(s=>{
@@ -463,13 +465,31 @@ const mkArms=dx=>[-1,1].map(s=>{
 });
 const arms=mkArms(0.27),armsB=mkArms(-0.27);   // armsB : roues reculées pour la version enfant
 craft.add(cyl(V(PIV.x,PIV.y,-0.51),V(PIV.x,PIV.y,0.51),0.0125,M.alu));
-// chaîne primaire : du plateau au caisson de quille, sous le siège, puis au pignon de l'arbre (tracé du modèle CAO)
-[[[-0.5393,0.3645],[-0.5202,0.2282]],[[-0.4903,0.2019],[0.1597,0.1959]],[[0.1871,0.2123],[0.3947,0.6094]],
- [[0.5348,0.515],[0.2522,0.1824]],[[-0.5772,0.2011],[-0.6036,0.3545]]].forEach(c=>craft.add(cyl(V(c[0][0],c[0][1],CZ),V(c[1][0],c[1][1],CZ),0.005,M.tyre,6)));
-// plateau, pignon d'arbre, deux galets du brin tendu, deux galets du brin mou
-[[0.47,0.57,0.085],[-0.5715,0.36,0.0325],[-0.49,0.2324,0.0305],[0.16,0.2264,0.0305],[0.235,0.197,0.0225],[-0.555,0.2049,0.0225]]
+// chaîne primaire : du plateau au caisson de quille, sous le siège, puis au pignon du moyeu à vitesses (tracé du modèle CAO)
+[[[-0.4667,0.2784],[-0.4963,0.245]],[[-0.4799,0.2075],[0.1594,0.1959]],[[0.1871,0.2123],[0.3947,0.6094]],
+ [[0.5348,0.515],[0.2522,0.1824]],[[-0.5516,0.2101],[-0.5222,0.3093]]].forEach(c=>craft.add(cyl(V(c[0][0],c[0][1],CZ),V(c[1][0],c[1][1],CZ),0.005,M.tyre,6)));
+// plateau, pignon du moyeu, deux galets du brin tendu, deux galets du brin mou
+[[0.47,0.57,0.085],[-0.491,0.3,0.0325],[-0.4795,0.23,0.0225],[0.16,0.2264,0.0305],[0.235,0.197,0.0225],[-0.53,0.2037,0.0225]]
   .forEach(q=>{const d=disc(q[2]);d.position.set(q[0],q[1],CZ);craft.add(d);});
-craft.add(tube([V(0.215,0.1744,CZ),V(0.113,0.1732,CZ),V(-0.13,0.1731,CZ),V(-0.373,0.1758,CZ),V(-0.535,0.181,CZ)],0.008,M.tyre));   // fourreau du brin mou
+craft.add(tube([V(0.215,0.1744,CZ),V(0.113,0.1732,CZ),V(-0.13,0.1731,CZ),V(-0.373,0.1758,CZ),V(-0.51,0.18,CZ)],0.008,M.tyre));   // fourreau du brin mou
+// moyeu à huit vitesses en renvoi, sous le dossier, entre deux platines vissées sur les flancs de la poutre
+(function(){
+  const H=V(-0.491,0.3,0),ZS=-0.061,ZG=0.08;   // ZS : chaîne secondaire, à bâbord ; ZG : chaîne de la machine d'arbre, à tribord
+  craft.add(cyl(V(H.x,H.y,-0.043),V(H.x,H.y,0.021),0.052,M.carbon,20));
+  craft.add(cyl(V(H.x,H.y,-0.1),V(H.x,H.y,0.086),0.005,M.alu,8));
+  [-0.0775,0.0635].forEach(z=>{
+    const sh=new THREE.Shape();
+    [[-0.543,0.179],[-0.448,0.179],[-0.448,0.221],[-0.462,0.3],[-0.48,0.32],[-0.505,0.322],[-0.52,0.3],[-0.543,0.221]].forEach((q,i)=>i?sh.lineTo(q[0],q[1]):sh.moveTo(q[0],q[1]));
+    const pl=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:0.006,bevelEnabled:false}),M.alu);pl.position.z=z-0.003;craft.add(pl);
+  });
+  [[H.x,H.y,0.0325,ZS],[-0.5715,0.36,0.0486,ZS],[-0.5715,0.36,0.0729,ZG],[-0.669,0.291,0.0225,ZG]].forEach(q=>{const d=disc(q[2]);d.position.set(q[0],q[1],q[3]);craft.add(d);});
+  [[[-0.506,0.2711],[-0.5939,0.3168],ZS],[[-0.5365,0.3938],[-0.4676,0.3226],ZS],
+   [[-0.5584,0.2883],[-0.6649,0.2688],ZG],[[-0.6886,0.3022],[-0.6347,0.3962],ZG]].forEach(c=>craft.add(cyl(V(c[0][0],c[0][1],c[2]),V(c[1][0],c[1][1],c[2]),0.005,M.tyre,6)));
+  // machine d'arbre : moteur sur route, génératrice sur l'eau, sur une platine au flanc tribord de la poutre
+  craft.add(cyl(V(-0.669,0.291,-0.014),V(-0.669,0.291,0.06),0.032,M.carbon,16));
+  const pg=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.15,0.006),M.alu);pg.position.set(-0.676,0.257,0.063);craft.add(pg);
+  craft.add(cyl(V(-0.23,0.44,0.262),V(-0.23,0.478,0.262),0.017,M.tyre));   // poignée tournante des vitesses, levier tribord
+})();
 
 
 /* ---------- foils ---------- */

@@ -135,12 +135,13 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
 16. **Ligne de chaîne** : le caisson impose y = −35, un pédalier courant donne environ 45 mm. Le boîtier est décalé de 10 mm vers bâbord, donc les pédales aussi.
 17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
+18. **Mode sieste et couronne** : la maquette incline le dossier à 24° avec le siège avancé de 20 cm. D'après les cotes de la CAO, le dossier touche alors la couronne de la machine d'arbre (environ 3 mm d'interférence) ; il passe au-dessus du moyeu. Limiter l'inclinaison vers 27° ou avancer davantage le siège. Non modélisé dans la CAO.
 
 ## Ce qui reste à faire
 
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
-- Site et maquette web : ils décrivent encore un seul rapport (4,12 m par tour). À mettre à jour avec l'accord de Guillaume.
+- Mode sieste : revoir l'inclinaison du dossier (voir point dur 18). Images `assets/cao-*.png` du site à refaire depuis le nouvel aperçu.
 - Pédalier électrique : essai sur établi de la sensation de pédalage, puis choix de la machine d'arbre, des deux variateurs et de la loi de commande. Placer variateurs et batterie, à l'abri des projections.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
@@ -159,7 +160,7 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 - Sur le poste Windows de Guillaume, Python n'est pas dans le PATH : l'environnement est dans `.venv` (créé avec `uv venv --python 3.12`), à lancer par `.venv/Scripts/python.exe`. Préfixer par `PYTHONIOENCODING=utf-8` pour l'affichage des accents.
 - Les tubes souples (gaines, fourreau de chaîne) sont des balayages le long d'une liste de points de passage. Ils montrent un cheminement, pas une longueur de câble.
 - Les cotes des pièces du commerce (paliers UCP205, platine de mât 165 × 90, moyeu de 110 mm) sont notées de mémoire : les vérifier sur les fiches des fournisseurs avant de découper.
-- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter. Réalignée sur la CAO le 16 novembre 2026 (largeur, foils, fourche, pédalier, chaîne, leviers, câbles, pilote de 1,85 m) : ses cotes sont recopiées à la main, à reprendre après chaque évolution du modèle. Pour la contrôler sans navigateur piloté : capture avec Chrome en mode headless, l'ancre `#capture` masque l'interface.
+- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter. Réalignée sur la CAO le 16 novembre 2026 (largeur, foils, fourche, pédalier, chaîne, leviers, câbles, pilote de 1,85 m), puis le 17 pour le moyeu à vitesses et la machine d'arbre : ses cotes sont recopiées à la main, à reprendre après chaque évolution du modèle. Pour la contrôler sans navigateur piloté : capture avec Chrome en mode headless, l'ancre `#capture` masque l'interface.
 - Langue du projet : français. Messages de commit en français.
 
 ## Identité graphique et site
