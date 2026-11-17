@@ -66,7 +66,7 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 
 Estimés à la main, à confirmer :
 
-- Masse à vide visée : 50 à 55 kg.
+- Masse à vide visée : 50 à 55 kg. Le devis de masses du 17 novembre 2026 donne environ 82 kg sans batterie pour le modèle tel qu'il est dessiné : voir « Devis de masses ».
 - Puissance pour voler : de l'ordre de 1 kW vers 20 km/h. Autonomie en vol inférieure à une heure avec 1 kWh.
 - Budget du prototype : 6 000 à 12 000 € de matériel, médiane vers 8 000 €.
 - Version de série : 18 000 à 25 000 € en petite série.
@@ -124,6 +124,16 @@ Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les 
 - **Masse** : 2,6 kg pour les deux tôles, soit environ 1,3 kg de plus que les quatre joues.
 - **Non traité** : flambement du bord comprimé des tôles, corrosion et isolation entre aluminium et vis inox, découpe (laser ou jet d'eau, la pièce fait 0,96 m de large). Le couple porteur arrière avait le même défaut : voir « Ferrure porteuse arrière ».
 
+## Devis de masses (17 novembre 2026)
+
+`python3 cad/devis_masses.py` pèse les pièces dessinées par leur volume, donne une masse estimée aux pièces du commerce et ajoute ce qui n'est pas modélisé (toile, visserie, capote, variateurs, batterie de 6 kg). Résultat dans `cad/out/devis-masses.json`. Tout est à l'estime, aucune pièce n'a été pesée ; le pilote est pris à 80 kg, découpé en quatre segments.
+
+- **Masse à vide : environ 82 kg sans batterie, 88 kg avec**, loin des 50 à 55 kg visés. Roues, direction et freins 21,5 kg ; foils, ferrures et relevage 20 kg ; bois 15 kg ; transmission 7 kg ; non modélisé 14,5 kg. Les pièces d'aluminium sont dessinées pleines et épaisses (flasques de bras 2,7 kg, ferrures 3,5 kg, sabots 1,4 kg), l'arbre d'acier plein fait 3,9 kg. Avec le pilote : 168 kg, et non 135. Les chiffres calculés pour 135 kg (tirant d'eau, efforts sur les foils et les couples) sont donc optimistes d'environ un quart.
+- **Centrage sur route : il ne va pas.** Le centre de gravité en charge est à x = −291, les roues arrière à x = −302 : 99 % du poids sur les roues arrière, moins de 1 kg sur la roue avant. La direction ne tient pas et le véhicule se cabre à la moindre pente. Mettre la batterie à l'avant du cockpit ne donne que 6 kg sur la roue avant.
+- **Remède chiffré** : passer les roues derrière l'arbre (`arm_dx` négatif, déjà prévu pour la version siège enfant). Roues à x = −842, empattement de 2,40 m : 78 % sur l'arrière, 37 kg sur la roue avant. Non modélisé : cela change le relevage des bras, la largeur près du tableau, la chaîne des bras, les gaines de frein. Décision à prendre par Guillaume.
+- **Sur l'eau** : le centre de carène à 135 kg est à x = −112, le centre de gravité 18 cm plus en arrière. La coque flotterait sur le cul ; à recalculer à la vraie masse.
+- **En vol** : 74 % du poids sur les foils avant, cohérent avec les 70 % supposés.
+
 ## Ferrure porteuse arrière (modélisée le 17 novembre 2026)
 
 Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±430 mm et le poids descend au milieu, or le couple porteur arrière n'a que 25 mm de contreplaqué au-dessus de la poutre. L'arbre d'acier ne passe pas ce moment : ses paliers à rotule sont des appuis simples, il ne porte que son propre porte-à-faux. Calcul majorant : 135 kg sur les deux roues arrière, poids repris au milieu. Tout suit `t_ferr_ar`, `ferr_ar_top` et `FERR_AR_BOLTS`.
@@ -132,7 +142,7 @@ Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±43
 - **Ferrure** : les deux équerres de verrou des bras deviennent une seule tôle d'aluminium, d'un palier à l'autre, sur la face arrière du couple. Son âme monte à z = 330 au-dessus de la poutre, avec un bord tombé de 22 mm pour la raidir. Une encoche à tribord laisse passer la chaîne et la couronne de la machine d'arbre. Épaisseur de 4 mm seulement : la machine d'arbre est 1 mm derrière. 28 MPa au milieu à une fois la charge, 85 MPa à trois fois ; 36 MPa sous l'encoche. Masse : 0,9 kg.
 - **Arbre** : 165 mm de porte-à-faux entre la roue et le palier, 71 MPa à une fois la charge, 214 MPa à trois fois. Il faut un acier à plus de 300 MPa de limite élastique : pas un inox courant.
 - **Goupille de bras** : la roue est 270 mm devant l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,4 kN à une fois la charge, 4,1 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
-- **Centrage** : les roues arrière sont à x ≈ −300 et la hanche du pilote à −280. Presque tout le poids est sur les roues arrière et la roue avant est très peu chargée : à vérifier avec un vrai devis de masses, pour la direction et le risque de cabrage.
+- **Centrage** : confirmé par le devis de masses, voir « Devis de masses ».
 - **Non traité** : vissage de l'éclisse dans l'épicéa (environ 0,8 kN par vis à trois fois la charge avec cinq vis), flambement, part réelle du poids qui arrive par les lisses plutôt que par le milieu.
 
 ## Sabot de verrouillage et foil à coude arrondi (modélisés le 17 novembre 2026)
@@ -190,6 +200,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Ce qui reste à faire
 
+- **Centrage et masse** : décider du recul des roues arrière (`arm_dx` négatif), puis alléger (pièces d'aluminium ajourées, arbre creux) et refaire les calculs à la vraie masse.
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
 - Mode sieste : dessiner la béquille à crans du dossier dans la CAO, avec sa butée à 28° (voir point dur 18).
@@ -209,6 +220,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 - Unités en millimètres. Repère : X vers l'avant, Y vers bâbord, Z vers le haut, Z = 0 au sol en mode route, X = 0 au milieu de la coque.
 - Les pièces plates sont construites en 2D avec shapely, puis extrudées. Leurs contours alimentent aussi le DXF.
 - Dans l'assemblage, bâbord est en configuration eau (foil déployé, roue relevée) et tribord en configuration route.
+- `cad/devis_masses.py` : devis de masses, centre de gravité, charge sur les roues (deux à trois minutes). Ses tables `COMMERCE` et `NON_MODELISE` sont des estimations à corriger au fil des pesées.
 - Après toute modification : lancer `python3 cad/verifier.py`. Il régénère les sorties, relit le STEP, vérifie que tous les solides sont valides et liste les collisions entre pièces. Compter une dizaine de minutes ; `--seulement motif1,motif2` limite le contrôle aux pièces nommées. Les collisions listées entre un axe ou une goupille et la pièce qu'il traverse sont attendues : les perçages ne sont pas tous modélisés.
 - Sur le poste Windows de Guillaume, Python n'est pas dans le PATH : l'environnement est dans `.venv` (créé avec `uv venv --python 3.12`), à lancer par `.venv/Scripts/python.exe`. Préfixer par `PYTHONIOENCODING=utf-8` pour l'affichage des accents.
 - Les tubes souples (gaines, fourreau de chaîne) sont des balayages le long d'une liste de points de passage. Ils montrent un cheminement, pas une longueur de câble.

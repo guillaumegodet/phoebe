@@ -1,0 +1,98 @@
+{
+ "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 6 kg",
+ "par_categorie_kg": {
+  "coque et squelette en bois": 15.4,
+  "divers": 1.8,
+  "foils, ferrures et relevage": 20.2,
+  "non modélisé (à l'estime)": 14.5,
+  "roues, direction, freins": 21.5,
+  "siège": 1.1,
+  "transmission et machine d'arbre": 7.4
+ },
+ "pieces_les_plus_lourdes_kg": {
+  "capote solaire et ses arceaux": 4.0,
+  "arbre_arriere": 3.93,
+  "moteur_immerge_encombrement": 3.0,
+  "toile vernie de la coque et des ponts": 3.0,
+  "colle, visserie, vernis du bois": 2.5,
+  "foil_L_encombrement_babord_deploye": 2.3,
+  "foil_L_encombrement_tribord_replie": 2.3,
+  "roue_avant_encombrement": 1.8,
+  "moyeu_vitesses_encombrement": 1.7,
+  "roue_arriere_encombrement_babord_releve": 1.6,
+  "roue_arriere_encombrement_tribord_route": 1.6,
+  "mat_foil_arriere_encombrement": 1.6,
+  "variateurs et câblage": 1.5,
+  "ferrure_porteuse_foils_2": 1.29
+ },
+ "pilote_cg_x_mm_siege_recule": -332,
+ "roue_avant_x_mm": 1560,
+ "centre_de_carene_x_mm_a_135_kg": -112,
+ "cas": {
+  "actuel, batterie derrière le siège (x = -750)": {
+   "masse_a_vide_kg": 88.0,
+   "cg_a_vide_x_mm": -254,
+   "masse_totale_kg": 168.0,
+   "cg_x_mm": -291,
+   "cg_z_mm": 482,
+   "roues_arriere_x_mm": -302,
+   "part_sur_les_roues_arriere_pct": 99.4,
+   "charge_roue_avant_kg": 0.9,
+   "cg_devant_l_axe_arriere_mm": 10,
+   "pente_de_cabrage_deg": 1.2,
+   "part_sur_les_foils_avant_pct": 73.9
+  },
+  "actuel, batterie à l'avant du cockpit (x = +800)": {
+   "masse_a_vide_kg": 88.0,
+   "cg_a_vide_x_mm": -148,
+   "masse_totale_kg": 168.0,
+   "cg_x_mm": -236,
+   "cg_z_mm": 482,
+   "roues_arriere_x_mm": -302,
+   "part_sur_les_roues_arriere_pct": 96.5,
+   "charge_roue_avant_kg": 5.9,
+   "cg_devant_l_axe_arriere_mm": 66,
+   "pente_de_cabrage_deg": 7.8,
+   "part_sur_les_foils_avant_pct": 77.6
+  },
+  "actuel, pilote de 1,60 m (siège avancé de 150), batterie à l'avant": {
+   "masse_a_vide_kg": 88.0,
+   "cg_a_vide_x_mm": -148,
+   "masse_totale_kg": 168.0,
+   "cg_x_mm": -182,
+   "cg_z_mm": 487,
+   "roues_arriere_x_mm": -302,
+   "part_sur_les_roues_arriere_pct": 93.6,
+   "charge_roue_avant_kg": 10.8,
+   "cg_devant_l_axe_arriere_mm": 120,
+   "pente_de_cabrage_deg": 13.8,
+   "part_sur_les_foils_avant_pct": 81.2
+  },
+  "roues derrière l'arbre, batterie derrière le siège": {
+   "masse_a_vide_kg": 88.0,
+   "cg_a_vide_x_mm": -299,
+   "masse_totale_kg": 168.0,
+   "cg_x_mm": -315,
+   "cg_z_mm": 482,
+   "roues_arriere_x_mm": -842,
+   "part_sur_les_roues_arriere_pct": 78.1,
+   "charge_roue_avant_kg": 36.8,
+   "cg_devant_l_axe_arriere_mm": 527,
+   "pente_de_cabrage_deg": 47.5,
+   "part_sur_les_foils_avant_pct": 72.4
+  },
+  "roues derrière l'arbre, batterie à l'avant": {
+   "masse_a_vide_kg": 88.0,
+   "cg_a_vide_x_mm": -193,
+   "masse_totale_kg": 168.0,
+   "cg_x_mm": -259,
+   "cg_z_mm": 482,
+   "roues_arriere_x_mm": -842,
+   "part_sur_les_roues_arriere_pct": 75.8,
+   "charge_roue_avant_kg": 40.7,
+   "cg_devant_l_axe_arriere_mm": 582,
+   "pente_de_cabrage_deg": 50.4,
+   "part_sur_les_foils_avant_pct": 76.0
+  }
+ }
+}

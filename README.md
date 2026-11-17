@@ -16,6 +16,7 @@ Dans la mythologie grecque, Phébé ou Phœbé (en grec ancien Φοίϐη / Pho�
 |---|---|
 | `cad/phoebe_cad.py` | Modèle paramétrique CadQuery : coque, squelette, interfaces, transmission, direction, freins |
 | `cad/verifier.py` | Contrôle après modification : solides valides, relecture du STEP, collisions entre pièces |
+| `cad/devis_masses.py` | Devis de masses : masse à vide, centre de gravité, charge sur les roues (à l'estime) |
 | `cad/out/` | Fichiers générés : assemblage STEP, gabarits DXF à l'échelle 1, aperçu, bilan |
 | `CLAUDE.md` | Mémoire du projet : décisions, chiffres de référence, points ouverts |
 | `maquette/index.html` | Maquette 3D interactive (three.js), à ouvrir dans un navigateur |
