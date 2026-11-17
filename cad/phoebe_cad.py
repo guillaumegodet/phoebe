@@ -136,13 +136,28 @@ class Params:
     bb_chainline: float = 50.0      # ligne de chaîne du moteur de pédalier (à vérifier sur sa fiche)
     chain_y: float = -35.0          # plan de la chaîne primaire : elle passe dans le caisson de quille
     z_ring: int = 42                # dents du plateau
-    z_shaft: int = 16               # dents du pignon d'arbre
-    z_idler: int = 15               # galets du brin tendu
+    z_shaft: int = 24               # dents du pignon d'arbre (chaîne secondaire)
+    z_idler: int = 15               # galet avant du brin tendu
+    z_idler_aft: int = 11           # galet arrière du brin tendu, plus petit pour passer devant le moyeu
     z_idler_slack: int = 11         # galets du brin mou
     idler_fwd_x: float = 160.0      # galets avant (entre les couples +100 et +320)
     slack_fwd_x: float = 235.0
-    idler_aft_x: float = -490.0     # galets arrière (entre les couples -620 et -440)
-    slack_aft_x: float = -555.0
+    idler_aft_x: float = -479.5     # galets arrière (entre les couples -620 et -440)
+    slack_aft_x: float = -530.0
+    # Changement de vitesses : un moyeu de vélo à vitesses intégrées monté en renvoi sous le dossier, entre deux
+    # platines vissées sur les flancs de la poutre. La chaîne primaire entraîne son pignon ; un pignon vissé sur
+    # sa fixation de disque entraîne l'arbre par une chaîne courte, à bâbord. Cotes du moyeu notées de mémoire
+    # (type Shimano Nexus ou Alfine 8) : à vérifier sur la fiche.
+    hub_x: float = -491.0           # axe du moyeu, au milieu de ses lumières de tension
+    hub_z: float = 300.0
+    hub_r: float = 52.0             # rayon d'encombrement du corps (flasques)
+    hub_width: float = 135.0        # entre contre-écrous
+    hub_chainline: float = 42.0     # ligne de chaîne du pignon d'entrée
+    hub_disc_off: float = 15.0      # face d'appui du disque, depuis le contre-écrou gauche
+    hub_gears: tuple = (0.527, 0.644, 0.748, 0.851, 1.0, 1.223, 1.419, 1.615)
+    z_hub_in: int = 16              # pignon d'entrée du moyeu
+    z_hub_out: int = 16             # pignon vissé sur la fixation de disque
+    hub_slot: float = 16.0          # course de tension de la chaîne secondaire
     z_arm: tuple = (16, 16)         # dents arbre -> roue, sur chaque bras
     # ---------------- commande de direction ----------------
     lever_x: float = -230.0         # pivot des leviers (axe parallèle à Y)
@@ -326,32 +341,43 @@ def tangent(cA, rA, cB, rB):
     n = (math.cos(a), math.sin(a))
     return (cA[0] + rA * n[0], cA[1] + rA * n[1]), (cB[0] + rB * n[0], cB[1] + rB * n[1])
 def chain_layout():
-    ri, rs = rp(P.z_idler), rp(P.z_idler_slack)
-    W = {'arbre': ((XA, P.shaft_z), rp(P.z_shaft)),
-         'tendu_ar': ((P.idler_aft_x, beam_top(P.idler_aft_x) + 8), -ri),
+    ri, rs, ria = rp(P.z_idler), rp(P.z_idler_slack), rp(P.z_idler_aft)
+    W = {'moyeu': ((P.hub_x, P.hub_z), rp(P.z_hub_in)),
+         'tendu_ar': ((P.idler_aft_x, beam_top(P.idler_aft_x) + 6), -ria),
          'tendu_av': ((P.idler_fwd_x, beam_top(P.idler_fwd_x) + 8), -ri),
          'plateau': ((P.bb_x, P.bb_z), rp(P.z_ring)),
          'mou_av': ((P.slack_fwd_x, tube_z(P.slack_fwd_x) + rs), rs),
          'mou_ar': ((P.slack_aft_x, tube_z(P.slack_aft_x) + rs), rs)}
-    order = ['arbre', 'tendu_ar', 'tendu_av', 'plateau', 'mou_av']
+    order = ['moyeu', 'tendu_ar', 'tendu_av', 'plateau', 'mou_av']
     segs = [tangent(*W[a], *W[b]) for a, b in zip(order, order[1:])]
     tube = [(x, tube_z(x)) for x in np.linspace(P.slack_fwd_x, P.slack_aft_x, 40)]
-    last = tangent(*W['mou_ar'], *W['arbre'])
+    last = tangent(*W['mou_ar'], *W['moyeu'])
     def arc(name, p_in, p_out):
         c, r = W[name]
         a0 = math.atan2(p_in[1] - c[1], p_in[0] - c[0]); a1 = math.atan2(p_out[1] - c[1], p_out[0] - c[0])
         return abs(r) * (((a0 - a1) if r > 0 else (a1 - a0)) % (2 * math.pi))
     L = sum(math.dist(a, b) for a, b in segs + [last]) + sum(math.dist(a, b) for a, b in zip(tube, tube[1:]))
-    L += arc('arbre', last[1], segs[0][0]) + arc('tendu_ar', segs[0][1], segs[1][0]) + arc('tendu_av', segs[1][1], segs[2][0])
+    L += arc('moyeu', last[1], segs[0][0]) + arc('tendu_ar', segs[0][1], segs[1][0]) + arc('tendu_av', segs[1][1], segs[2][0])
     L += arc('plateau', segs[2][1], segs[3][0]) + arc('mou_av', segs[3][1], tube[0]) + arc('mou_ar', tube[-1], last[0])
     def x_at(seg, z):                                            # abscisse d'un brin à la cote z
         (x0, z0), (x1, z1) = seg; return x0 + (x1 - x0) * (z - z0) / (z1 - z0)
     # lumières dans la semelle haute de la poutre : (x0, x1, y0, y1)
     m = 12.0; cy = P.chain_y
     s_fwd = (P.idler_fwd_x - ri - m, max(x_at(segs[3], beam_top(P.slack_fwd_x)), P.slack_fwd_x + rs) + m, cy - 10, cy + 10)
-    s_aft = (min(x_at(last, beam_top(P.slack_aft_x)), P.slack_aft_x - rs) - m, P.idler_aft_x + ri + m, cy - 10, cy + 10)
+    s_aft = (min(x_at(last, beam_top(P.slack_aft_x)), P.slack_aft_x - rs) - m, P.idler_aft_x + ria + m, cy - 10, cy + 10)
+    # chaîne secondaire : du pignon de sortie du moyeu au pignon de l'arbre
+    hub, arb = (W['moyeu'][0], rp(P.z_hub_out)), ((XA, P.shaft_z), rp(P.z_shaft))
+    sec = [tangent(*hub, *arb), tangent(*arb, *hub)]
+    ent = math.dist(hub[0], arb[0]); da = math.asin((arb[1] - hub[1]) / ent)
+    L2 = 2 * math.dist(*sec[0]) + arb[1] * (math.pi + 2 * da) + hub[1] * (math.pi - 2 * da)
+    jeux = {'galet tendu arrière / pignon du moyeu': math.dist(W['tendu_ar'][0], W['moyeu'][0]) - ria - W['moyeu'][1],
+            'galets arrière entre eux': math.dist(W['tendu_ar'][0], W['mou_ar'][0]) - ria - rs,
+            'pignons de la chaîne secondaire': ent - hub[1] - arb[1]}
+    for k, v in jeux.items():                                    # entre cercles primitifs : il faut la place des dents
+        if v < 8: print(f"  ! {k} : {v:.1f} mm entre cercles primitifs")
     return {'roues': W, 'brins_tendus': segs[:3], 'brins_mous': [segs[3], last], 'fourreau': tube,
-            'longueur': L, 'lumieres': [s_fwd, s_aft]}
+            'longueur': L, 'lumieres': [s_fwd, s_aft], 'secondaire': sec, 'longueur_secondaire': L2, 'entraxe_secondaire': ent,
+            'jeux': jeux}
 CH = chain_layout()
 
 # potence de pédalier : plaque encastrée dans la poutre, entre les deux couples qui encadrent le pédalier
@@ -625,9 +651,9 @@ def build(outdir, apercu=True):
         yo = ybb + sg * 90
         parts.append((f"pedale_{tag}", cyl((xe, yo, bbz), (xe, yo + sg * 95, bbz), 8), ENV))
     W = CH['roues']
-    for key, nm, ri_ in (('arbre', 'pignon_arbre_primaire', P.shaft_d / 2 + 0.1), ('tendu_av', 'galet_tendu_avant', 5.1), ('tendu_ar', 'galet_tendu_arriere', 5.1),
+    for key, nm, ri_ in (('moyeu', 'pignon_entree_moyeu', 17.0), ('tendu_av', 'galet_tendu_avant', 5.1), ('tendu_ar', 'galet_tendu_arriere', 5.1),
                          ('mou_av', 'galet_mou_avant', 4.1), ('mou_ar', 'galet_mou_arriere', 4.1)):
-        (x0, z0), r = W[key]; h = 1.5 if key == 'arbre' else 4.0
+        (x0, z0), r = W[key]; h = 1.5 if key == 'moyeu' else 4.0
         parts.append((nm, ring((x0, cy - h, z0), (x0, cy + h, z0), abs(r), ri_), STEEL))
     for key, tag in (('tendu_av', 'avant'), ('tendu_ar', 'arriere')):      # galets tendus : axe sur deux paliers vissés sur la semelle
         (x0, z0), _ = W[key]; zt = max(beam_top(x0 - 12), beam_top(x0 + 12)) + 0.3
@@ -643,8 +669,35 @@ def build(outdir, apercu=True):
         parts.append((f"chaine_brin_mou_{k + 1}", cyl((a[0], cy, a[1]), (b[0], cy, b[1]), 4.5), STEEL))
     parts.append(("fourreau_brin_mou", gaine([(x, cy, z) for x, z in CH['fourreau'] if P.slack_aft_x + 18 < x < P.slack_fwd_x - 18], 8), RUBBER))
 
-    # --- 6. commande de direction : deux leviers, câbles sous gaine en va-et-vient vers la fourche et vers la tête de safran
     xl, yl, zl = P.lever_x, P.lever_y, P.lever_z; zc = zl + P.lever_arm; hn = P.horn; zgr = zl + P.lever_len
+    # --- 5 bis. changement de vitesses : moyeu à vitesses intégrées en renvoi, sous le dossier
+    hx, hz = P.hub_x, P.hub_z; yh = cy + P.hub_chainline              # milieu du moyeu
+    yR, yL = yh - P.hub_width / 2, yh + P.hub_width / 2               # contre-écrous droit (tribord) et gauche
+    y2 = yL - P.hub_disc_off + 1.5                                    # plan de la chaîne secondaire
+    parts.append(("moyeu_vitesses_encombrement", cyl((hx, yh - 28, hz), (hx, yh + 36, hz), P.hub_r), ENV))
+    parts.append(("moyeu_vitesses_axe", cyl((hx, yR - 24, hz), (hx, yL + 24, hz), 5), STEEL))
+    parts.append(("moyeu_vitesses_commande", ring((hx, yR + 3, hz), (hx, cy - 6, hz), 30, 8), ALU))
+    parts.append(("pignon_sortie_moyeu", ring((hx, y2 - 1.5, hz), (hx, y2 + 1.5, hz), rp(P.z_hub_out), 17), STEEL))
+    parts.append(("pignon_arbre_secondaire", ring((xa, y2 - 1.5, zS), (xa, y2 + 1.5, zS), rp(P.z_shaft), P.shaft_d / 2 + 0.1), STEEL))
+    for k, (a, b) in enumerate(CH['secondaire']):
+        parts.append((f"chaine_secondaire_brin_{k + 1}", cyl((a[0], y2, a[1]), (b[0], y2, b[1]), 4.5), STEEL))
+    # platines : vissées sur les flancs de la poutre, lumière de tension dans l'axe moyeu -> arbre
+    ux, uz = (hx - xa) / CH['entraxe_secondaire'], (hz - zS) / CH['entraxe_secondaire']; e = P.hub_slot / 2
+    fente = LineString([(hx - e * ux, hz - e * uz), (hx + e * ux, hz + e * uz)])
+    pied = box(hx - 52, beam_bot(hx) + 14, hx + 43, beam_top(hx) - 4)
+    HUB_BOLTS = [(hx + dx, (beam_bot(hx) + beam_top(hx)) / 2 + 5 + dz) for dx in (-42, 33) for dz in (-10, 10)]
+    plm = unary_union([pied, fente.buffer(24)]).convex_hull.difference(fente.buffer(5.2))
+    for q in HUB_BOLTS: plm = plm.difference(circ(*q, 6.5))
+    flats.append(("platine_moyeu_vitesses", 6.0, 2, plm, [], 'ALU'))
+    parts.append(("platine_moyeu_tribord", solid(plm, lambda a, b: (a, yR - 6, b), (0, 6, 0)), ALU))
+    parts.append(("platine_moyeu_babord", solid(plm, lambda a, b: (a, yL, b), (0, 6, 0)), ALU))
+    parts.append(("cale_platine_moyeu_babord", solid(pied, lambda a, b: (a, P.beam_w / 2, b), (0, yL - P.beam_w / 2, 0)), SPRUCE))
+    # commande : poignée tournante sur le levier tribord, gaine jusqu'au boîtier de commande du moyeu
+    parts.append(("poignee_tournante_vitesses", ring((xl, -yl, zgr - 185), (xl, -yl, zgr - 147), 17, 11.2), RUBBER))
+    parts.append(("gaine_vitesses", gaine([(xl - 22, -yl + 6, zgr - 170), (xl - 60, -yl + 25, 400), (-390, -215, 318), (-450, -140, 304),
+        (hx + 30, yR - 14, hz + 26), (hx + 14, yR + 12, hz + 30)]), RUBBER))
+
+    # --- 6. commande de direction : deux leviers, câbles sous gaine en va-et-vient vers la fourche et vers la tête de safran
     Pb = at(P.wheel_r + 179)                                 # palonnier de fourche, en tête de pivot
     parts.append(("palonnier_fourche", cyl(p3(Pb, -hn - 7), p3(Pb, hn + 7), 8), ALU))
     parts.append(("potence_butees_avant", bx(1287, 1299, -6, 6, P.fork_pz + 18, 628).fuse(cyl((1293, -hn - 7, 620), (1293, hn + 7, 620), 6)), ALU))
@@ -755,11 +808,22 @@ def build(outdir, apercu=True):
         "largeur_hors_tout_route_mm": round(2 * (P.arm_y + P.hub_old / 2 + 6 + 8)),
         "envergure_foils_avant_mm": round(2 * (P.hinge_y + P.hinge_e + P.wing_span)),
     }
-    ratio = P.z_ring / P.z_shaft * P.z_arm[0] / P.z_arm[1]; dev = ratio * 2 * math.pi * P.wheel_r / 1000
+    ratio = P.z_ring / P.z_hub_in * P.z_hub_out / P.z_shaft * P.z_arm[0] / P.z_arm[1]
+    devs = [ratio * g * 2 * math.pi * P.wheel_r / 1000 for g in P.hub_gears]
+    jeu_dossier = -(P.hub_x - P.seat_x) * math.sin(sa) - (P.hub_z - zs) * math.cos(sa) - 9 - P.hub_r
     course = P.horn * math.sin(math.radians(P.steer_deg)); a_lev = math.asin(course / P.lever_arm)
     rep["transmission"] = {
-        "plateau_dents": P.z_ring, "pignon_arbre_dents": P.z_shaft, "bras_dents_arbre_roue": list(P.z_arm),
-        "developpement_m_par_tour_de_pedalier": round(dev, 2), "vitesse_kmh_a_80_tr_min": round(dev * 80 * 60 / 1000, 1),
+        "plateau_dents": P.z_ring, "moyeu_pignon_entree_dents": P.z_hub_in, "moyeu_pignon_sortie_dents": P.z_hub_out,
+        "pignon_arbre_dents": P.z_shaft, "bras_dents_arbre_roue": list(P.z_arm), "vitesses": len(P.hub_gears),
+        "rapport_plateau_sur_pignon_du_moyeu": round(P.z_ring / P.z_hub_in, 2),
+        "developpement_m_par_tour_de_pedalier": [round(d, 2) for d in devs],
+        "vitesse_kmh_a_80_tr_min": [round(d * 80 * 60 / 1000, 1) for d in devs],
+        "moyeu_axe_x_z_mm": [P.hub_x, P.hub_z], "jeu_moyeu_sous_dossier_siege_recule_mm": round(jeu_dossier, 1),
+        "jeu_moyeu_au_dessus_de_la_poutre_mm": round(P.hub_z - P.hub_r - beam_top(P.hub_x), 1),
+        "chaine_secondaire_entraxe_mm": round(CH['entraxe_secondaire'], 1),
+        "chaine_secondaire_mm": round(CH['longueur_secondaire']), "chaine_secondaire_maillons": round(CH['longueur_secondaire'] / PITCH, 1),
+        "jeux_entre_cercles_primitifs_mm": {k: round(v, 1) for k, v in CH['jeux'].items()},
+        "lumieres_de_chaine_mm": [round(l[1] - l[0]) for l in CH['lumieres'][:2]],
         "chaine_primaire_mm": round(CH['longueur']), "chaine_primaire_maillons": 2 * math.ceil(CH['longueur'] / PITCH / 2),
         "plan_de_chaine_y_mm": P.chain_y,
     }

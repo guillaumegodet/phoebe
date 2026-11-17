@@ -37,7 +37,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - **Foils avant** : deux foils en L articulés sur le couple porteur avant (x = +100), repliés vers le haut sur route.
 - **Foil arrière** : en T, sur une tête de safran relevable et orientable fixée au tableau.
 - **Roues** : 20 pouces. Bras arrière relevables de 69° autour de l'arbre transversal ; console de direction avant relevable sur l'étrave.
-- **Transmission** : plateau de 42 dents, chaîne dans le caisson de quille (plan y = −35), pignon de 16 dents sur l'arbre transversal de 25 mm (x ≈ −572), puis une chaîne et une roue libre par roue arrière. Brin tendu rectiligne entre deux galets vissés sur la semelle haute ; brin mou dans un fourreau au fond du caisson. Un seul rapport.
+- **Transmission** : plateau de 42 dents, chaîne dans le caisson de quille (plan y = −35) jusqu'au pignon de 16 dents d'un moyeu à huit vitesses monté en renvoi sous le dossier (voir « Moyeu à vitesses en renvoi »). Un pignon de 16 dents vissé sur la fixation de disque du moyeu entraîne, par une chaîne courte à bâbord (plan y = +61), le pignon de 24 dents de l'arbre transversal de 25 mm (x ≈ −572), puis une chaîne et une roue libre par roue arrière. Brin tendu rectiligne entre deux galets vissés sur la semelle haute ; brin mou dans un fourreau au fond du caisson.
 - **Direction** : deux leviers (x = −230, y = ±262) sur un longeron d'épicéa. Câbles sous gaine en va-et-vient : vers le palonnier de fourche du même côté, vers le palonnier de la tête de safran en croisant. Palonniers de ±75 mm, 30° de braquage. Les gaines passent sous le plat-bord puis sur les ponts, sans traverser la coque. Les deux directions restent reliées en permanence.
 - **Freins** : tambours dans les moyeux arrière (un levier à double tirage, à bâbord), disque de 160 mm à l'avant (levier tribord). Un frein sur l'arbre ne servirait à rien : les roues libres sont dans les moyeux.
 - **Sorties d'arbre** : platine en contreplaqué contre le couple porteur, tube traversant, toile pincée entre deux brides, joint à lèvre 25 × 35 × 7.
@@ -52,8 +52,10 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 | Tirant d'eau à 135 kg (véhicule et pilote) | 154 mm |
 | Tirant d'eau à 165 kg (avec un enfant) | 174 mm |
 | Contreplaqué du squelette | ≈ 2,4 m², ≈ 12,3 kg en okoumé |
-| Développement | 4,12 m par tour de pédalier, 19,8 km/h à 80 tr/min |
-| Chaîne primaire | 3,14 m, 248 maillons |
+| Développement | huit vitesses, de 1,45 à 4,44 m par tour de pédalier : 7,0 à 21,3 km/h à 80 tr/min |
+| Chaîne primaire | 2,99 m, 236 maillons |
+| Chaîne secondaire | 36 maillons, entraxe de 100 mm |
+| Moyeu à vitesses | axe à x = −491, z = 300 ; 17 mm sous le dossier (siège reculé), 23 mm au-dessus de la poutre |
 | Hanche → axe de pédale, jambe tendue, siège reculé | 0,95 m |
 | Réglage du siège | 180 mm de course : pilotes de 1,55 m (butée avant) à 1,89 m (butée arrière) ; Guillaume, 1,85 m, à 2 cm de la butée arrière |
 | Pédalier au-dessus de l'assise | 0,30 m |
@@ -81,9 +83,19 @@ Le pédalier a donc été reculé de 48 cm et monté de 9 cm, sur une potence. I
 
 Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongement de l'étrave vers l'arrière (x = 840 à 1014) ne sert plus au pédalier.
 
-## Pistes retenues, pas encore modélisées (17 novembre 2026)
+## Moyeu à vitesses en renvoi (modélisé le 17 novembre 2026)
 
-**Changement de vitesses : un moyeu à vitesses intégrées monté en renvoi.** Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alfine 8, plage de 307 %) est fixé par son axe entre deux platines, sous le dossier du siège. La chaîne primaire entraîne son pignon au lieu de celui de l'arbre ; un pignon vissé sur sa fixation de disque (pignon à six trous du commerce) entraîne l'arbre transversal par une chaîne courte, du côté bâbord. Commande par une poignée tournante sur le levier de direction droit. Avec 42 → 18 dents, puis 18 → 24 : de 1,45 à 4,44 m par tour de pédalier, soit 7 à 21 km/h à 80 tr/min. Le rapport d'entrée de 2,33 respecte la limite de couple habituelle de ces moyeux. À faire : l'implanter dans la CAO (place sous le dossier, entre le couple −440 et l'arbre, et galets arrière à déplacer), vérifier les dentures disponibles. Le moyeu gauche garde sa roue libre inversée. Variante pour la série : un bloc moteur et boîte de vitesses intégrés dans le pédalier, en 48 V.
+Un moyeu de vélo à huit vitesses à frein à disque (type Shimano Nexus ou Alfine 8, plage de 307 %) est tenu par son axe entre deux platines d'aluminium de 6 mm vissées sur les flancs de la poutre, sous le dossier. La chaîne primaire entraîne son pignon ; un pignon vissé sur sa fixation de disque entraîne l'arbre transversal par une chaîne courte, à bâbord. Commande par une poignée tournante sur le levier de direction tribord. Tout suit `hub_x`, `hub_z` et les `z_hub_*` dans `Params`.
+
+- **Dentures** : 42 → 16, puis 16 → 24 (au lieu de 42 → 18 et 18 → 24 prévus : même rapport global, mais des pignons plus petits, sans quoi rien ne passait). Rapport d'entrée de 2,62, au-dessus du minimum habituel de ces moyeux.
+- **Place** : elle est comptée. Le moyeu est coincé entre le dossier (17 mm de jeu, siège en butée arrière), la poutre (23 mm), le couple −440 et l'arbre. Il ne peut ni avancer ni monter. Un dossier qui fléchit sous le pilote peut le toucher : à raidir, ou à protéger par un carter.
+- **Galets arrière déplacés** : galet tendu à x = −479,5, ramené à 11 dents ; galet mou à x = −530. La lumière arrière de la semelle passe de 147 à 120 mm.
+- **Tension** : les platines ont une lumière de 16 mm dans l'axe moyeu → arbre, pour tendre la chaîne secondaire. La chaîne primaire n'a toujours pas de tendeur.
+- **Platine bâbord** : sur une cale de 14,5 mm, parce que le moyeu est décalé de 7 mm vers bâbord pour aligner son pignon sur le plan de chaîne.
+- **À vérifier sur les fiches** : largeur de 135 mm, ligne de chaîne de 42 mm, diamètre du corps (104 mm retenus), position de la fixation de disque. Les moyeux Shimano de ce type sont en Center Lock : il faut un adaptateur six trous ou un pignon Center Lock, à trouver dans le commerce. Rondelles anti-rotation à choisir selon l'angle des lumières.
+- Le moyeu gauche des roues garde sa roue libre inversée. Variante pour la série : un bloc moteur et boîte de vitesses intégrés dans le pédalier, en 48 V.
+
+## Pistes retenues, pas encore modélisées (17 novembre 2026)
 
 **Une seule tension, 48 V.** Des moteurs de pédalier de 250 W existent en 48 V (par exemple Bafang BBS01B ou Tongsheng TSDZ2B ; références à vérifier sur les fiches). Pour rester un vélo à assistance : 250 W nominaux et assistance coupée à 25 km/h. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V.
 
@@ -108,9 +120,9 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 9. **Étanchéité** des sorties d'arbre et du passage des joues à l'étrave.
 10. **Réglementation** : vitesse limitée sur l'Erdre, statut de vélo à assistance sur route, marquage CE des bateaux à vérifier.
 11. **Pédalier haut** : 30 cm au-dessus de l'assise pour que les talons passent au-dessus des varangues (pédale au plus bas à z = 400). À valider sur un gabarit grandeur ; des manivelles plus courtes le feraient descendre.
-12. **Lumières dans la semelle haute de la poutre** : deux de 20 mm de large pour la chaîne (environ 170 et 145 mm de long) et une pour la potence. Elles affaiblissent la poutre là où elle travaille en compression : à renforcer ou à calculer.
+12. **Lumières dans la semelle haute de la poutre** : deux de 20 mm de large pour la chaîne (environ 180 et 120 mm de long) et une pour la potence. Elles affaiblissent la poutre là où elle travaille en compression : à renforcer ou à calculer.
 13. **Ancrage de la potence de pédalier** : l'effort de chaîne (jusqu'à 1,8 kN) tire à 35 cm au-dessus de la poutre. Collage dans le caisson à valider par essai.
-14. **Un seul rapport** : 4,12 m par tour, c'est long pour sortir de l'eau sur une cale. Piste retenue : moyeu à huit vitesses en renvoi (voir « Pistes retenues »).
+14. **Place du moyeu à vitesses** : 17 mm sous le dossier et 23 mm au-dessus de la poutre, avec des cotes de moyeu notées de mémoire. À valider sur un gabarit avec le moyeu réel ; pas de tendeur sur la chaîne primaire.
 15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
 16. **Ligne de chaîne** : le caisson impose y = −35, le moteur de pédalier donne environ 50 mm. Le boîtier est décalé de 15 mm vers bâbord, donc les pédales aussi.
 17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
@@ -118,7 +130,8 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 ## Ce qui reste à faire
 
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
-- Modéliser le changement de vitesses (moyeu en renvoi), puis les carters de chaîne et les chaînes des bras arrière.
+- Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
+- Site et maquette web : ils décrivent encore un seul rapport (4,12 m par tour). À mettre à jour avec l'accord de Guillaume.
 - Commande du moteur immergé par le pédalage : choisir capteur et variateur.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.

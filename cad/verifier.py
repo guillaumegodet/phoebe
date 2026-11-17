@@ -18,7 +18,7 @@ import sys, os, itertools, importlib.util
 SEUIL_MM3 = 60.0
 CONTACTS_VOULUS = [
     ("chaine", "pignon"), ("chaine", "plateau"), ("chaine", "galet"), ("chaine", "chaine"),
-    ("gaine", "gaine"),
+    ("gaine", "gaine"), ("moyeu_vitesses_encombrement", "moyeu_vitesses_axe"),
 ]
 
 def charger(chemin):

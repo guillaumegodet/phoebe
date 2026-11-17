@@ -17,20 +17,60 @@
  "masse_contreplaque_kg": 12.3,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 178,
+ "nb_pieces_3D": 190,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
   "plateau_dents": 42,
-  "pignon_arbre_dents": 16,
+  "moyeu_pignon_entree_dents": 16,
+  "moyeu_pignon_sortie_dents": 16,
+  "pignon_arbre_dents": 24,
   "bras_dents_arbre_roue": [
    16,
    16
   ],
-  "developpement_m_par_tour_de_pedalier": 4.12,
-  "vitesse_kmh_a_80_tr_min": 19.8,
-  "chaine_primaire_mm": 3135,
-  "chaine_primaire_maillons": 248,
+  "vitesses": 8,
+  "rapport_plateau_sur_pignon_du_moyeu": 2.62,
+  "developpement_m_par_tour_de_pedalier": [
+   1.45,
+   1.77,
+   2.06,
+   2.34,
+   2.75,
+   3.36,
+   3.9,
+   4.44
+  ],
+  "vitesse_kmh_a_80_tr_min": [
+   7.0,
+   8.5,
+   9.9,
+   11.2,
+   13.2,
+   16.1,
+   18.7,
+   21.3
+  ],
+  "moyeu_axe_x_z_mm": [
+   -491.0,
+   300.0
+  ],
+  "jeu_moyeu_sous_dossier_siege_recule_mm": 17.4,
+  "jeu_moyeu_au_dessus_de_la_poutre_mm": 23.5,
+  "chaine_secondaire_entraxe_mm": 100.4,
+  "chaine_secondaire_mm": 458,
+  "chaine_secondaire_maillons": 36.1,
+  "jeux_entre_cercles_primitifs_mm": {
+   "galet tendu arrière / pignon du moyeu": 15.8,
+   "galets arrière entre eux": 11.9,
+   "pignons de la chaîne secondaire": 19.2
+  },
+  "lumieres_de_chaine_mm": [
+   178,
+   120
+  ],
+  "chaine_primaire_mm": 2986,
+  "chaine_primaire_maillons": 236,
   "plan_de_chaine_y_mm": -35.0
  },
  "reglage_siege": {
