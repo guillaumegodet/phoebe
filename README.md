@@ -67,7 +67,7 @@ Cotes qui découlent de ces interfaces : largeur hors tout sur route d'environ 1
 
 Chiffres de la transmission et de la direction (voir `cad/out/bilan.json`) : huit vitesses, de 1,45 à 4,44 m par tour de pédalier, soit 7 à 21 km/h à 80 tr/min ; 30° de braquage pour 23° de débattement des leviers.
 
-Non modélisé à ce stade : variateurs, batterie et capteur de pédalage, carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, visserie.
+Batterie de 2 kWh en deux caissons à l'avant du cockpit (encombrement supposé). Non modélisé à ce stade : variateurs, câble de puissance et capteur de pédalage, carters de chaîne, chaînes des bras arrière, dernier tronçon des gaines de frein arrière (la boucle qui suit le relevage du bras), découplage de la direction entre route et eau, visserie.
 
 ## Droits
 

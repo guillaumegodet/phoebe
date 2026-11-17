@@ -38,22 +38,49 @@
  },
  "roue_avant_x_mm": 1560,
  "centre_de_carene_a_plat_x_mm": -113,
+ "batterie_x_mm": 890,
  "sur_l_eau": {
-  "batterie derrière le siège": {
+  "batterie à l'avant du cockpit (modèle)": {
+   "assiette_deg_arriere_enfonce": 1.6,
+   "franc_bord_au_tableau_mm": 160,
+   "tirant_d_eau_au_tableau_mm": 94,
+   "tirant_d_eau_a_l_etrave_mm": 0
+  },
+  "pour mémoire, batterie derrière le siège": {
    "assiette_deg_arriere_enfonce": 3.7,
    "franc_bord_au_tableau_mm": 120,
    "tirant_d_eau_au_tableau_mm": 134,
    "tirant_d_eau_a_l_etrave_mm": 0
-  },
-  "batterie à l'avant du cockpit": {
-   "assiette_deg_arriere_enfonce": 1.7,
-   "franc_bord_au_tableau_mm": 158,
-   "tirant_d_eau_au_tableau_mm": 96,
-   "tirant_d_eau_a_l_etrave_mm": 0
   }
  },
  "cas": {
-  "batterie derrière le siège (x = -750)": {
+  "batterie à l'avant du cockpit (modèle)": {
+   "masse_a_vide_kg": 88.3,
+   "cg_a_vide_x_mm": -101,
+   "masse_totale_kg": 168.3,
+   "cg_x_mm": -210,
+   "cg_z_mm": 480,
+   "roues_arriere_x_mm": -841,
+   "part_sur_les_roues_arriere_pct": 73.7,
+   "charge_roue_avant_kg": 44.2,
+   "cg_devant_l_axe_arriere_mm": 631,
+   "pente_de_cabrage_deg": 52.7,
+   "part_sur_les_foils_avant_pct": 79.3
+  },
+  "pilote de 1,60 m (siège avancé de 150)": {
+   "masse_a_vide_kg": 88.3,
+   "cg_a_vide_x_mm": -101,
+   "masse_totale_kg": 168.3,
+   "cg_x_mm": -156,
+   "cg_z_mm": 485,
+   "roues_arriere_x_mm": -841,
+   "part_sur_les_roues_arriere_pct": 71.5,
+   "charge_roue_avant_kg": 48.0,
+   "cg_devant_l_axe_arriere_mm": 685,
+   "pente_de_cabrage_deg": 54.7,
+   "part_sur_les_foils_avant_pct": 82.9
+  },
+  "pour mémoire, batterie derrière le siège (x = -750)": {
    "masse_a_vide_kg": 88.3,
    "cg_a_vide_x_mm": -323,
    "masse_totale_kg": 168.3,
@@ -65,32 +92,6 @@
    "cg_devant_l_axe_arriere_mm": 514,
    "pente_de_cabrage_deg": 47.0,
    "part_sur_les_foils_avant_pct": 71.5
-  },
-  "batterie à l'avant du cockpit (x = +800)": {
-   "masse_a_vide_kg": 88.3,
-   "cg_a_vide_x_mm": -113,
-   "masse_totale_kg": 168.3,
-   "cg_x_mm": -217,
-   "cg_z_mm": 480,
-   "roues_arriere_x_mm": -841,
-   "part_sur_les_roues_arriere_pct": 74.0,
-   "charge_roue_avant_kg": 43.8,
-   "cg_devant_l_axe_arriere_mm": 625,
-   "pente_de_cabrage_deg": 52.5,
-   "part_sur_les_foils_avant_pct": 78.9
-  },
-  "pilote de 1,60 m (siège avancé de 150), batterie derrière le siège": {
-   "masse_a_vide_kg": 88.3,
-   "cg_a_vide_x_mm": -323,
-   "masse_totale_kg": 168.3,
-   "cg_x_mm": -273,
-   "cg_z_mm": 485,
-   "roues_arriere_x_mm": -841,
-   "part_sur_les_roues_arriere_pct": 76.3,
-   "charge_roue_avant_kg": 39.8,
-   "cg_devant_l_axe_arriere_mm": 568,
-   "pente_de_cabrage_deg": 49.5,
-   "part_sur_les_foils_avant_pct": 75.1
   }
  }
 }

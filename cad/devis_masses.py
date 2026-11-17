@@ -141,7 +141,8 @@ def main():
                 "franc_bord_au_tableau_mm": round(m.zg(xt / P.HL) - (z0 - pente * xt)),
                 "tirant_d_eau_au_tableau_mm": round(z0 - pente * xt - m.zk(xt / P.HL)),
                 "tirant_d_eau_a_l_etrave_mm": round(max(0.0, z0 - pente * 1200 - m.zk(1200 / P.HL)))}
-    c0 = cas(0, -750); c1 = cas(0, 800)
+    xb = brut["batterie_caisson_babord"][1].x            # batterie : à sa place dans le modèle
+    c0 = cas(0, xb); c1 = cas(0, -750)
     lcb = carene(P.z_keel + m.draft_for(c0["masse_totale_kg"]), 0.0)[1]
     rep = {
         "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 12 kg",
@@ -150,12 +151,13 @@ def main():
         "pilote_cg_x_mm_siege_recule": round(xp), "empattement_mm": round(x_av - x_ar),
         "roue_arriere_relevee": {"bas_z_mm": round(bb_rel.zmin), "haut_z_mm": round(bb_rel.zmax), "arriere_x_mm": round(bb_rel.xmin),
                                  "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (170, 200)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_a_plat_x_mm": round(lcb),
-        "sur_l_eau": {"batterie derrière le siège": equilibre(c0["masse_totale_kg"], c0["cg_x_mm"]),
-                      "batterie à l'avant du cockpit": equilibre(c1["masse_totale_kg"], c1["cg_x_mm"])},
+        "batterie_x_mm": round(xb),
+        "sur_l_eau": {"batterie à l'avant du cockpit (modèle)": equilibre(c0["masse_totale_kg"], c0["cg_x_mm"]),
+                      "pour mémoire, batterie derrière le siège": equilibre(c1["masse_totale_kg"], c1["cg_x_mm"])},
         "cas": {
-            "batterie derrière le siège (x = -750)": cas(0, -750),
-            "batterie à l'avant du cockpit (x = +800)": cas(0, 800),
-            "pilote de 1,60 m (siège avancé de 150), batterie derrière le siège": cas(150, -750),
+            "batterie à l'avant du cockpit (modèle)": c0,
+            "pilote de 1,60 m (siège avancé de 150)": cas(150, xb),
+            "pour mémoire, batterie derrière le siège (x = -750)": c1,
         },
     }
     json.dump(rep, open(os.path.join(out, "devis-masses.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)

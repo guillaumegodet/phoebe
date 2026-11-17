@@ -142,7 +142,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h3>Version avec siège enfant</h3>
   <ul>
     <li>Siège amovible clipsé sur le pont arrière, face à la route, avec harnais, poignées et dossier haut. Le caisson étanche arrière est conservé.</li>
-    <li>Les pieds reposent sur une tablette placée derrière le siège du pilote. Elle capote aussi l'arbre transversal et la batterie.</li>
+    <li>Les pieds reposent sur une tablette placée derrière le siège du pilote. Elle capote aussi l'arbre transversal.</li>
     <li>Les roues arrière sont déjà derrière l'arbre, sur des bras tournés vers l'arrière (empattement de 2,40 m) : le siège enfant ne change pas leur position. Son effet sur la charge de la roue avant reste à chiffrer.</li>
     <li>Un arceau arrière porte le toit, qui reste en place sur l'eau moteur descendu.</li>
     <li>Gabarit visé : enfant jusqu'à 1,20 m et 25 kg environ. La place pour les genoux est comptée.</li>
@@ -191,7 +191,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h3>Éclairage et batterie</h3>
   <ul>
     <li>Un seul phare rond de style ancien, en laiton, au milieu du pont avant, et un feu rouge au tableau arrière.</li>
-    <li>Batterie lithium d'environ 2 kWh (ordre de grandeur : 12 kg), en caisson étanche au fond de la coque derrière le siège, au plus près des roues motrices. Elle alimente la machine d'arbre, le moteur immergé et l'éclairage, en 48 V. En vol, à l'estime, 1,3 à 2,3 kW : 50 à 90 minutes d'autonomie. Sa place, derrière le siège ou à l'avant du cockpit, reste à décider : elle pèse sur le centrage.</li>
+    <li>Batterie lithium d'environ 2 kWh (ordre de grandeur : 12 kg), en deux caissons étanches à l'avant du cockpit, de part et d'autre de l'étrave : c'est là qu'elle charge le mieux la roue avant et redresse l'assiette sur l'eau. Elle alimente la machine d'arbre, le moteur immergé et l'éclairage, en 48 V. En vol, à l'estime, 1,3 à 2,4 kW : 50 à 90 minutes d'autonomie.</li>
   </ul>
   <h3>Détails de caractère</h3>
   <ul>
@@ -221,7 +221,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h3>Points durs à valider</h3>
   <ul>
     <li>Structure dimensionnée à l'estime, sans calcul. Essai statique à faire avant de naviguer : suspendre l'engin par ses points de foil avec 2 à 3 fois la charge.</li>
-    <li>Voler demande de l'ordre de 1,3 à 2,3 kW vers 22 km/h, d'où le moteur immergé dédié. Puissance et autonomie à confirmer par essai.</li>
+    <li>Voler demande de l'ordre de 1,3 à 2,4 kW vers 23 km/h, d'où le moteur immergé dédié. Puissance et autonomie à confirmer par essai.</li>
     <li>Vitesse réglementée sur l'Erdre : limites à vérifier avant de voler à 20 km/h.</li>
     <li>Sorties de l'arbre transversal, 5 à 7 cm au-dessus de la flottaison : tube traversant, toile pincée entre deux brides, joint à lèvre. À essayer.</li>
     <li>Pédalier haut, lumières de chaîne dans la poutre de quille : à valider sur un gabarit grandeur.</li>
@@ -611,10 +611,13 @@ const bagG=new THREE.Group();craft.add(bagG);
   // feu arrière
   const tail=new THREE.Mesh(new THREE.CircleGeometry(0.035,20),redM);tail.rotation.y=-Math.PI/2;tail.position.set(-1.304,0.4,0);craft.add(tail);
   const tr=new THREE.Mesh(new THREE.TorusGeometry(0.037,0.005,6,20),M.alu);tr.rotation.y=Math.PI/2;tr.position.set(-1.304,0.4,0);craft.add(tr);
-  // batterie au fond de la coque, derrière le siège
-  const bat=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.09,0.36),batM);bat.position.set(-0.735,0.3,0);bat.castShadow=true;craft.add(bat);
-  const bstripe=new THREE.Mesh(new THREE.BoxGeometry(0.124,0.02,0.364),lidM);bstripe.position.set(-0.735,0.325,0);craft.add(bstripe);
-  addP(tube([V(-0.675,0.3,0.12),V(-0.5,0.26,0.11),V(0.2,0.2,0.1),V(0.5,0.3,-0.06),V(0.53,0.47,-0.06)],0.005,M.tyre));
+  // batterie : deux caissons à l'avant du cockpit, de part et d'autre de l'étrave (cotes du modèle CAO)
+  [-1,1].forEach(s=>{
+    const bat=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.14,0.095),batM);bat.position.set(0.89,0.399,s*0.0625);bat.castShadow=true;craft.add(bat);
+    const bstripe=new THREE.Mesh(new THREE.BoxGeometry(0.224,0.02,0.099),lidM);bstripe.position.set(0.89,0.44,s*0.0625);craft.add(bstripe);
+  });
+  addP(tube([V(0.78,0.36,0.1),V(0.5,0.3,0.1),V(0.2,0.2,0.1),V(-0.5,0.26,0.11),V(-0.675,0.3,0.12)],0.005,M.tyre));   // câble de puissance vers l'arrière
+  addP(tube([V(0.78,0.42,-0.06),V(0.65,0.44,-0.06),V(0.53,0.47,-0.06)],0.005,M.tyre));
   // garde-boue en bois cintré
   const guard=(parent,cx,cy,rot)=>{
     const m=new THREE.Mesh(new THREE.TorusGeometry(0.272,0.006,4,26,2.3),M.wood);

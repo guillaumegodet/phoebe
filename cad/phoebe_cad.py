@@ -100,10 +100,10 @@ class Params:
     shoe_z: float = 335.0           # hauteur de la goupille du sabot (au-dessus de la flottaison à 165 kg)
     shoe_w: float = 80.0            # largeur du sabot, le long de la coque
     shoe_pin_y: float = 465.0
-    foil_share: float = 0.75        # part du poids portée par les deux foils avant (72 à 76 % d'après le devis de masses)
+    foil_share: float = 0.8         # part du poids portée par les deux foils avant (79 à 83 % d'après le devis de masses, batterie à l'avant)
     # masses de calcul, d'après le devis de masses (cad/devis_masses.py) : à corriger quand il change
     mass_ref: float = 170.0         # kg, véhicule, batterie de 2 kWh et pilote de 80 kg
-    rear_share: float = 0.8         # part du poids sur les deux roues arrière, sur route
+    rear_share: float = 0.75        # part du poids sur les deux roues arrière, sur route (72 à 74 % d'après le devis)
     # arbre arrière et paliers à semelle vissés sur la face avant du couple
     shaft_d: float = 25.0
     shaft_bore: float = 19.0        # arbre creux (tube 25 x 3) : 1,7 kg au lieu de 3,9 ; acier à haute limite élastique
@@ -212,6 +212,14 @@ class Params:
     rud_mass: float = 6.0           # kg, mât, aile, moteur et hélice (hypothèse)
     rud_cg: float = 600.0
     rud_tackle: int = 6             # brins du palan arrière
+    # ---------------- batterie ----------------
+    # 2 kWh en 48 V, en deux caissons étanches de part et d'autre de l'étrave, à l'avant du cockpit : c'est là
+    # qu'elle charge le mieux la roue avant et redresse l'assiette sur l'eau (devis de masses). Encombrement supposé.
+    batt_x0: float = 780.0          # derrière le couple +760, hors de portée des pieds
+    batt_len: float = 220.0
+    batt_w: float = 95.0
+    batt_h: float = 140.0
+    batt_y0: float = 15.0           # jeu avec l'étrave
     # ---------------- étanchéité des sorties d'arbre ----------------
     seal_tube_r: float = 22.0       # tube de traversée (diamètre 44, alésage 35 pour un joint 25 x 35 x 7)
     seal_flange_r: float = 36.0     # bride qui pince la toile
@@ -619,6 +627,11 @@ def build(outdir, apercu=True):
     flats.append(("secteur_relevage_foil", 8.0, 2, sect_f, [], 'ALU'))
     parts += hinge_side(False, False, "babord_deploye") + hinge_side(True, True, "tribord_replie")
 
+    # --- 1 ter. batterie : deux caissons posés sur la poutre, de part et d'autre de l'étrave, sanglés
+    zb0 = beam_top(P.batt_x0 + P.batt_len) + 2
+    for sg, tag in ((1, "babord"), (-1, "tribord")):
+        y0, y1 = sy(sg, P.batt_y0, P.batt_y0 + P.batt_w)
+        parts.append((f"batterie_caisson_{tag}", bx(P.batt_x0, P.batt_x0 + P.batt_len, y0, y1, zb0, zb0 + P.batt_h), ENV))
     # --- 2. arbre arrière : paliers à semelle vissés sur la face avant du couple porteur
     xf = P.x_frame_axle + tU; xa = xf + P.brg_h; zS = P.shaft_z
     ys = P.arm_y + P.hub_old / 2 + 25
