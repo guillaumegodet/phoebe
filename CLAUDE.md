@@ -23,7 +23,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - Variantes demandées : une version de série au design haut de gamme, une version avec siège enfant à l'arrière.
 - Conception en CAO paramétrique (CadQuery), versionnée dans ce dépôt.
 - Position du pédalier confirmée le 17 novembre 2026 : sur sa potence, à x = 470, z = 570 (voir « Pédalier reculé »).
-- **Le projet n'est pas open source** (17 novembre 2026). Ce véhicule n'existe pas dans le commerce, des brevets sont envisagés et une commercialisation doit rester possible. Tous droits réservés : voir `LICENCE.md`. Ne plus écrire « projet ouvert », « plans ouverts » ni inviter à participer ; ne pas proposer de téléchargement du modèle ou des plans ; ne pas ajouter de détail technique nouveau sur le site sans l'accord de Guillaume.
+- **Le projet n'est pas open source** (17 novembre 2026). Ce véhicule n'existe pas dans le commerce, des brevets sont envisagés et une commercialisation doit rester possible. Tous droits réservés : voir `LICENCE.md`. Ne plus écrire « projet ouvert », « plans ouverts » ; les liens de discussion vers GitHub restent (voir « Propriété intellectuelle ») ; ne pas proposer de téléchargement du modèle ou des plans ; ne pas ajouter de détail technique nouveau sur le site sans l'accord de Guillaume.
 - Une seule tension à bord : 48 V, pour le moteur de pédalier comme pour le moteur immergé, donc une seule batterie.
 - Changement de vitesses avec des pièces standard du commerce (voir « Pistes retenues »).
 - Sur l'eau, la poussée du moteur immergé doit suivre le pédalage plutôt qu'une manette : conduite plus amusante (voir « Pistes retenues »).
@@ -93,7 +93,7 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 
 - Le dépôt GitHub et le site sont **publics** depuis novembre 2026. En droit européen des brevets, ce qui a été rendu public ne peut plus être breveté (pas de délai de grâce) : ne rien publier de nouveau qui pourrait l'être avant d'avoir vu un conseil en propriété industrielle.
 - Pistes à voir avec un conseil ou l'INPI : enveloppe e-Soleau pour dater les créations, dépôt de la marque Phoebe (disponibilité à vérifier), dessins et modèles pour l'apparence (délai de grâce de 12 mois après divulgation), brevet pour ce qui n'est pas encore divulgué.
-- Décision en attente de Guillaume : passer le dépôt en privé (le site GitHub Pages demande alors une offre payante, ou un hébergement séparé).
+- Décision de Guillaume (17 novembre 2026) : le dépôt reste **public** à ce stade du projet, et le site garde ses liens « En discuter » vers les tickets GitHub. La licence « tous droits réservés » reste en place. À reposer si un brevet devient concret.
 
 ## Points durs connus
 
@@ -124,7 +124,7 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Implantation du moteur de pédalier sur la potence, une fois le modèle choisi.
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
-- Propriété intellectuelle : décider de la visibilité du dépôt, consulter un conseil (voir « Propriété intellectuelle »).
+- Propriété intellectuelle : consulter un conseil (voir « Propriété intellectuelle »).
 - Essai statique, puis calcul de structure, avant toute construction.
 
 ## Travailler dans ce dépôt
@@ -145,5 +145,5 @@ Conséquences : l'avant du cockpit (x = 600 à 1014) est libre, et le prolongeme
 - Site public (GitHub Pages, branche `main`, racine du dépôt) : https://guillaumegodet.github.io/phoebe/. Page d'accueil `index.html`, styles communs `assets/phoebe.css`, charte `identite/index.html`. Pas de build : fichiers statiques, `.nojekyll`.
 - Logo : un croissant orange (la coque, et la lune de Phoebé) porté par un foil au-dessus d'une vague. Fichiers SVG dans `identite/`, mot « phoebe » vectorisé en Bricolage Grotesque gras.
 - Couleurs : encre `#16252b`, Erdre `#0f6f86`, housse (orange) `#d9622b`, toile `#f6f3ea`, ciel `#dfe9ec`, écume `#7cc4d6`, okoumé `#cfa873`. Polices : Bricolage Grotesque (titres), Barlow (texte).
-- Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés. Projet personnel, tous droits réservés : pas d'appel à participer, pas de lien vers le dépôt, pas de fichiers à télécharger.
+- Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés. Projet personnel, tous droits réservés : pas de fichiers à télécharger. Les cartes de la section « Les chantiers » ont chacune un lien « En discuter » qui ouvre un ticket GitHub au sujet prérempli, et le pied de page renvoie vers les discussions.
 - Le site reprend les chiffres de référence et les points durs de ce fichier : les mettre à jour ensemble. `assets/cao-apercu.png` et `assets/cao-gabarits.png` sont des recadrages de `cad/out/phoebe-apercu.png`.

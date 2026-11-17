@@ -433,53 +433,62 @@
     <div class="entete-section">
       <p class="surtitre">Les chantiers</p>
       <h2>Neuf questions à résoudre avant de construire.</h2>
-      <p class="chapo">Voici les points durs du projet, tels qu'ils sont aujourd'hui.</p>
+      <p class="chapo">Voici les points durs du projet, tels qu'ils sont aujourd'hui. Si l'un d'eux touche à votre métier ou à votre passion, votre avis est bienvenu&nbsp;: chaque carte ouvre une discussion sur GitHub.</p>
     </div>
     <div class="chantiers">
       <article class="chantier">
         <span class="metier">Structure · calcul</span>
         <h3>Charnières de foils et verrous de bras</h3>
         <p>Environ 3&nbsp;kN par vis dans le contreplaqué à trois fois la charge. Comment le valider par un essai statique simple, puis par le calcul&nbsp;?</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Structure : charnières des foils avant et verrous des bras arrière">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Hydrodynamique · foil</span>
         <h3>Régulation d'altitude en vol</h3>
         <p>Palpeurs mécaniques, foils en V ou volets pilotés&nbsp;? Rien n'est conçu. Le choix des profils et des surfaces est ouvert lui aussi.</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Foils : régulation d'altitude en vol">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Électricité · batteries</span>
         <h3>Une seule tension à bord</h3>
         <p>Tout passe en 48&nbsp;V&nbsp;: il existe des moteurs de pédalier de 250&nbsp;W dans cette tension, celle du moteur immergé. Une seule batterie, donc. Reste à lui trouver sa place, et celle de la capote solaire.</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Électricité : 48 V, batterie et capote solaire">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Mécanique vélo</span>
         <h3>Changer de vitesse</h3>
         <p>Un seul rapport aujourd'hui, trop long pour remonter une cale. La piste&nbsp;: un moyeu de vélo à huit vitesses monté en renvoi, entre la chaîne du pédalier et l'arbre des roues. Le moyeu gauche demande toujours une roue libre inversée.</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Transmission : changement de vitesses et moyeu gauche">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Construction navale</span>
         <h3>Étanchéité et entoilage</h3>
         <p>Deux sorties d'arbre et le passage des joues à l'étrave traversent la toile. Si vous avez construit un kayak en toile, vos conseils sont attendus.</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Coque : étanchéité des traversées et entoilage">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Composites</span>
         <h3>Verrouiller le mât arrière</h3>
         <p>Une goupille oblige à percer le carbone du mât. Un collier serait préférable&nbsp;: lequel, et comment le rendre orientable et relevable&nbsp;?</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Foil arrière : verrouillage du mât sans percer le carbone">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Réglementation</span>
         <h3>Un vélo, un bateau, ou les deux</h3>
         <p>Statut de vélo à assistance sur route, vitesse limitée sur l'Erdre, marquage CE des bateaux&nbsp;: que faut-il respecter, et dans quel ordre&nbsp;?</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Réglementation : route, navigation et marquage CE">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Code · Python, three.js</span>
         <h3>CAO et maquette web</h3>
         <p>Modéliser le changement de vitesses, la version à siège enfant, la capote, les housses et l'éclairage.</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="CAO et maquette : ">En discuter</a>
       </article>
       <article class="chantier">
         <span class="metier">Commande · électronique</span>
         <h3>Pédaler aussi sur l'eau</h3>
         <p>La poussée du moteur immergé suivrait le pédalage plutôt qu'une manette&nbsp;: un capteur de pédalage du commerce commande son variateur. Les roues relevées n'offrent presque pas de résistance&nbsp;: comment rendre l'effort réel&nbsp;?</p>
+        <a href="https://github.com/guillaumegodet/phoebe/issues" data-sujet="Commande : poussée du moteur immergé liée au pédalage">En discuter</a>
       </article>
     </div>
   </div>
@@ -507,6 +516,7 @@
         <ul>
           <li><a href="maquette/">Maquette 3D</a></li>
           <li><a href="identite/">Identité graphique</a></li>
+          <li><a href="https://github.com/guillaumegodet/phoebe/issues">Discussions sur GitHub</a></li>
         </ul>
       </div>
       <div>
@@ -550,6 +560,13 @@
     lancer.replaceWith(f);f.focus();
   });
 })();
+</script>
+<script>
+// Liens « En discuter » : un ticket GitHub avec le sujet déjà rempli.
+[].forEach.call(document.querySelectorAll('a[data-sujet]'),function(a){
+  var s=a.dataset.sujet;
+  a.href='https://github.com/guillaumegodet/phoebe/issues/new'+(s?'?title='+encodeURIComponent(s):'');
+});
 </script>
 </body>
 </html>

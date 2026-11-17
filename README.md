@@ -2,7 +2,7 @@
 
 # Phoebe
 
-**[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/)
+**[Site du projet et maquette 3D](https://guillaumegodet.github.io/phoebe/)** · [Identité graphique](https://guillaumegodet.github.io/phoebe/identite/) · [Discussions](https://github.com/guillaumegodet/phoebe/issues)
 
 Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils.
 
