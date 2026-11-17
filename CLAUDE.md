@@ -112,6 +112,16 @@ Principe : un secteur à gorge, solidaire du foil et centré sur son axe, garde 
 - **Foil arrière** : secteur de 90 mm (limité par le palonnier), claveté sur l'axe de relevage, à bâbord de la tête de safran. L'axe doit donc être solidaire du mât et transmettre 35 N·m. Le bout descend à une poulie sur le tableau, à 15 mm de l'axe de direction pour ne pas gêner le braquage, passe sur le pont arrière et rejoint un palan à six brins le long du plat-bord bâbord. Environ 65 N au garant sans les frottements, pour 1,7 m de cordage à reprendre. Taquet à x = −200. Pas de rappel : un vérin à gaz est à étudier.
 - **Non traité** : départ de la descente (foil replié à la verticale, il faut le décoller de sa butée : ressort ou second bout), tenue du sandow, trajectoires pendant la rotation et pendant le braquage du mât arrière (seules les positions extrêmes sont contrôlées), contact des bouts avec la toile du pont.
 
+## Foils coulissant dans un puits : écarté (17 novembre 2026)
+
+Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une variante à foils en arc de cercle coulissant dans un puits courbe a été dessinée puis retirée du modèle, à la demande de Guillaume. La version à charnières reste la seule.
+
+- **Pourquoi** : la coque est trop peu haute. Le puits ne guidait le foil que sur 276 mm, d'où 6,3 kN sur l'appui bas à trois fois la charge, contre 3 kN par vis pour les charnières. Le foil ne se manœuvrait plus depuis le siège et il fallait le retirer pour rouler.
+- **L'Ioda réel** (vidéo de montage) : des L en aluminium d'une seule pièce, à coude arrondi. Le mât droit coulisse dans un puits droit, l'aile reste sous la coque. Enfilés par en dessous, ils restent à bord. Sur route, une telle aile resterait déployée sous la coque : la charnière reste préférable.
+- **À reprendre peut-être** : le coude arrondi d'une seule pièce, le verrouillage par un axe retenu par un sandow, une position mi-hauteur pour quitter la cale, un sandow sur crochet pour tenir le foil relevé.
+- **Question ouverte** : comment l'Ioda règle son altitude avec une aile horizontale. À demander au constructeur.
+- **Brevet** : une demande française FR3134792A1 (« hydroptère à foil rétractable ») est apparue dans la recherche. Ni lue ni attribuée.
+
 ## Pistes retenues, pas encore modélisées (17 novembre 2026)
 
 **Une seule tension, 48 V.** La machine d'arbre et le moteur immergé ont chacun leur variateur (type VESC, à vérifier), sur le même bus 48 V, reliés par bus CAN. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V. Pour rester un vélo à assistance sur route : 250 W nominaux, assistance seulement quand on pédale, coupée à 25 km/h. Avec un moteur bridé par logiciel plutôt qu'un kit marqué 250 W, ce statut est plus discutable : à vérifier.
