@@ -134,7 +134,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <li>Roues à flasques pleins, garde-boue carbone, courroie à la place des chaînes, câbles intégrés.</li>
     <li>Verrière en polycarbonate avec cellules solaires intégrées, portée par les foils repliés et par un arceau arrière. Elle reste en place sur l'eau et ne se range que pour voler.</li>
     <li>Ailes avant repliées logées dans une gorge rembourrée sous la verrière. Chaussettes élastiques sombres sur les mâts.</li>
-    <li>Phares annulaires, siège en maille tendue, écran de bord étanche, sélecteur unique Route, Eau, Vol avec vérins.</li>
+    <li>Phare annulaire, siège en maille tendue, écran de bord étanche, sélecteur unique Route, Eau, Vol avec vérins.</li>
     <li>Régulation d'altitude automatique des foils, deux batteries amovibles sur une seule tension.</li>
     <li>Prix visé, à l'estime : 18 000 à 25 000 € en petite série. Rien de cette version n'est dimensionné.</li>
   </ul>
@@ -186,10 +186,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <ul>
     <li>Deux foils avant en L pivotent sur le plat-bord. Repliés, ils se rejoignent au-dessus du pilote et servent d'arceau de toit.</li>
     <li>Un foil arrière en T, relevable comme un safran, porte le moteur et sert de gouvernail. Relevé, il fait mât de signalisation.</li>
+    <li>Relevage depuis le siège : chaque foil porte un secteur à gorge sur lequel s'enroule un bout, repris par un taquet sur le plat-bord. Un sandow compense le poids des foils avant ; un palan à six brins démultiplie l'effort pour le foil arrière et son moteur.</li>
   </ul>
   <h3>Éclairage et batterie</h3>
   <ul>
-    <li>Deux phares ronds à LED sur le pont avant, avec paupières, et un feu rouge au tableau arrière.</li>
+    <li>Un seul phare rond de style ancien, en laiton, au milieu du pont avant, et un feu rouge au tableau arrière.</li>
     <li>Batterie lithium d'environ 1 kWh (ordre de grandeur : 6 kg), en caisson étanche au fond de la coque derrière le siège, au plus près des roues motrices. Elle alimente la machine d'arbre, le moteur immergé et l'éclairage, en 48 V. À 1 kW en vol, l'autonomie reste sous une heure.</li>
   </ul>
   <h3>Détails de caractère</h3>
@@ -501,6 +502,7 @@ const fronts=[-1,1].map(s=>{
   wing.position.set(0,-DEPTH,(s>0?0:-0.37)+E);wing.castShadow=true;g.add(wing);
   const tip=new THREE.Mesh(new THREE.SphereGeometry(0.012,8,6),M.accent);tip.position.set(0,-DEPTH,s*0.37+E);g.add(tip);
   const hinge=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.2,10),M.alu);hinge.rotation.z=Math.PI/2;g.add(hinge);
+  const sec=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.008,28),M.alu);sec.rotation.z=Math.PI/2;sec.position.x=0.027;g.add(sec);   // secteur de relevage
   craft.add(g);return {g,s,E};
 });
 const rear=new THREE.Group();rear.position.set(-1.335,0.5,0);craft.add(rear);
@@ -525,6 +527,21 @@ const prop=new THREE.Group();prop.position.set(-0.18,PY,0);steerG.add(prop);
   const b=new THREE.Mesh(new THREE.BoxGeometry(0.006,0.15,0.035),M.accent);
   b.rotation.x=i*Math.PI/2;b.rotation.order='XYZ';prop.add(b);
 });
+// relevage des foils : un secteur à gorge sur chaque foil, un bout jusqu'à un taquet sur le plat-bord (tracé du modèle CAO)
+const boutM=new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.8});
+[-1,1].forEach(s=>{
+  craft.add(tube([V(0.127,0.5,s*0.372),V(0.127,0.498,s*0.318),V(0.127,0.498,s*0.262),V(0.103,0.49,s*0.255),V(0.04,0.484,s*0.27),V(-0.05,0.473,s*0.322),V(-0.12,0.469,s*0.361)],0.003,boutM));
+  const tq=new THREE.Mesh(new THREE.BoxGeometry(0.036,0.008,0.016),M.alu);tq.position.set(-0.12,0.464,s*0.361);craft.add(tq);
+  craft.add(cyl(V(0.139,0.487,s*0.3),V(0.139,0.3,s*0.3),0.004,M.tyre,6));   // sandow de rappel, ancré en bas de la joue
+});
+(function(){
+  const sec=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.008,28),M.alu);sec.rotation.x=Math.PI/2;sec.position.set(0,0,-0.024);steerG.add(sec);   // secteur du foil arrière
+  craft.add(tube([V(-1.3,0.505,-0.024),V(-1.293,0.571,-0.036),V(-1.2,0.554,-0.07),V(-1.09,0.538,-0.15),V(-0.975,0.522,-0.2),V(-0.87,0.515,-0.225),
+    V(-0.8,0.518,-0.24),V(-0.73,0.518,-0.285),V(-0.625,0.524,-0.304)],0.003,boutM));
+  craft.add(cyl(V(-0.612,0.523,-0.304),V(-0.33,0.493,-0.328),0.011,M.tyre,8));   // palan à six brins
+  craft.add(tube([V(-0.326,0.493,-0.328),V(-0.27,0.48,-0.347),V(-0.2,0.47,-0.361)],0.003,boutM));
+  const tq=new THREE.Mesh(new THREE.BoxGeometry(0.036,0.008,0.016),M.alu);tq.position.set(-0.2,0.464,-0.361);craft.add(tq);
+})();
 // housses de foils pour le mode route
 const coverM=new THREE.MeshStandardMaterial({color:0xd9622b,roughness:0.92});
 const bandM=new THREE.MeshStandardMaterial({color:0xeef2f3,emissive:0xcfd6d8,emissiveIntensity:0.5,roughness:0.4});
@@ -573,16 +590,19 @@ const bagG=new THREE.Group();craft.add(bagG);
   const brass=new THREE.MeshStandardMaterial({color:0xc9a23f,roughness:0.3,metalness:0.85});
   const batM=new THREE.MeshStandardMaterial({color:0x1f6f6a,roughness:0.5});
   const bagM=new THREE.MeshStandardMaterial({color:0x6f7f4a,roughness:0.95});
-  // phares : deux yeux ronds sur le pont avant
-  [-1,1].forEach(s=>{
-    const g=new THREE.Group();g.position.set(1.1,0.63,s*0.095);g.rotation.z=0.08;
-    const shell=new THREE.Mesh(new THREE.SphereGeometry(0.052,18,14),M.ply);shell.scale.x=0.85;shell.castShadow=true;g.add(shell);
-    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.043,24),lensM);lens.rotation.y=Math.PI/2;lens.position.x=0.034;g.add(lens);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.045,0.005,6,24),M.alu);ring.rotation.y=Math.PI/2;ring.position.x=0.032;g.add(ring);
-    const lid=new THREE.Mesh(new THREE.SphereGeometry(0.058,18,8,0,Math.PI*2,0,Math.PI*0.36),lidM);lid.rotation.z=-0.5;g.add(lid);
+  // phare : un seul, de style ancien, en laiton, au milieu du pont avant
+  (function(){
+    const laiton=new THREE.MeshStandardMaterial({color:0xd4a843,roughness:0.42,metalness:0.2,side:THREE.DoubleSide});   // laiton clair : sans reflets d'ambiance, un métal pur sortirait noir
+    const g=new THREE.Group();g.position.set(1.1,0.665,0);g.rotation.z=0.06;
+    const shell=new THREE.Mesh(new THREE.SphereGeometry(0.075,22,16,0,Math.PI*2,0,Math.PI/2),laiton);shell.rotation.z=Math.PI/2;shell.scale.y=1.35;shell.castShadow=true;g.add(shell);   // coque en obus
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.068,28),lensM);lens.rotation.y=Math.PI/2;lens.position.x=0.004;g.add(lens);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.073,0.008,8,28),laiton);ring.rotation.y=Math.PI/2;ring.position.x=0.003;g.add(ring);
+    const visor=new THREE.Mesh(new THREE.CylinderGeometry(0.081,0.081,0.035,24,1,true,-Math.PI/2,Math.PI),laiton);
+    visor.rotation.z=-Math.PI/2;visor.position.x=0.02;g.add(visor);                                                                           // petite visière
     addP(g);
-    craft.add(cyl(V(1.1,0.54,s*0.095),V(1.1,0.6,s*0.095),0.009,M.alu,8));
-  });
+    addP(cyl(V(1.07,0.54,0),V(1.07,0.6,0),0.009,laiton,8));                                                                                    // pied
+    [-1,1].forEach(s=>addP(cyl(V(1.07,0.6,0),V(1.085,0.665,s*0.078),0.006,laiton,6)));                                                         // fourche du phare
+  })();
   // feu arrière
   const tail=new THREE.Mesh(new THREE.CircleGeometry(0.035,20),redM);tail.rotation.y=-Math.PI/2;tail.position.set(-1.304,0.4,0);craft.add(tail);
   const tr=new THREE.Mesh(new THREE.TorusGeometry(0.037,0.005,6,20),M.alu);tr.rotation.y=Math.PI/2;tr.position.set(-1.304,0.4,0);craft.add(tr);
@@ -681,12 +701,13 @@ let seatMat=M.ply;
   });
   roofS.add(cyl(V(-1.2,1.4,-0.33),V(-1.2,1.4,0.33),0.011,M.carbon,8));
   const ringM=new THREE.MeshStandardMaterial({color:0xfff6d8,emissive:0xffedb8,emissiveIntensity:1,roughness:0.2});
-  [-1,1].forEach(s=>{   // phares annulaires
-    const g=new THREE.Group();g.position.set(1.1,0.63,s*0.095);
-    const r=new THREE.Mesh(new THREE.TorusGeometry(0.043,0.009,8,28),ringM);r.rotation.y=Math.PI/2;g.add(r);
-    const b=new THREE.Mesh(new THREE.SphereGeometry(0.046,16,12),M.carbon);b.scale.x=0.6;b.position.x=-0.02;g.add(b);
+  (function(){   // phare annulaire, un seul
+    const g=new THREE.Group();g.position.set(1.1,0.65,0);
+    const r=new THREE.Mesh(new THREE.TorusGeometry(0.06,0.011,8,32),ringM);r.rotation.y=Math.PI/2;g.add(r);
+    const b=new THREE.Mesh(new THREE.SphereGeometry(0.064,16,12),M.carbon);b.scale.x=0.6;b.position.x=-0.025;g.add(b);
     craft.add(g);S.push(g);
-  });
+    const pied=cyl(V(1.085,0.54,0),V(1.085,0.6,0),0.01,M.carbon,8);craft.add(pied);S.push(pied);
+  })();
   const scr=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.085,0.012),new THREE.MeshStandardMaterial({color:0x0f2a2c,emissive:0x1f8f8a,emissiveIntensity:0.7,roughness:0.3}));
   scr.position.set(0.22,0.6,-0.3);scr.rotation.y=-1.15;craft.add(scr);S.push(scr);
   const st=cyl(V(0.22,0.47,-0.345),V(0.22,0.56,-0.3),0.006,M.alu,6);craft.add(st);S.push(st);

@@ -19,7 +19,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - Une seule machine électrique sur l'arbre transversal, au sec (17 novembre 2026) : moteur d'assistance sur route, génératrice sur l'eau. Elle remplace le moteur de pédalier, abandonné. Pas de moteurs-roues.
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
 - Direction sur l'eau par le mât arrière orientable (poussée orientée).
-- Équipements voulus : phares, batterie, capote faisant panneau solaire et rangeable pour voler, siège inclinable (mode sieste), housses de foils pour la route, squelette porteur.
+- Équipements voulus : un seul phare à l'avant, de style vintage (deux phares n'ont pas de sens ; 17 novembre 2026), batterie, capote faisant panneau solaire et rangeable pour voler, siège inclinable (mode sieste), housses de foils pour la route, squelette porteur.
 - Variantes demandées : une version de série au design haut de gamme, une version avec siège enfant à l'arrière.
 - Conception en CAO paramétrique (CadQuery), versionnée dans ce dépôt.
 - Position du pédalier confirmée le 17 novembre 2026 : sur sa potence, à x = 470, z = 570 (voir « Pédalier reculé »).
