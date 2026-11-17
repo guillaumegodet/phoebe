@@ -17,7 +17,7 @@
  "masse_contreplaque_kg": 12.3,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 196,
+ "nb_pieces_3D": 226,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
@@ -99,6 +99,29 @@
   ],
   "jeu_couronne_sous_dossier_mm": 14.1,
   "jeu_machine_au_dessus_de_la_poutre_mm": 24.6
+ },
+ "relevage_des_foils": {
+  "hypotheses": {
+   "foil_avant_kg": 2.3,
+   "foil_avant_centre_de_gravite_mm": 550.0,
+   "foil_arriere_kg": 6.0,
+   "foil_arriere_centre_de_gravite_mm": 600.0
+  },
+  "foil_avant": {
+   "couple_maxi_Nm": 12.4,
+   "rayon_secteur_mm": 70.0,
+   "traction_sans_rappel_N": 177,
+   "bout_a_reprendre_mm": 220,
+   "bras_de_levier_sandow_a_mi_course_mm": 55,
+   "tension_sandow_pour_compenser_a_mi_course_N": 225
+  },
+  "foil_arriere": {
+   "couple_maxi_Nm": 35.3,
+   "rayon_secteur_mm": 90.0,
+   "palan_brins": 6,
+   "traction_au_garant_N_sans_frottement": 65,
+   "garant_a_reprendre_mm": 1696
+  }
  },
  "reglage_siege": {
   "course_mm": 180.0,

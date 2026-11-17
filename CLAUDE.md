@@ -104,6 +104,14 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 - La gaine du frein arrière tribord, qui traversait au-dessus de l'arbre, passe maintenant au-dessus de la couronne, sous le dossier.
 - Le moteur de pédalier a disparu du modèle ; la ligne de chaîne du pédalier passe de 50 à 45 mm.
 
+## Relevage des foils (modélisé le 17 novembre 2026)
+
+Principe : un secteur à gorge, solidaire du foil et centré sur son axe, garde un bras de levier constant sur les 180° de rotation. Le relevage ne porte que le poids du foil ; en vol, l'effort reste repris par les goupilles et les sabots. Masses supposées, à remplacer par celles des foils réels : 2,3 kg par foil avant (centre de gravité à 0,55 m de l'axe), 6 kg pour le foil arrière avec son moteur (à 0,60 m). Tout suit `lift_*`, `foil_*` et `rud_*` dans `Params`.
+
+- **Foils avant** : secteur de 70 mm de rayon (limité par le plat-bord), vissé sur la platine de mât, devant la joue avant. Couple maximal de 12 N·m, soit 18 kg de traction sans aide, pour 22 cm de bout. Un sandow de rappel compense le poids : attaché au secteur, renvoyé sur un réa de la joue, ancré en bas de la joue, côté cockpit. Il lui faut environ 225 N à mi-course. Le bout passe par deux filoirs sur la joue et file au taquet coinceur sur le plat-bord (x = −120).
+- **Foil arrière** : secteur de 90 mm (limité par le palonnier), claveté sur l'axe de relevage, à bâbord de la tête de safran. L'axe doit donc être solidaire du mât et transmettre 35 N·m. Le bout descend à une poulie sur le tableau, à 15 mm de l'axe de direction pour ne pas gêner le braquage, passe sur le pont arrière et rejoint un palan à six brins le long du plat-bord bâbord. Environ 65 N au garant sans les frottements, pour 1,7 m de cordage à reprendre. Taquet à x = −200. Pas de rappel : un vérin à gaz est à étudier.
+- **Non traité** : départ de la descente (foil replié à la verticale, il faut le décoller de sa butée : ressort ou second bout), tenue du sandow, trajectoires pendant la rotation et pendant le braquage du mât arrière (seules les positions extrêmes sont contrôlées), contact des bouts avec la toile du pont.
+
 ## Pistes retenues, pas encore modélisées (17 novembre 2026)
 
 **Une seule tension, 48 V.** La machine d'arbre et le moteur immergé ont chacun leur variateur (type VESC, à vérifier), sur le même bus 48 V, reliés par bus CAN. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V. Pour rester un vélo à assistance sur route : 250 W nominaux, assistance seulement quand on pédale, coupée à 25 km/h. Avec un moteur bridé par logiciel plutôt qu'un kit marqué 250 W, ce statut est plus discutable : à vérifier.
@@ -146,6 +154,7 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
+- Relevage des foils : peser ou estimer les foils réels, dimensionner sandows et palan, dessiner le départ de la descente et un rappel pour le foil arrière.
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
 - Propriété intellectuelle : consulter un conseil (voir « Propriété intellectuelle »).
 - Essai statique, puis calcul de structure, avant toute construction.

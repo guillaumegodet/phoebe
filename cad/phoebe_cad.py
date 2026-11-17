@@ -181,6 +181,19 @@ class Params:
     # ---------------- freins ----------------
     drum_r: float = 50.0            # tambours dans les moyeux arrière (encombrement)
     disc_r: float = 80.0            # disque avant
+    # ---------------- relevage des foils ----------------
+    # Un secteur à gorge, solidaire du foil et centré sur son axe, garde un bras de levier constant sur les 180
+    # degrés de rotation. Foils avant : bout de manoeuvre vers un taquet sur le plat-bord, et sandow de rappel
+    # qui compense le poids. Foil arrière : secteur claveté sur l'axe de relevage, palan dans le cockpit.
+    # Masses et centres de gravité supposés, à remplacer par ceux des foils réels.
+    lift_r: float = 70.0            # rayon du secteur des foils avant (limité par le plat-bord)
+    lift_q: float = 60.0            # rayon d'attache du sandow sur le secteur
+    foil_mass: float = 2.3          # kg, mât et aile d'un foil avant (hypothèse)
+    foil_cg: float = 550.0          # distance de l'axe au centre de gravité (hypothèse)
+    rud_lift_r: float = 90.0        # rayon du secteur du foil arrière (limité par le palonnier)
+    rud_mass: float = 6.0           # kg, mât, aile, moteur et hélice (hypothèse)
+    rud_cg: float = 600.0
+    rud_tackle: int = 6             # brins du palan arrière
     # ---------------- étanchéité des sorties d'arbre ----------------
     seal_tube_r: float = 22.0       # tube de traversée (diamètre 44, alésage 35 pour un joint 25 x 35 x 7)
     seal_flange_r: float = 36.0     # bride qui pince la toile
@@ -505,7 +518,7 @@ def build(outdir, apercu=True):
         out = []
         for i, x0 in enumerate((hx - tU - P.t_cheek, hx + tU)):
             out.append((f"joue_charniere_{i + 1}_{tag}", solid(cheek, lambda a, b, x0=x0: (x0, a, b), (P.t_cheek, 0, 0)), ALU))
-        out.append((f"axe_charniere_{tag}", cyl((hx - tU - 10, hy, hz), (hx + tU + 10, hy, hz), 6), STEEL))
+        out.append((f"axe_charniere_{tag}", cyl((hx - tU - 10, hy, hz), (hx + tU + 21, hy, hz), 6), STEEL))
         yl = hy - P.hinge_lock_r
         out.append((f"goupille_verrou_{tag}", cyl((hx - tU - 10, yl, hz), (hx + tU + 10, yl, hz), 5), STEEL))
         ym = hy + P.hinge_e; zt = hz - 21
@@ -513,10 +526,37 @@ def build(outdir, apercu=True):
                ("platine_de_mat", bx(hx - P.plate_L / 2, hx + P.plate_L / 2, ym - P.plate_W / 2, ym + P.plate_W / 2, zt - 8, zt), ALU),
                ("mat_foil_encombrement", bx(hx - P.mast_chord / 2, hx + P.mast_chord / 2, ym - P.mast_thk / 2, ym + P.mast_thk / 2, zt - 8 - P.mast_len, zt - 8), CARB),
                ("aile_foil_encombrement", bx(hx - P.wing_chord / 2, hx + P.wing_chord / 2, ym, ym + P.wing_span, zt - 16 - P.mast_len, zt - P.mast_len), CARB)]
+        # relevage : secteur à gorge fixé sur la platine de mât, devant la joue avant
+        xs0 = hx + tU + P.t_cheek + 5; xc = xs0 + 4; xe = xs0 + 16       # plan du secteur, plan du sandow
+        mov += [("secteur_relevage", solid(sect_f, lambda a, b: (xs0, a, b), (8, 0, 0)), ALU),
+                ("equerre_secteur", bx(xs0 - 4, xs0 + 12, hy + 12, hy + 62, zt, zt + 6), ALU),
+                ("attache_sandow_secteur", cyl((xs0 + 8, hy + P.lift_q, hz), (xe + 4, hy + P.lift_q, hz), 4), STEEL)]
         for nm, sd, c in mov:
             if folded: sd = sd.rotate(V(0, hy, hz), V(1, hy, hz), 180)
             out.append((f"{nm}_{tag}", sd, c))
+        yR, zA = 300.0, 300.0                                            # renvoi du sandow sur la joue, ancrage en bas de la joue
+        out.append((f"rea_sandow_{tag}", cyl((hx + tU + P.t_cheek, yR, hz), (xe + 4, yR, hz), 4), STEEL))
+        out.append((f"ancrage_sandow_{tag}", cyl((hx + tU + P.t_cheek, yR, zA), (xe + 4, yR, zA), 4), STEEL))
+        yq = hy - P.lift_q if folded else hy + P.lift_q
+        out.append((f"sandow_rappel_1_{tag}", cyl((xe, yq - 5, hz), (xe, yR + 5, hz), 3.5), RUBBER))
+        out.append((f"sandow_rappel_2_{tag}", cyl((xe, yR, hz - 5), (xe, yR, zA + 5), 3.5), RUBBER))
+        # bout de relevage : du secteur à deux filoirs sur la joue, puis au taquet coinceur sur le plat-bord
+        B = (318.0, hz + 11.0); a0 = math.asin((zt + 6 - hz) / P.lift_r)
+        if folded: T = (hy + P.lift_r * math.cos(math.pi + a0), hz + P.lift_r * math.sin(math.pi + a0))     # le bout tire sur son attache
+        else:
+            d = math.hypot(hy - B[0], hz - B[1]); a = math.atan2(hz - B[1], hy - B[0]) + math.asin(P.lift_r / d)
+            L = math.sqrt(d * d - P.lift_r ** 2); T = (B[0] + L * math.cos(a), B[1] + L * math.sin(a))          # tangent au secteur
+        xq = -120.0; tq = xq / P.HL; yq_ = hb(tq) - P.stringer / 2
+        out.append((f"bout_relevage_brin_{tag}", cyl((xc, T[0], T[1]), (xc, B[0], B[1]), 2.5), (0.85, 0.38, 0.17)))
+        out.append((f"bout_relevage_{tag}", gaine([(xc, B[0], B[1]), (xc, 290, B[1]), (xc, 262, B[1]), (xc - 24, 255, B[1] - 8), (40, 270, 484),
+            (-50, 322, 473), (xq, yq_, zg(tq) + 9)], 2.5), (0.85, 0.38, 0.17)))
+        for k, y0 in enumerate((311, 252)):
+            out.append((f"filoir_relevage_{k + 1}_{tag}", bx(hx + tU + P.t_cheek, xc + 6, y0, y0 + 16, B[1] - 9, B[1] - 3.5), ALU))
+        out.append((f"taquet_relevage_{tag}", bx(xq - 18, xq + 18, yq_ - 8, yq_ + 8, zg(tq), zg(tq) + 5.5), ALU))
         return [(nm, sd.mirror("XZ") if mirror else sd, c) for nm, sd, c in out]
+    zt_ = hz - 21                                                        # secteur : disque tronqué au ras de son équerre
+    sect_f = Point(hy, hz).buffer(P.lift_r, 48).intersection(box(0, zt_ + 6, 1000, 1000)).difference(circ(hy, hz, 12.5))
+    flats.append(("secteur_relevage_foil", 8.0, 2, sect_f, [], 'ALU'))
     parts += hinge_side(False, False, "babord_deploye") + hinge_side(True, True, "tribord_replie")
 
     # --- 2. arbre arrière : paliers à semelle vissés sur la face avant du couple porteur
@@ -592,7 +632,26 @@ def build(outdir, apercu=True):
     for sg, tag in ((1, "babord"), (-1, "tribord")):
         parts.append((f"joue_tete_de_safran_{tag}", solid(rc, lambda a, b, y0=(11 if sg > 0 else -17): (a, y0, b), (0, 6, 0)), ALU))
     parts.append(("palonnier_direction_arriere", cyl((xp, -P.horn - 7, zb_), (xp, P.horn + 7, zb_), 8), ALU))
-    parts.append(("axe_relevage_foil_arriere", cyl((Lx, -22, Lz), (Lx, 22, Lz), 6), STEEL))
+    parts.append(("axe_relevage_foil_arriere", cyl((Lx, -22, Lz), (Lx, 31, Lz), 6), STEEL))
+    # relevage : secteur claveté sur l'axe, à bâbord de la tête de safran ; le bout descend à une poulie sur le
+    # tableau, tout près de l'axe de direction, passe sur le pont et rejoint un palan dans le cockpit
+    rr = P.rud_lift_r; ys_ = 24.0
+    sect_r = Point(Lx, Lz).buffer(rr, 48).difference(circ(Lx, Lz, 12.2))
+    flats.append(("secteur_relevage_foil_arriere", 8.0, 1, sect_r, [], 'ALU'))
+    parts.append(("secteur_relevage_foil_arriere", solid(sect_r, lambda a, b: (a, ys_ - 4, b), (0, 8, 0)), ALU))
+    parts.append(("poulie_relevage_tableau", bx(xt - 14, xt, ys_ - 7, ys_ + 7, 496, 510), ALU))
+    def zd(x, y, dz=9.0):                                    # au-dessus du pont
+        t = x / P.HL; return zg(t) + P.crown * (1 - (y / hb(t)) ** 2) + dz
+    def yb(x, dy): return hb(x / P.HL) - dy                  # depuis le plat-bord
+    cord = [(Lx + rr + 2.5, ys_, Lz), (xt - 7, ys_, 492), (xt - 22, ys_ + 4, 530), (xt - 4, ys_ + 12, zd(xt, ys_) + 8)]
+    cord += [(x, y, zd(x, y)) for x, y in ((-1200, 70), (-1090, 125), (-975, 165), (-870, 200))]
+    cord += [(-800, 232, zd(-806, 232) + 6), (-730, yb(-730, 62), zg(-730 / P.HL) + 42), (-625, yb(-625, 52), zg(-625 / P.HL) + 52)]
+    parts.append(("bout_relevage_arriere", gaine(cord, 2.5), (0.85, 0.38, 0.17)))
+    pa, pb = (-612, yb(-612, 52), zg(-0.47) + 52), (-330, yb(-330, 40), zg(-0.25) + 30)
+    parts.append(("palan_relevage_arriere_encombrement", cyl(pa, pb, 11), ENV))
+    xq = -200.0; tq = xq / P.HL
+    parts.append(("garant_relevage_arriere", gaine([(pb[0] + 4, pb[1], pb[2]), (-270, yb(-270, 22), zg(-0.2) + 18), (xq, yb(xq, 9), zg(tq) + 9)], 2.5), (0.85, 0.38, 0.17)))
+    parts.append(("taquet_relevage_arriere", bx(xq - 18, xq + 18, yb(xq, 17), yb(xq, 1), zg(tq), zg(tq) + 5.5), ALU))
     parts.append(("goupille_foil_arriere", cyl((locks[0][0], -22, locks[0][1]), (locks[0][0], 22, locks[0][1]), 5), STEEL))
     zb = Lz + 40 - P.rud_mast
     parts.append(("mat_foil_arriere_encombrement", bx(Lx - 55, Lx + 55, -8, 8, zb, Lz + 40), CARB))
@@ -870,6 +929,18 @@ def build(outdir, apercu=True):
         "couple_machine_Nm_pour_150_W_pedales": [round(150 / (a * kg * 2 * math.pi / 60), 1) for a in (arbre_80[0], arbre_80[-1])],
         "jeu_couronne_sous_dossier_mm": round(sous_dossier(XA, P.shaft_z) - rp(P.z_gen_ring) - 4.5, 1),
         "jeu_machine_au_dessus_de_la_poutre_mm": round(P.gen_z - P.gen_r - beam_top(P.gen_x), 1),
+    }
+    c_av = P.foil_mass * 9.81 * P.foil_cg / 1000; c_ar = P.rud_mass * 9.81 * P.rud_cg / 1000
+    rep["relevage_des_foils"] = {
+        "hypotheses": {"foil_avant_kg": P.foil_mass, "foil_avant_centre_de_gravite_mm": P.foil_cg,
+                       "foil_arriere_kg": P.rud_mass, "foil_arriere_centre_de_gravite_mm": P.rud_cg},
+        "foil_avant": {"couple_maxi_Nm": round(c_av, 1), "rayon_secteur_mm": P.lift_r,
+                       "traction_sans_rappel_N": round(c_av / P.lift_r * 1000), "bout_a_reprendre_mm": round(math.pi * P.lift_r),
+                       "bras_de_levier_sandow_a_mi_course_mm": round((hy - 300.0) * P.lift_q / math.hypot(hy - 300.0, P.lift_q)),
+                       "tension_sandow_pour_compenser_a_mi_course_N": round(c_av * 1000 / ((hy - 300.0) * P.lift_q / math.hypot(hy - 300.0, P.lift_q)))},
+        "foil_arriere": {"couple_maxi_Nm": round(c_ar, 1), "rayon_secteur_mm": P.rud_lift_r, "palan_brins": P.rud_tackle,
+                         "traction_au_garant_N_sans_frottement": round(c_ar / P.rud_lift_r * 1000 / P.rud_tackle),
+                         "garant_a_reprendre_mm": round(math.pi * P.rud_lift_r * P.rud_tackle)},
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)

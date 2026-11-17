@@ -17,7 +17,7 @@ import sys, os, itertools, importlib.util
 
 SEUIL_MM3 = 60.0
 CONTACTS_VOULUS = [
-    ("chaine", "pignon"), ("chaine", "plateau"), ("chaine", "galet"), ("chaine", "couronne"), ("chaine", "chaine"),
+    ("chaine", "pignon"), ("chaine", "plateau"), ("chaine", "galet"), ("chaine", "couronne"), ("bout", "secteur"), ("bout", "poulie"), ("chaine", "chaine"),
     ("gaine", "gaine"), ("moyeu_vitesses_encombrement", "moyeu_vitesses_axe"),
 ]
 
