@@ -6,7 +6,7 @@
 
 Véhicule amphibie léger : un trike couché à assistance électrique qui roule, flotte et vole sur foils.
 
-Le nom vient de la titanide Phoebé, fille d'Ouranos et de Gaïa : « je vais en Phoebe » = amphibie.
+Dans la mythologie grecque, Phébé ou Phœbé (en grec ancien Φοίϐη / Phoíbē, « brillante ») est une Titanide, fille d'Ouranos (le Ciel) et de Gaïa (la Terre). Par ailleurs, Phoebe dans Friends est jolie, attachante et un peu barrée, comme ce projet. 
 
 **État : étude de concept.** Rien ici n'est calculé ni validé par essai. Les cotes, épaisseurs et sections sont des choix de départ.
 
@@ -67,7 +67,7 @@ Non modélisé à ce stade : variateurs, batterie et capteur de pédalage, carte
 
 ## Droits
 
-© 2026 Guillaume Godet. Tous droits réservés. Ce projet n'est pas open source : voir [LICENCE.md](LICENCE.md). Le contenu peut être consulté, mais ni copié, ni modifié, ni utilisé pour fabriquer ou vendre quoi que ce soit sans accord écrit.
+© 2026 Guillaume Godet. Tous droits réservés. Voir [LICENCE.md](LICENCE.md). Le contenu peut être consulté, mais ni copié, ni modifié, ni utilisé pour fabriquer ou vendre quoi que ce soit sans accord écrit.
 
 ## Avertissement
 
