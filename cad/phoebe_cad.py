@@ -110,7 +110,7 @@ class Params:
     brg_bolt: float = 10.5
     arm_y: float = 430.0            # plan médian des roues arrière
     hub_old: float = 110.0          # largeur du moyeu arrière (type BMX à roue libre)
-    arm_dx: float = 270.0           # axe de roue par rapport au pivot (positif = roue devant le pivot)
+    arm_dx: float = -270.0          # axe de roue par rapport au pivot : roues derrière l'arbre, pour charger la roue avant (devis de masses)
     arm_dz: float = -110.0
     arm_lift: float = 69.0          # angle de relevage des roues, en degrés
     arm_lock_r: float = 130.0       # rayon de la goupille de verrouillage du bras

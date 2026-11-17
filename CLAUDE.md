@@ -15,6 +15,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 ## Décisions prises par Guillaume
 
 - Roues arrière motrices et roue avant directrice placée devant l'étrave, plutôt qu'une roue avant motrice, qui aurait traversé la coque.
+- Roues arrière derrière l'arbre transversal (17 novembre 2026), pour charger la roue avant : voir « Devis de masses ».
 - Le projet ne se présente pas comme dérivé d'un autre véhicule : aucune référence à un projet d'origine, ni dans le dépôt ni sur le site.
 - Une seule machine électrique sur l'arbre transversal, au sec (17 novembre 2026) : moteur d'assistance sur route, génératrice sur l'eau. Elle remplace le moteur de pédalier, abandonné. Pas de moteurs-roues.
 - Objectif : le vol sur foils. Donc un second moteur, immergé, au pied du foil arrière, commandé depuis les leviers.
@@ -36,7 +37,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - **Pédalier** : sur une potence en contreplaqué de 18 mm encastrée dans la poutre, entre les couples +320 et +540 (x = 470, z = 570). Il est fixe : c'est le siège qui coulisse pour s'adapter au pilote. Il n'est plus sur l'étrave (voir « Pédalier reculé » plus bas).
 - **Foils avant** : deux foils en L d'une seule pièce, à coude arrondi (rayon 120 mm, corde constante de 150 mm), articulés sur le couple porteur avant (x = +100), repliés vers le haut sur route. Déployés, ils sont verrouillés en bas par un sabot (voir « Sabot de verrouillage »).
 - **Foil arrière** : en T, sur une tête de safran relevable et orientable fixée au tableau.
-- **Roues** : 20 pouces. Bras arrière relevables de 69° autour de l'arbre transversal ; console de direction avant relevable sur l'étrave.
+- **Roues** : 20 pouces. Bras arrière tournés vers l'arrière (roues 270 mm derrière l'arbre, empattement de 2,40 m), relevables de 69° autour de l'arbre transversal ; console de direction avant relevable sur l'étrave.
 - **Transmission** : plateau de 42 dents, chaîne dans le caisson de quille (plan y = −35) jusqu'au pignon de 16 dents d'un moyeu à huit vitesses monté en renvoi sous le dossier (voir « Moyeu à vitesses en renvoi »). Un pignon de 16 dents vissé sur la fixation de disque du moyeu entraîne, par une chaîne courte à bâbord (plan y = +61), le pignon de 24 dents de l'arbre transversal de 25 mm (x ≈ −572), puis une chaîne et une roue libre par roue arrière. Brin tendu rectiligne entre deux galets vissés sur la semelle haute ; brin mou dans un fourreau au fond du caisson.
 - **Direction** : deux leviers (x = −230, y = ±262) sur un longeron d'épicéa. Câbles sous gaine en va-et-vient : vers le palonnier de fourche du même côté, vers le palonnier de la tête de safran en croisant. Palonniers de ±75 mm, 30° de braquage. Les gaines passent sous le plat-bord puis sur les ponts, sans traverser la coque. Les deux directions restent reliées en permanence.
 - **Freins** : tambours dans les moyeux arrière (un levier à double tirage, à bâbord), disque de 160 mm à l'avant (levier tribord). Un frein sur l'arbre ne servirait à rien : les roues libres sont dans les moyeux.
@@ -129,8 +130,8 @@ Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les 
 `python3 cad/devis_masses.py` pèse les pièces dessinées par leur volume, donne une masse estimée aux pièces du commerce et ajoute ce qui n'est pas modélisé (toile, visserie, capote, variateurs, batterie de 6 kg). Résultat dans `cad/out/devis-masses.json`. Tout est à l'estime, aucune pièce n'a été pesée ; le pilote est pris à 80 kg, découpé en quatre segments.
 
 - **Masse à vide : environ 82 kg sans batterie, 88 kg avec**, loin des 50 à 55 kg visés. Roues, direction et freins 21,5 kg ; foils, ferrures et relevage 20 kg ; bois 15 kg ; transmission 7 kg ; non modélisé 14,5 kg. Les pièces d'aluminium sont dessinées pleines et épaisses (flasques de bras 2,7 kg, ferrures 3,5 kg, sabots 1,4 kg), l'arbre d'acier plein fait 3,9 kg. Avec le pilote : 168 kg, et non 135. Les chiffres calculés pour 135 kg (tirant d'eau, efforts sur les foils et les couples) sont donc optimistes d'environ un quart.
-- **Centrage sur route : il ne va pas.** Le centre de gravité en charge est à x = −291, les roues arrière à x = −302 : 99 % du poids sur les roues arrière, moins de 1 kg sur la roue avant. La direction ne tient pas et le véhicule se cabre à la moindre pente. Mettre la batterie à l'avant du cockpit ne donne que 6 kg sur la roue avant.
-- **Remède chiffré** : passer les roues derrière l'arbre (`arm_dx` négatif, déjà prévu pour la version siège enfant). Roues à x = −842, empattement de 2,40 m : 78 % sur l'arrière, 37 kg sur la roue avant. Non modélisé : cela change le relevage des bras, la largeur près du tableau, la chaîne des bras, les gaines de frein. Décision à prendre par Guillaume.
+- **Centrage sur route, avant correction** : avec les roues devant l'arbre (x = −302), le centre de gravité en charge (x = −291) était au droit des roues arrière : 99 % du poids sur elles, moins de 1 kg sur la roue avant. Déplacer la batterie ne donnait que 6 kg.
+- **Roues reculées (décision de Guillaume, 17 novembre 2026)** : `arm_dx = −270`, les roues sont derrière l'arbre, à x = −841. Empattement de 2,40 m, 78 % du poids sur l'arrière, 37 kg sur la roue avant (41 kg avec la batterie à l'avant). Aucune collision nouvelle. La roue relevée bascule vers l'arrière et le haut : son bas est à 29 mm de la flottaison à 135 kg, 8 mm à 165 kg, comme avant. Non revu : le cheminement des gaines de frein arrière, les chaînes des bras, le rayon de braquage avec cet empattement, l'effet du siège enfant.
 - **Sur l'eau** : le centre de carène à 135 kg est à x = −112, le centre de gravité 18 cm plus en arrière. La coque flotterait sur le cul ; à recalculer à la vraie masse.
 - **En vol** : 74 % du poids sur les foils avant, cohérent avec les 70 % supposés.
 
@@ -141,7 +142,7 @@ Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±43
 - **Contreplaqué seul** : 73 MPa au milieu dès une fois la charge. Il ne tenait pas.
 - **Ferrure** : les deux équerres de verrou des bras deviennent une seule tôle d'aluminium, d'un palier à l'autre, sur la face arrière du couple. Son âme monte à z = 330 au-dessus de la poutre, avec un bord tombé de 22 mm pour la raidir. Une encoche à tribord laisse passer la chaîne et la couronne de la machine d'arbre. Épaisseur de 4 mm seulement : la machine d'arbre est 1 mm derrière. 28 MPa au milieu à une fois la charge, 85 MPa à trois fois ; 36 MPa sous l'encoche. Masse : 0,9 kg.
 - **Arbre** : 165 mm de porte-à-faux entre la roue et le palier, 71 MPa à une fois la charge, 214 MPa à trois fois. Il faut un acier à plus de 300 MPa de limite élastique : pas un inox courant.
-- **Goupille de bras** : la roue est 270 mm devant l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,4 kN à une fois la charge, 4,1 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
+- **Goupille de bras** : la roue est à 270 mm de l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,4 kN à une fois la charge, 4,1 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
 - **Centrage** : confirmé par le devis de masses, voir « Devis de masses ».
 - **Non traité** : vissage de l'éclisse dans l'épicéa (environ 0,8 kN par vis à trois fois la charge avec cinq vis), flambement, part réelle du poids qui arrive par les lisses plutôt que par le milieu.
 
@@ -200,14 +201,14 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Ce qui reste à faire
 
-- **Centrage et masse** : décider du recul des roues arrière (`arm_dx` négatif), puis alléger (pièces d'aluminium ajourées, arbre creux) et refaire les calculs à la vraie masse.
+- **Masse** : alléger (pièces d'aluminium ajourées, arbre creux) et refaire les calculs à la vraie masse, environ 168 kg en charge au lieu de 135. Revoir l'assiette sur l'eau.
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
 - Mode sieste : dessiner la béquille à crans du dossier dans la CAO, avec sa butée à 28° (voir point dur 18).
 - Pédalier électrique : essai sur établi de la sensation de pédalage, puis choix de la machine d'arbre, des deux variateurs et de la loi de commande. Placer variateurs et batterie, à l'abri des projections.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
-- Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
+- Version siège enfant dans le modèle CAO : les roues sont déjà reculées, chiffrer la charge de la roue avant avec l'enfant.
 - Sabots de foil : verrou manœuvrable depuis le siège, étanchéité des tirants, tenon sur le mât.
 - Relevage des foils : peser ou estimer les foils réels, dimensionner sandows et palan, dessiner le départ de la descente et un rappel pour le foil arrière.
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.

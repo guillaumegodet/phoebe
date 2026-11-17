@@ -76,6 +76,7 @@ def main():
         import io, contextlib
         with contextlib.redirect_stdout(io.StringIO()): parts, hull = m.build(tmp, apercu=False)
     brut = {nm: (s.Volume(), s.Center()) for nm, s, _ in parts}
+    bb_rel = dict((nm, s) for nm, s, _ in parts)["roue_arriere_encombrement_babord_releve"].BoundingBox()
     lignes = []
     for nm, s, col in parts:
         vol, g = brut[nm]; col = tuple(round(c, 3) for c in col)
@@ -98,17 +99,13 @@ def main():
     cats = {}
     for l in lignes: cats.setdefault(l[1], []).append(l)
     x_av = P.axle_x; x_ar = brut["roue_arriere_encombrement_tribord_route"][1].x
-    x_ar_recule = x_ar - 2 * P.arm_dx          # roues derrière l'arbre (arm_dx négatif)
 
-    def cas(avance, x_bat, recule=False):
+    def cas(avance, x_bat):
         L = list(lignes) + [("batterie", "", BATTERIE, x_bat, 300, "")]
-        if recule:   # les roues, moyeux et tambours passent derrière l'arbre, les flasques tournent autour de lui
-            L = [(n, c, kg, x - 2 * P.arm_dx if any(k in n for k in ("roue_arriere", "moyeu_arriere", "tambour", "pignon_roue_libre")) else
-                  x - P.arm_dx if "flasque_bras" in n else x, z, s) for n, c, kg, x, z, s in L]
         Mv, xv, zv = somme(L)
         seg = pilote(P, avance)
         L += [(k, "", PILOTE * f, seg[k][0], seg[k][1], "") for k, f in SEGMENTS.items()]
-        Mt, xt, zt = somme(L); xr = x_ar_recule if recule else x_ar
+        Mt, xt, zt = somme(L); xr = x_ar
         part_ar = (x_av - xt) / (x_av - xr)
         return {"masse_a_vide_kg": round(Mv, 1), "cg_a_vide_x_mm": round(xv), "masse_totale_kg": round(Mt, 1), "cg_x_mm": round(xt), "cg_z_mm": round(zt),
                 "roues_arriere_x_mm": round(xr), "part_sur_les_roues_arriere_pct": round(100 * part_ar, 1),
@@ -129,13 +126,13 @@ def main():
         "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 6 kg",
         "par_categorie_kg": {c: round(somme(L)[0], 1) for c, L in sorted(cats.items())},
         "pieces_les_plus_lourdes_kg": {l[0]: round(l[2], 2) for l in sorted(lignes, key=lambda l: -l[2])[:14]},
-        "pilote_cg_x_mm_siege_recule": round(xp), "roue_avant_x_mm": round(x_av), "centre_de_carene_x_mm_a_135_kg": round(lcb),
+        "pilote_cg_x_mm_siege_recule": round(xp), "empattement_mm": round(x_av - x_ar),
+        "roue_arriere_relevee": {"bas_z_mm": round(bb_rel.zmin), "haut_z_mm": round(bb_rel.zmax), "arriere_x_mm": round(bb_rel.xmin),
+                                 "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (135, 165)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_x_mm_a_135_kg": round(lcb),
         "cas": {
-            "actuel, batterie derrière le siège (x = -750)": cas(0, -750),
-            "actuel, batterie à l'avant du cockpit (x = +800)": cas(0, 800),
-            "actuel, pilote de 1,60 m (siège avancé de 150), batterie à l'avant": cas(150, 800),
-            "roues derrière l'arbre, batterie derrière le siège": cas(0, -750, True),
-            "roues derrière l'arbre, batterie à l'avant": cas(0, 800, True),
+            "batterie derrière le siège (x = -750)": cas(0, -750),
+            "batterie à l'avant du cockpit (x = +800)": cas(0, 800),
+            "pilote de 1,60 m (siège avancé de 150), batterie derrière le siège": cas(150, -750),
         },
     }
     json.dump(rep, open(os.path.join(out, "devis-masses.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
