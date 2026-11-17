@@ -25,7 +25,7 @@ COMMERCE = [
     ("helice_tuyere_encombrement", 0.6), ("palan_relevage_arriere_encombrement", 0.3), ("pedale_", 0.2),
     ("mat_foil_arriere_encombrement", 1.6), ("aile_foil_arriere_encombrement", 0.8),
     ("palier_corps", 0.6), ("palier_semelle", 0.2), ("fourreau_pivot_bras", 0.35),
-    ("pivot_fourche", 0.35), ("te_fourche", 0.25), ("fourreau_fourche", 0.3),
+    ("douille_direction", 0.2), ("pivot_fourche", 0.35), ("te_fourche", 0.25), ("fourreau_fourche", 0.3),
 ]
 FACTEUR = [("chaine_", 0.52)]          # les chaînes sont dessinées comme des barres pleines
 # (désignation, masse kg, x mm, z mm) : à l'estime, positions supposées
@@ -116,19 +116,42 @@ def main():
 
     seg0 = pilote(P, 0.0)
     xp = sum(f * seg0[k][0] for k, f in SEGMENTS.items())
-    # centre de carène à 135 kg, pour l'assiette sur l'eau
-    zw = P.z_keel + m.draft_for(135); ts = np.linspace(-1, P.t_bow, 201)
+    # assiette sur l'eau : flottaison inclinée qui met le centre de carène à l'aplomb du centre de gravité
     from shapely.geometry import box
-    A = np.array([m.hull_poly(t, deck=False).intersection(box(-1000, 0, 1000, zw)).area for t in ts])
     trap = getattr(np, "trapezoid", None) or np.trapz
-    lcb = float(trap(A * ts * P.HL, ts) / trap(A, ts))
+    ts = np.linspace(-1, P.t_bow, 81); xs = ts * P.HL; polys = [m.hull_poly(t, deck=False) for t in ts]
+    def carene(z0, pente):                       # volume (L) et abscisse du centre de carène ; pente > 0 : l'arrière s'enfonce
+        A = np.array([q.intersection(box(-1000, 0, 1000, z0 - pente * x)).area for q, x in zip(polys, xs)])
+        V = float(trap(A, xs)); return V / 1e6, float(trap(A * xs, xs)) / V
+    def equilibre(masse, xg):
+        def z_pour(pente):
+            lo, hi = P.z_keel, P.z_gun + 100
+            for _ in range(26):
+                mid = (lo + hi) / 2
+                if carene(mid, pente)[0] < masse: lo = mid
+                else: hi = mid
+            return (lo + hi) / 2
+        a, b = -0.15, 0.15
+        for _ in range(16):
+            c = (a + b) / 2
+            if carene(z_pour(c), c)[1] > xg: a = c
+            else: b = c
+        pente = (a + b) / 2; z0 = z_pour(pente); xt = P.x_transom
+        return {"assiette_deg_arriere_enfonce": round(math.degrees(math.atan(pente)), 1),
+                "franc_bord_au_tableau_mm": round(m.zg(xt / P.HL) - (z0 - pente * xt)),
+                "tirant_d_eau_au_tableau_mm": round(z0 - pente * xt - m.zk(xt / P.HL)),
+                "tirant_d_eau_a_l_etrave_mm": round(max(0.0, z0 - pente * 1200 - m.zk(1200 / P.HL)))}
+    c0 = cas(0, -750); c1 = cas(0, 800)
+    lcb = carene(P.z_keel + m.draft_for(c0["masse_totale_kg"]), 0.0)[1]
     rep = {
         "avertissement": "masses à l'estime, aucune pièce pesée ; pilote de 80 kg et 1,85 m ; batterie de 6 kg",
         "par_categorie_kg": {c: round(somme(L)[0], 1) for c, L in sorted(cats.items())},
         "pieces_les_plus_lourdes_kg": {l[0]: round(l[2], 2) for l in sorted(lignes, key=lambda l: -l[2])[:14]},
         "pilote_cg_x_mm_siege_recule": round(xp), "empattement_mm": round(x_av - x_ar),
         "roue_arriere_relevee": {"bas_z_mm": round(bb_rel.zmin), "haut_z_mm": round(bb_rel.zmax), "arriere_x_mm": round(bb_rel.xmin),
-                                 "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (135, 165)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_x_mm_a_135_kg": round(lcb),
+                                 "au_dessus_de_la_flottaison_mm": {f"{k} kg": round(bb_rel.zmin - P.z_keel - m.draft_for(k)) for k in (165, 195)}}, "roue_avant_x_mm": round(x_av), "centre_de_carene_a_plat_x_mm": round(lcb),
+        "sur_l_eau": {"batterie derrière le siège": equilibre(c0["masse_totale_kg"], c0["cg_x_mm"]),
+                      "batterie à l'avant du cockpit": equilibre(c1["masse_totale_kg"], c1["cg_x_mm"])},
         "cas": {
             "batterie derrière le siège (x = -750)": cas(0, -750),
             "batterie à l'avant du cockpit (x = +800)": cas(0, 800),

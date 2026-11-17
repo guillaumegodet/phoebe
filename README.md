@@ -39,7 +39,7 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 - Pédalier sur une potence encastrée dans la poutre de quille. La chaîne court dans le caisson, sous le siège, jusqu'à l'arbre transversal.
 - Deux leviers de part et d'autre du siège commandent par câbles la fourche avant et la tête de safran arrière.
 - Deux foils avant repliables sur le plat-bord, un foil arrière orientable qui porte le moteur immergé.
-- Une seule machine électrique sur l'arbre transversal : moteur d'assistance de 250 W sur route, génératrice sur l'eau. Moteur immergé d'environ 1 kW pour l'eau.
+- Une seule machine électrique sur l'arbre transversal : moteur d'assistance de 250 W sur route, génératrice sur l'eau. Moteur immergé de 1,5 à 2 kW pour l'eau.
 
 ## Interfaces modélisées
 
@@ -47,7 +47,7 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 |---|---|---|
 | Charnières des foils avant | Une ferrure porteuse en aluminium : deux tôles de 6 mm d'un seul tenant, d'une charnière à l'autre, prennent le couple porteur en sandwich (14 vis M8) et reprennent la flexion au-dessus de la poutre de quille. Une chape pivote autour d'un axe de 12 mm et se verrouille par goupille, repliée ou déployée. | Foil en L d'une seule pièce à coude arrondi, sur platine (entraxe 165 × 90 à vérifier) |
 | Sabots de verrouillage des foils | Une console en aluminium sur le flanc, 152 mm sous la charnière, terminée par une chape. Un tenon fixé au mât y entre quand le foil se déploie ; une goupille les traverse. Deux tirants serrent le sabot autour du couple porteur et de sa ferrure, jusqu'à une contre-plaque intérieure. | Tirants M8, goupille de 10 mm |
-| Arbre arrière | Arbre de 25 mm, paliers à semelle vissés sur la face avant du couple porteur. À l'arrière, une ferrure porteuse en aluminium de 4 mm, d'un palier à l'autre, reprend la flexion au-dessus de la poutre de quille. | Paliers type UCP205 |
+| Arbre arrière | Arbre creux de 25 × 3 mm, paliers à semelle vissés sur la face avant du couple porteur. À l'arrière, une ferrure porteuse en aluminium de 4 mm, d'un palier à l'autre, reprend la flexion au-dessus de la poutre de quille. | Paliers type UCP205 |
 | Direction avant | Console pivotante entre deux joues alu boulonnées sur l'étrave, verrouillée par goupille. Elle porte un jeu de direction classique et une fourche de 20 pouces. | Fourche et jeu de direction 1 1/8 |
 | Bras des roues arrière | Deux flasques alu de 6 mm par roue, pivotant sur l'arbre et tournés vers l'arrière : les roues sont 270 mm derrière l'arbre, pour charger la roue avant (empattement de 2,40 m). Une goupille les verrouille sur une patte de la ferrure porteuse, prolongée par une éclisse sur le plat-bord, en position route ou relevée (69°). Chaîne entre les flasques. | Moyeu arrière de 110 mm à roue libre (type BMX), roue de 20 pouces |
 | Foil arrière | Tête de safran relevable : deux joues alu pivotent sur deux fémelots vissés au tableau (direction), le mât pivote entre les joues (relevage), avec trois positions de goupille. Une corne des joues porte le palonnier sur l'axe de direction, au-dessus du pont. | Mât de foil, moteur immergé |

@@ -4,9 +4,11 @@
  "volume_sous_plat_bord_L": 416,
  "volume_total_avec_pont_L": 464,
  "volume_solide_STEP_L": 464,
+ "masse_de_calcul_kg": 165.0,
  "tirant_eau_mm": {
   "135 kg": 154,
-  "165 kg": 174
+  "165 kg": 174,
+  "195 kg": 195
  },
  "contreplaque_m2_par_epaisseur": {
   "6 mm": 0.54,
@@ -18,7 +20,7 @@
  "masse_contreplaque_kg": 12.4,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 244,
+ "nb_pieces_3D": 246,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
@@ -130,18 +132,18 @@
   "rayon_du_coude_mm": 120.0,
   "surface_portante_projetee_par_foil_m2": 0.0555,
   "sabot_de_verrouillage": {
-   "hypothese": "70 % de 135 kg sur les deux foils avant, portance au milieu de l'aile",
-   "portance_par_foil_N": 464,
-   "moment_autour_de_la_charniere_Nm": 113,
+   "hypothese": "75 % de 165 kg sur les deux foils avant, portance au milieu de l'aile",
+   "portance_par_foil_N": 607,
+   "moment_autour_de_la_charniere_Nm": 147,
    "hauteur_goupille_mm": 335.0,
    "bras_de_levier_sous_la_charniere_mm": 152,
-   "effort_au_sabot_N": 741,
-   "effort_au_sabot_a_trois_fois_la_charge_N": 2223,
-   "par_tirant_a_trois_fois_la_charge_N": 1112,
-   "sans_sabot_effort_sur_la_goupille_de_charniere_a_trois_fois_la_charge_N": 9655,
+   "effort_au_sabot_N": 970,
+   "effort_au_sabot_a_trois_fois_la_charge_N": 2911,
+   "par_tirant_a_trois_fois_la_charge_N": 1456,
+   "sans_sabot_effort_sur_la_goupille_de_charniere_a_trois_fois_la_charge_N": 12643,
    "au_dessus_de_la_flottaison_mm": {
-    "135 kg": 26,
-    "165 kg": 6
+    "165 kg": 6,
+    "195 kg": -15
    },
    "depassement_du_flanc_mm": 110
   },
@@ -151,37 +153,66 @@
    "vis_M8": 14,
    "hauteur_au_dessus_de_la_poutre_mm": 61.6,
    "contrainte_de_flexion_MPa_a_une_fois_la_charge": {
-    "toles_seules_au_milieu": 41.7,
-    "toles_seules_dans_le_bras_z350": 22.0,
-    "contreplaque_seul_au_milieu": 20.9,
-    "contreplaque_seul_dans_le_bras_z350": 6.7
+    "toles_seules_au_milieu": 54.6,
+    "toles_seules_dans_le_bras_z350": 28.8,
+    "contreplaque_seul_au_milieu": 27.3,
+    "contreplaque_seul_dans_le_bras_z350": 8.7
    },
-   "contrainte_toles_seules_au_milieu_a_trois_fois_la_charge_MPa": 125,
-   "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": 18.2
+   "contrainte_toles_seules_au_milieu_a_trois_fois_la_charge_MPa": 164,
+   "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": 23.8
   }
  },
  "couple_porteur_arriere": {
-  "hypothese": "135 kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
-  "reaction_par_roue_N": 662,
+  "hypothese": "80 % de 165 kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
+  "reaction_par_roue_N": 647,
   "arbre": {
    "porte_a_faux_roue_palier_mm": 165,
-   "moment_Nm": 109,
-   "contrainte_MPa_a_une_fois_la_charge": 71,
-   "contrainte_MPa_a_trois_fois_la_charge": 214
+   "moment_Nm": 107,
+   "contrainte_MPa_a_une_fois_la_charge": 105,
+   "contrainte_MPa_a_trois_fois_la_charge": 314
   },
-  "moment_au_milieu_du_couple_Nm": 175,
+  "moment_au_milieu_du_couple_Nm": 172,
   "contrainte_de_flexion_MPa_a_une_fois_la_charge": {
-   "contreplaque_seul_au_milieu": 72.5,
-   "ferrure_seule_au_milieu": 28.3,
-   "ferrure_seule_sous_la_chaine_de_la_machine": 35.6
+   "contreplaque_seul_au_milieu": 70.9,
+   "ferrure_seule_au_milieu": 27.7,
+   "ferrure_seule_sous_la_chaine_de_la_machine": 34.8
   },
-  "ferrure_seule_au_milieu_a_trois_fois_la_charge_MPa": 85,
+  "ferrure_seule_au_milieu_a_trois_fois_la_charge_MPa": 83,
   "ferrure_masse_kg": 0.9,
   "goupille_de_bras": {
-   "effort_N_a_une_fois_la_charge": 1375,
-   "effort_N_a_trois_fois_la_charge": 4126,
+   "effort_N_a_une_fois_la_charge": 1345,
+   "effort_N_a_trois_fois_la_charge": 4034,
    "direction": "d'avant en arrière, hors du plan du couple : renvoyé au plat-bord par une éclisse"
   }
+ },
+ "vol_a_l_estime": {
+  "hypotheses": {
+   "masse_kg": 165.0,
+   "coefficient_de_portance_des_foils_avant": 0.6,
+   "finesse_de_l_ensemble": [
+    8,
+    12
+   ],
+   "rendement_helice_moteur_variateur": [
+    0.55,
+    0.65
+   ],
+   "batterie_Wh": 1000
+  },
+  "surface_portante_m2": {
+   "un_foil_avant": 0.0555,
+   "foil_arriere": 0.066
+  },
+  "vitesse_de_vol_kmh": 21.7,
+  "coefficient_de_portance_du_foil_arriere_a_cette_vitesse": 0.34,
+  "puissance_electrique_W": [
+   1250.0,
+   2220.0
+  ],
+  "autonomie_min": [
+   27,
+   48
+  ]
  },
  "reglage_siege": {
   "course_mm": 180.0,

@@ -50,8 +50,9 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 | Grandeur | Valeur |
 |---|---|
 | Volume de coque sous le plat-bord | 416 L |
-| Tirant d'eau à 135 kg (véhicule et pilote) | 154 mm |
-| Tirant d'eau à 165 kg (avec un enfant) | 174 mm |
+| Masse de calcul (véhicule, batterie, pilote de 80 kg) | 165 kg (`mass_ref`, d'après le devis de masses) |
+| Tirant d'eau à 165 kg | 174 mm |
+| Tirant d'eau à 195 kg (avec un enfant) | 195 mm |
 | Contreplaqué du squelette | ≈ 2,4 m², ≈ 12,4 kg en okoumé |
 | Développement | huit vitesses, de 1,45 à 4,44 m par tour de pédalier : 7,0 à 21,3 km/h à 80 tr/min |
 | Chaîne primaire | 2,99 m, 236 maillons |
@@ -67,8 +68,8 @@ Calculés par le script (voir `cad/out/bilan.json`) :
 
 Estimés à la main, à confirmer :
 
-- Masse à vide visée : 50 à 55 kg. Le devis de masses du 17 novembre 2026 donne environ 82 kg sans batterie pour le modèle tel qu'il est dessiné : voir « Devis de masses ».
-- Puissance pour voler : de l'ordre de 1 kW vers 20 km/h. Autonomie en vol inférieure à une heure avec 1 kWh.
+- Masse à vide : environ 76 kg sans batterie d'après le devis de masses, après allègement du métal (voir « Devis de masses »). Les 50 à 55 kg visés au départ ne sont pas atteignables avec cette architecture.
+- Vol à 165 kg (`vol_a_l_estime` dans le bilan) : les foils portent le poids vers 22 km/h avec un coefficient de portance de 0,6. Puissance électrique de 1,3 à 2,2 kW (finesse de 8 à 12, rendement de 0,55 à 0,65), soit 27 à 48 minutes avec 1 kWh. Le moteur immergé d'environ 1 kW est donc trop juste : viser 1,5 à 2 kW, soit 30 à 45 A sous 48 V.
 - Budget du prototype : 6 000 à 12 000 € de matériel, médiane vers 8 000 €.
 - Version de série : 18 000 à 25 000 € en petite série.
 
@@ -119,9 +120,9 @@ Le recalcul des charnières a montré deux choses. D'abord le sabot soulage la g
 
 Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les quatre joues de charnière sont donc remplacées par une **ferrure porteuse** : deux tôles d'aluminium de 6 mm, d'un seul tenant d'une charnière à l'autre, plaquées sur les deux faces du couple porteur. Le bois garde la forme et tient les lisses ; l'aluminium porte l'effort concentré. Tout suit `ferrure_poly`, `FERRURE_BOLTS` et `floor_over_foil`.
 
-- **Forme** : le contour du couple, en retrait de 26 mm de la toile pour passer derrière les lisses (aucune encoche), avec les oreilles de charnière au-dessus du plat-bord. 14 vis M8 de couture. Les axes de charnière et de verrou portent directement dans l'aluminium (18 MPa à trois fois la charge).
+- **Forme** : le contour du couple, en retrait de 26 mm de la toile pour passer derrière les lisses (aucune encoche), avec les oreilles de charnière au-dessus du plat-bord. 14 vis M8 de couture. Les axes de charnière et de verrou portent directement dans l'aluminium (24 MPa à trois fois la charge).
 - **Varangue haute** : au-dessus de la poutre, tôles et contreplaqué montent à 62 mm au lieu de 25. C'est le maximum : l'assise du siège avancé passe 5 mm au-dessus. Les rails du siège s'arrêtent contre la ferrure, sur une équerre.
-- **Contraintes de flexion, tôles seules** (70 % de 135 kg sur les foils avant) : 42 MPa au milieu à une fois la charge, 125 MPa à trois fois ; 22 MPa dans le bras. À comparer à la limite élastique de l'alliage choisi (de l'ordre de 240 MPa pour du 6061-T6, de mémoire, à vérifier).
+- **Contraintes de flexion, tôles seules** (75 % de 165 kg sur les foils avant) : 55 MPa au milieu à une fois la charge, 164 MPa à trois fois ; 29 MPa dans le bras. La marge sur la limite élastique tombe à 1,5 à trois fois la charge : passer à 8 mm si l'essai statique le demande. À comparer à la limite élastique de l'alliage choisi (de l'ordre de 240 MPa pour du 6061-T6, de mémoire, à vérifier).
 - **Masse** : 2,6 kg pour les deux tôles, soit environ 1,3 kg de plus que les quatre joues.
 - **Non traité** : flambement du bord comprimé des tôles, corrosion et isolation entre aluminium et vis inox, découpe (laser ou jet d'eau, la pièce fait 0,96 m de large). Le couple porteur arrière avait le même défaut : voir « Ferrure porteuse arrière ».
 
@@ -129,20 +130,21 @@ Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les 
 
 `python3 cad/devis_masses.py` pèse les pièces dessinées par leur volume, donne une masse estimée aux pièces du commerce et ajoute ce qui n'est pas modélisé (toile, visserie, capote, variateurs, batterie de 6 kg). Résultat dans `cad/out/devis-masses.json`. Tout est à l'estime, aucune pièce n'a été pesée ; le pilote est pris à 80 kg, découpé en quatre segments.
 
-- **Masse à vide : environ 82 kg sans batterie, 88 kg avec**, loin des 50 à 55 kg visés. Roues, direction et freins 21,5 kg ; foils, ferrures et relevage 20 kg ; bois 15 kg ; transmission 7 kg ; non modélisé 14,5 kg. Les pièces d'aluminium sont dessinées pleines et épaisses (flasques de bras 2,7 kg, ferrures 3,5 kg, sabots 1,4 kg), l'arbre d'acier plein fait 3,9 kg. Avec le pilote : 168 kg, et non 135. Les chiffres calculés pour 135 kg (tirant d'eau, efforts sur les foils et les couples) sont donc optimistes d'environ un quart.
+- **Masse à vide : environ 76 kg sans batterie, 82 kg avec**, loin des 50 à 55 kg visés. Foils, ferrures et relevage 19 kg ; roues, direction et freins 17,5 kg ; bois 15,5 kg ; transmission 7,5 kg ; non modélisé 14,5 kg. Avec le pilote : 162 kg, arrondis à 165 kg pour tous les calculs (`mass_ref`).
+- **Allègement du 17 novembre 2026** (5,7 kg gagnés sur 82) : arbre creux de 25 × 3 (1,7 kg au lieu de 3,9), flasques de bras ajourés, sabots en deux flasques de 16 mm au lieu d'un bloc, rails du siège en tube carré, secteur de relevage arrière à rayons. Ce qui reste lourd est surtout du commerce ou de l'estimé : capote 4 kg, moteur immergé 3 kg, toile 3 kg, colle et visserie 2,5 kg, roues 5 kg. Pour descendre nettement, il faudrait renoncer à un équipement, pas ajourer davantage.
 - **Centrage sur route, avant correction** : avec les roues devant l'arbre (x = −302), le centre de gravité en charge (x = −291) était au droit des roues arrière : 99 % du poids sur elles, moins de 1 kg sur la roue avant. Déplacer la batterie ne donnait que 6 kg.
-- **Roues reculées (décision de Guillaume, 17 novembre 2026)** : `arm_dx = −270`, les roues sont derrière l'arbre, à x = −841. Empattement de 2,40 m, 78 % du poids sur l'arrière, 37 kg sur la roue avant (41 kg avec la batterie à l'avant). Aucune collision nouvelle. La roue relevée bascule vers l'arrière et le haut : son bas est à 29 mm de la flottaison à 135 kg, 8 mm à 165 kg, comme avant. Non revu : le cheminement des gaines de frein arrière, les chaînes des bras, le rayon de braquage avec cet empattement, l'effet du siège enfant.
-- **Sur l'eau** : le centre de carène à 135 kg est à x = −112, le centre de gravité 18 cm plus en arrière. La coque flotterait sur le cul ; à recalculer à la vraie masse.
-- **En vol** : 74 % du poids sur les foils avant, cohérent avec les 70 % supposés.
+- **Roues reculées (décision de Guillaume, 17 novembre 2026)** : `arm_dx = −270`, les roues sont derrière l'arbre, à x = −841. Empattement de 2,40 m, 78 % du poids sur l'arrière, 36 kg sur la roue avant (40 kg avec la batterie à l'avant). Aucune collision nouvelle. La roue relevée bascule vers l'arrière et le haut : son bas est à 8 mm de la flottaison à 165 kg, coque à plat. Non revu : le cheminement des gaines de frein arrière, les chaînes des bras, le rayon de braquage avec cet empattement, l'effet du siège enfant.
+- **Sur l'eau, à 162 kg** : la coque flotte l'arrière enfoncé de 3,3° (2,3° avec la batterie à l'avant du cockpit). L'étrave sort de l'eau, le tableau cale 12 cm et garde 13 cm de franc-bord. Les roues arrière relevées, à 8 mm de la flottaison à plat, trempent donc. À corriger : batterie à l'avant, ou volume de coque reporté vers l'arrière.
+- **En vol** : 72 à 76 % du poids sur les foils avant ; les calculs prennent 75 % (`foil_share`).
 
 ## Ferrure porteuse arrière (modélisée le 17 novembre 2026)
 
-Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±430 mm et le poids descend au milieu, or le couple porteur arrière n'a que 25 mm de contreplaqué au-dessus de la poutre. L'arbre d'acier ne passe pas ce moment : ses paliers à rotule sont des appuis simples, il ne porte que son propre porte-à-faux. Calcul majorant : 135 kg sur les deux roues arrière, poids repris au milieu. Tout suit `t_ferr_ar`, `ferr_ar_top` et `FERR_AR_BOLTS`.
+Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±430 mm et le poids descend au milieu, or le couple porteur arrière n'a que 25 mm de contreplaqué au-dessus de la poutre. L'arbre d'acier ne passe pas ce moment : ses paliers à rotule sont des appuis simples, il ne porte que son propre porte-à-faux. Calcul : 80 % de 165 kg sur les deux roues arrière (`rear_share`), poids repris au milieu. Tout suit `t_ferr_ar`, `ferr_ar_top` et `FERR_AR_BOLTS`.
 
-- **Contreplaqué seul** : 73 MPa au milieu dès une fois la charge. Il ne tenait pas.
-- **Ferrure** : les deux équerres de verrou des bras deviennent une seule tôle d'aluminium, d'un palier à l'autre, sur la face arrière du couple. Son âme monte à z = 330 au-dessus de la poutre, avec un bord tombé de 22 mm pour la raidir. Une encoche à tribord laisse passer la chaîne et la couronne de la machine d'arbre. Épaisseur de 4 mm seulement : la machine d'arbre est 1 mm derrière. 28 MPa au milieu à une fois la charge, 85 MPa à trois fois ; 36 MPa sous l'encoche. Masse : 0,9 kg.
-- **Arbre** : 165 mm de porte-à-faux entre la roue et le palier, 71 MPa à une fois la charge, 214 MPa à trois fois. Il faut un acier à plus de 300 MPa de limite élastique : pas un inox courant.
-- **Goupille de bras** : la roue est à 270 mm de l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,4 kN à une fois la charge, 4,1 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
+- **Contreplaqué seul** : 71 MPa au milieu dès une fois la charge. Il ne tenait pas.
+- **Ferrure** : les deux équerres de verrou des bras deviennent une seule tôle d'aluminium, d'un palier à l'autre, sur la face arrière du couple. Son âme monte à z = 330 au-dessus de la poutre, avec un bord tombé de 22 mm pour la raidir. Une encoche à tribord laisse passer la chaîne et la couronne de la machine d'arbre. Épaisseur de 4 mm seulement : la machine d'arbre est 1 mm derrière. 28 MPa au milieu à une fois la charge, 83 MPa à trois fois ; 35 MPa sous l'encoche. Masse : 0,9 kg.
+- **Arbre** : creux, 25 × 3 mm (`shaft_bore`). 165 mm de porte-à-faux entre la roue et le palier, 105 MPa à une fois la charge, 314 MPa à trois fois. Il faut un tube d'acier allié à plus de 450 MPa de limite élastique (type 25CrMo4, à vérifier) : ni inox courant, ni tube de construction.
+- **Goupille de bras** : la roue est à 270 mm de l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,3 kN à une fois la charge, 4,0 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
 - **Centrage** : confirmé par le devis de masses, voir « Devis de masses ».
 - **Non traité** : vissage de l'éclisse dans l'épicéa (environ 0,8 kN par vis à trois fois la charge avec cinq vis), flambement, part réelle du poids qui arrive par les lisses plutôt que par le milieu.
 
@@ -150,9 +152,9 @@ Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±43
 
 En vol, la portance s'applique en dehors de la charnière : elle cherche à replier le foil vers l'extérieur, et le mât tire donc sur la coque. Le sabot le retient 152 mm sous la charnière (goupille à z = 335), au lieu des 35 mm de la goupille de charnière. Tout suit `shoe_*` et `foil_elbow_r` dans `Params`.
 
-- **Sabot** : une console en aluminium sur le flanc, terminée par une chape. Un tenon fixé à la face intérieure du mât y entre quand le foil se déploie ; une goupille de 10 mm les traverse. Le sabot est serré autour du couple porteur par deux tirants M8 qui passent de part et d'autre de la ferrure porteuse, jusqu'à une contre-plaque appuyée sur le chant intérieur du couple. Une cale de contreplaqué remplit les 6 mm entre la toile et le couple. Rien n'est vissé dans le chant du contreplaqué.
-- **Efforts** (hypothèse : 70 % de 135 kg sur les deux foils avant, portance au milieu de l'aile) : 464 N par foil, 113 N·m autour de la charnière, 0,74 kN au sabot, 2,2 kN à trois fois la charge, soit 1,1 kN par tirant. Sans sabot, la goupille de charnière prendrait 9,7 kN à trois fois la charge.
-- **Encombrement** : il dépasse le flanc de 110 mm et reste dans la largeur sur route. Son dessous est à 26 mm de la flottaison à 135 kg, 6 mm à 165 kg : il traîne dans l'eau au clapot.
+- **Sabot** : une console en aluminium sur le flanc (deux flasques de 16 mm), terminée par une chape. Un tenon fixé à la face intérieure du mât y entre quand le foil se déploie ; une goupille de 10 mm les traverse. Le sabot est serré autour du couple porteur par deux tirants M8 qui passent de part et d'autre de la ferrure porteuse, jusqu'à une contre-plaque appuyée sur le chant intérieur du couple. Une cale de contreplaqué remplit les 6 mm entre la toile et le couple. Rien n'est vissé dans le chant du contreplaqué.
+- **Efforts** (hypothèse : 75 % de 165 kg sur les deux foils avant, portance au milieu de l'aile) : 607 N par foil, 147 N·m autour de la charnière, 0,97 kN au sabot, 2,9 kN à trois fois la charge, soit 1,5 kN par tirant. Sans sabot, la goupille de charnière prendrait 12,6 kN à trois fois la charge.
+- **Encombrement** : il dépasse le flanc de 110 mm et reste dans la largeur sur route. Son dessous est à 6 mm de la flottaison à 165 kg : il traîne dans l'eau au clapot, et trempe avec un enfant à bord.
 - **Foil** : le coude arrondi remplace l'assemblage d'un mât et d'une aile. La corde est constante (150 mm au lieu de 120 pour le mât et 180 pour l'aile) : la surface portante projetée passe de 0,067 à 0,056 m² par foil, à envergure égale (1,74 m). Ce n'est plus un mât de foil du commerce : pièce à faire faire, en carbone ou en profilé d'aluminium cintré (masse à revoir, l'hypothèse de 2,3 kg date du carbone).
 - **Non traité** : étanchéité des deux tirants à travers la toile, fixation du tenon sur le mât, mise en place de la goupille depuis le siège (le sabot est hors de la coque, à bout de bras), efforts latéraux en virage, vitesse de décollage avec la surface réduite.
 
@@ -168,7 +170,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Pistes retenues, pas encore modélisées (17 novembre 2026)
 
-**Une seule tension, 48 V.** La machine d'arbre et le moteur immergé ont chacun leur variateur (type VESC, à vérifier), sur le même bus 48 V, reliés par bus CAN. Le moteur immergé d'environ 1 kW demande une vingtaine d'ampères sous 48 V. Pour rester un vélo à assistance sur route : 250 W nominaux, assistance seulement quand on pédale, coupée à 25 km/h. Avec un moteur bridé par logiciel plutôt qu'un kit marqué 250 W, ce statut est plus discutable : à vérifier.
+**Une seule tension, 48 V.** La machine d'arbre et le moteur immergé ont chacun leur variateur (type VESC, à vérifier), sur le même bus 48 V, reliés par bus CAN. Le moteur immergé, à porter vers 1,5 à 2 kW (voir « Chiffres de référence »), demande 30 à 45 A sous 48 V. Moteur de référence proposé par Guillaume (17 novembre 2026) : le Flipsky 65161 des efoils, annoncé 6 kW en pointe, 6 à 20S, 100 ou 120 KV, arbre de 12 mm, IP68, environ 365 € (fiche AliExpress ; masse non relevée). À 48 V, 6 kW font 125 A : le variateur, les câbles et la batterie se dimensionnent sur cette pointe, pas sur le courant de croisière. Pour rester un vélo à assistance sur route : 250 W nominaux, assistance seulement quand on pédale, coupée à 25 km/h. Avec un moteur bridé par logiciel plutôt qu'un kit marqué 250 W, ce statut est plus discutable : à vérifier.
 
 **Pédalier électrique sur l'eau (« pedal-by-wire »).** Aucune chaîne ne peut atteindre le moteur immergé, et roues relevées la transmission tourne à vide. La machine d'arbre sert donc de génératrice : elle oppose une résistance au pédalage, mesure la puissance fournie (tension × courant) et la renvoie sur le bus 48 V. Règle de poussée retenue : poussée = gâchette + k × puissance pédalée, plafonnée ; la gâchette donne la base, les jambes modulent (voler avec k seul demanderait 125 à 200 W en continu). Mesure lissée sur au moins un tour de pédalier ; descente progressive de la poussée sur 1 à 2 s quand on cesse de pédaler, pour ne pas faire retomber la coque. Si le bus CAN ou la génératrice tombe : retour à la gâchette seule. Le coupe-circuit à cordon coupe les deux variateurs. Les huit vitesses du moyeu servent aussi sur l'eau : elles règlent la cadence. Ni roue libre ni crabot au départ : les roues relevées tournent dans le vide. **Risque principal : la sensation sous les pieds.** Sans inertie, la génératrice freine aussi aux points morts ; le freinage doit croître avec la vitesse (comme un home-trainer), pas être constant. À valider d'abord sur un établi (pédalier, machine, variateur), avant toute autre dépense. L'énergie pédalée est consommée aussitôt par le moteur immergé : environ 8 à 10 % de courant en moins, pas une recharge.
 
@@ -180,11 +182,11 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Points durs connus
 
-1. **Couple porteur des foils avant** : le contreplaqué seul ne passait pas le moment des foils au-dessus de la poutre. Une ferrure porteuse en aluminium le reprend (125 MPa à trois fois la charge, voir « Ferrure porteuse »). À valider par essai statique, flambement compris. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
-2. **Couple porteur arrière et verrou des bras** : le contreplaqué seul ne passait pas le poids d'une roue à l'autre ; une ferrure en aluminium le reprend. La goupille de bras reçoit 4,1 kN à trois fois la charge, renvoyés au plat-bord par une éclisse. L'arbre demande un acier à haute limite élastique. Voir « Ferrure porteuse arrière ».
+1. **Couple porteur des foils avant** : le contreplaqué seul ne passait pas le moment des foils au-dessus de la poutre. Une ferrure porteuse en aluminium le reprend (164 MPa à trois fois la charge, voir « Ferrure porteuse »). À valider par essai statique, flambement compris. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
+2. **Couple porteur arrière et verrou des bras** : le contreplaqué seul ne passait pas le poids d'une roue à l'autre ; une ferrure en aluminium le reprend. La goupille de bras reçoit 4,0 kN à trois fois la charge, renvoyés au plat-bord par une éclisse. L'arbre demande un acier à haute limite élastique. Voir « Ferrure porteuse arrière ».
 3. **Régulation d'altitude des foils** : non conçue (palpeurs, foils en V ou volets).
 4. **Largeur de 1,00 m**, imposée par les moyeux arrière standard. La réduire demande des roues en porte-à-faux.
-5. **Roue arrière relevée proche de l'eau** : environ 3 cm au-dessus de la flottaison à 135 kg.
+5. **Roue arrière relevée dans l'eau** : 8 mm au-dessus de la flottaison à 165 kg coque à plat, mais la coque flotte l'arrière enfoncé de 3° : les roues trempent. Relever davantage (`arm_lift`) ou corriger l'assiette.
 6. **Moyeu gauche** : roue libre inversée nécessaire.
 7. **Mât arrière** : le verrouillage par goupille suppose de percer le carbone ; un collier serait préférable.
 8. **Machine d'arbre** : elle se dimensionne au couple, pas à la puissance. À 80 tr/min de pédalage elle tourne de 241 à 740 tr/min et doit fournir 1,9 à 5,9 N·m pour 150 W pédalés ; sur route, 868 tr/min à 25 km/h. Il faut un moteur lent (de l'ordre de 80 tr/min par volt, type moteur de skate de 63 mm ; à choisir sur fiche). Sur route elle agit après le moyeu, sans profiter des vitesses : peu de couple à basse vitesse pour sortir d'une cale. Batterie à placer.
@@ -201,7 +203,8 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Ce qui reste à faire
 
-- **Masse** : alléger (pièces d'aluminium ajourées, arbre creux) et refaire les calculs à la vraie masse, environ 168 kg en charge au lieu de 135. Revoir l'assiette sur l'eau.
+- **Assiette sur l'eau** : 3,3° sur l'arrière à 162 kg. Placer la batterie à l'avant, puis revoir la répartition du volume de coque. Relever davantage les roues arrière.
+- **Moteur immergé** : le dimensionner pour 1,5 à 2 kW, et revoir la batterie (autonomie de 27 à 48 minutes avec 1 kWh).
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
 - Mode sieste : dessiner la béquille à crans du dossier dans la CAO, avec sa butée à 28° (voir point dur 18).

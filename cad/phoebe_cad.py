@@ -100,9 +100,13 @@ class Params:
     shoe_z: float = 335.0           # hauteur de la goupille du sabot (au-dessus de la flottaison à 165 kg)
     shoe_w: float = 80.0            # largeur du sabot, le long de la coque
     shoe_pin_y: float = 465.0
-    foil_share: float = 0.7         # part du poids portée par les deux foils avant (hypothèse)
+    foil_share: float = 0.75        # part du poids portée par les deux foils avant (72 à 76 % d'après le devis de masses)
+    # masses de calcul, d'après le devis de masses (cad/devis_masses.py) : à corriger quand il change
+    mass_ref: float = 165.0         # kg, véhicule, batterie et pilote de 80 kg
+    rear_share: float = 0.8         # part du poids sur les deux roues arrière, sur route
     # arbre arrière et paliers à semelle vissés sur la face avant du couple
     shaft_d: float = 25.0
+    shaft_bore: float = 19.0        # arbre creux (tube 25 x 3) : 1,7 kg au lieu de 3,9 ; acier à haute limite élastique
     shaft_z: float = 360.0
     brg_y: float = 265.0            # centre des paliers
     brg_h: float = 36.5             # hauteur d'axe du palier (type UCP205)
@@ -588,7 +592,8 @@ def build(outdir, apercu=True):
         # sabot de verrouillage : corps et chape hors de la coque, cale entre la toile et le couple, contre-plaque
         # contre le chant intérieur du couple, deux tirants de part et d'autre des joues
         w2 = P.shoe_w / 2; zsb = P.shoe_z
-        out.append((f"sabot_corps_{tag}", solid(sabot_p, lambda a, b: (hx - w2, a, b), (P.shoe_w, 0, 0)), ALU))
+        for k, x0 in enumerate((hx - w2, hx + w2 - 16)):                 # deux flasques de 16 mm, traversés par les tirants
+            out.append((f"sabot_flasque_{k + 1}_{tag}", solid(sabot_p, lambda a, b, x0=x0: (x0, a, b), (16, 0, 0)), ALU))
         for k, x0 in enumerate((hx - 24, hx + 12)):
             out.append((f"sabot_oreille_{k + 1}_{tag}", bx(x0, x0 + 12, y_sab, P.shoe_pin_y + 14, zsb - 15, zsb + 15), ALU))
         out.append((f"goupille_sabot_{tag}", cyl((hx - 30, P.shoe_pin_y, zsb), (hx + 30, P.shoe_pin_y, zsb), 5), STEEL))
@@ -608,7 +613,7 @@ def build(outdir, apercu=True):
     seg = frame_poly(hx, 'U').intersection(LineString([(150, P.shoe_z), (500, P.shoe_z)]))
     y_cp = seg.bounds[0] - 7                                              # chant intérieur du couple porteur, à cette hauteur
     flats.append(("cale_sabot", 2 * tU, 2, cale_p, []))
-    flats.append(("sabot_corps", P.shoe_w, 2, sabot_p, [], 'ALU'))
+    flats.append(("sabot_flasque", 16.0, 4, sabot_p, [], 'ALU'))
     zt_ = hz - 21                                                        # secteur : disque tronqué au ras de son équerre
     sect_f = Point(hy, hz).buffer(P.lift_r, 48).intersection(box(0, zt_ + 6, 1000, 1000)).difference(circ(hy, hz, 12.5))
     flats.append(("secteur_relevage_foil", 8.0, 2, sect_f, [], 'ALU'))
@@ -617,7 +622,7 @@ def build(outdir, apercu=True):
     # --- 2. arbre arrière : paliers à semelle vissés sur la face avant du couple porteur
     xf = P.x_frame_axle + tU; xa = xf + P.brg_h; zS = P.shaft_z
     ys = P.arm_y + P.hub_old / 2 + 25
-    parts.append(("arbre_arriere", cyl((xa, -ys, zS), (xa, ys, zS), P.shaft_d / 2), STEEL))
+    parts.append(("arbre_arriere", ring((xa, -ys, zS), (xa, ys, zS), P.shaft_d / 2, P.shaft_bore / 2), STEEL))
     zB = zg(xa / P.HL) + 5                                   # au-dessus du plat-bord
     yin = P.arm_y - P.hub_old / 2 - 6                        # face intérieure du flasque de bras
     brk = unary_union([box(190, zS - 25, 338, zS + 25), box(285, zS + 25, 336, zB + 37), box(285, zB, yin - 2, zB + 37)])
@@ -650,7 +655,12 @@ def build(outdir, apercu=True):
     hornB = (xa + P.arm_lock_r * math.cos(aB), zS + P.arm_lock_r * math.sin(aB))
     axl = (xa + P.arm_dx, zS + P.arm_dz)
     armp = unary_union([Point(xa, zS).buffer(36), Point(*axl).buffer(30), Point(*hornA).buffer(16), Point(*hornB).buffer(16)]).convex_hull
+    sgx = 1 if P.arm_dx > 0 else -1; entret = ((xa + 70 * sgx, zS + 65), (xa + 10 * sgx, zS + 80))
+    garde = unary_union([Point(xa, zS).buffer(44), Point(*axl).buffer(36), Point(*hornA).buffer(24), Point(*hornB).buffer(24)] + [Point(*q).buffer(18) for q in entret])
+    jour = armp.buffer(-16).difference(garde).buffer(-5).buffer(5)                    # ajour : il reste 16 mm de bord et les bossages
+    if not jour.is_empty: armp = armp.difference(jour)
     armp = armp.difference(circ(xa, zS, 30)).difference(circ(*axl, 10.5)).difference(circ(*hornA, 10.5)).difference(circ(*hornB, 10.5))
+    armp = biggest(armp.buffer(0))
     flats.append(("flasque_bras_arriere", 6.0, 4, armp, [], 'ALU'))
     def rear_side(mirror, lifted, tag):
         out = []
@@ -680,7 +690,7 @@ def build(outdir, apercu=True):
                ("moyeu_arriere", cyl((axl[0], yin + 6, axl[1]), (axl[0], y1, axl[1]), 22), STEEL),
                ("tambour_frein", ring((axl[0], P.arm_y + 24, axl[1]), (axl[0], P.arm_y + 50, axl[1]), P.drum_r, 22.5), ALU),
                ("roue_arriere_encombrement", cyl((axl[0], P.arm_y - 22, axl[1]), (axl[0], P.arm_y + 22, axl[1]), P.wheel_r), ENV)]
-        for k, (ex, ez) in enumerate(((xa + 70 * (1 if P.arm_dx > 0 else -1), zS + 65), (xa + 10 * (1 if P.arm_dx > 0 else -1), zS + 80))):
+        for k, (ex, ez) in enumerate(entret):
             mov.append((f"entretoise_bras_{k + 1}", cyl((ex, yin + 6, ez), (ex, y1, ez), 8), ALU))
         for nm, sd, c in mov:
             if lifted: sd = sd.rotate(V(xa, 0, zS), V(xa, 1, zS), -P.arm_lift if P.arm_dx > 0 else P.arm_lift)
@@ -713,6 +723,8 @@ def build(outdir, apercu=True):
     # tableau, tout près de l'axe de direction, passe sur le pont et rejoint un palan dans le cockpit
     rr = P.rud_lift_r; ys_ = 24.0
     sect_r = Point(Lx, Lz).buffer(rr, 48).difference(circ(Lx, Lz, 12.2))
+    rayons = unary_union([affinity.rotate(box(Lx - rr, Lz - 8, Lx + rr, Lz + 8), a, origin=(Lx, Lz)) for a in (0, 60, 120)])
+    sect_r = sect_r.difference(Point(Lx, Lz).buffer(rr - 18, 48).difference(Point(Lx, Lz).buffer(26, 32)).difference(rayons)).buffer(0)   # jante, moyeu et six rayons
     flats.append(("secteur_relevage_foil_arriere", 8.0, 1, sect_r, [], 'ALU'))
     parts.append(("secteur_relevage_foil_arriere", solid(sect_r, lambda a, b: (a, ys_ - 4, b), (0, 8, 0)), ALU))
     parts.append(("poulie_relevage_tableau", bx(xt - 14, xt, ys_ - 7, ys_ + 7, 496, 510), ALU))
@@ -768,7 +780,8 @@ def build(outdir, apercu=True):
         return Polygon([p0, p1, (p1[0] + n[0], p1[1] + n[1]), (p0[0] + n[0], p0[1] + n[1])])
     for sg, tag in ((1, "babord"), (-1, "tribord")):
         xr = P.x_frame_foil - P.t_U - P.t_cheek                # les rails s'arrêtent contre la ferrure porteuse, sur une équerre
-        parts.append((f"rail_siege_{tag}", bx(-440, xr - 2, sg * 50 - 10, sg * 50 + 10, zr, zr + 20), ALU))
+        parts.append((f"rail_siege_{tag}", bx(-440, xr - 2, sg * 50 - 10, sg * 50 + 10, zr, zr + 20)
+                      .cut(bx(-441, xr - 1, sg * 50 - 8, sg * 50 + 8, zr + 2, zr + 18)), ALU))     # tube carré 20 x 20 x 2
         parts.append((f"equerre_rail_siege_{tag}", bx(xr - 30, xr, sg * 50 - 10, sg * 50 + 10, zr - 6, zr), ALU))
     zs = zr + 20; sa = math.radians(P.seat_angle)
     pan = slab((P.seat_x, zs), (P.seat_x + 340, zs + 30), 9)
@@ -965,7 +978,8 @@ def build(outdir, apercu=True):
         "volume_sous_plat_bord_L": round(volume_below(None, deck=False)),
         "volume_total_avec_pont_L": round(volume_below(None, deck=True)),
         "volume_solide_STEP_L": round(hull.Volume() / 1e6),
-        "tirant_eau_mm": {f"{m} kg": round(draft_for(m)) for m in (135, 165)},
+        "masse_de_calcul_kg": P.mass_ref,
+        "tirant_eau_mm": {f"{m:g} kg": round(draft_for(m)) for m in (135, P.mass_ref, P.mass_ref + 30)},
         "contreplaque_m2_par_epaisseur": {f"{k:g} mm": round(v, 2) for k, v in sorted(area.items())},
         "masse_contreplaque_kg": round(m_ply, 1), "lisses_m": round(str_len / 1000, 1), "masse_lisses_kg": round(m_str, 1),
         "nb_pieces_3D": len(parts),
@@ -1020,19 +1034,19 @@ def build(outdir, apercu=True):
                          "traction_au_garant_N_sans_frottement": round(c_ar / P.rud_lift_r * 1000 / P.rud_tackle),
                          "garant_a_reprendre_mm": round(math.pi * P.rud_lift_r * P.rud_tackle)},
     }
-    Fz = P.foil_share * 135 * 9.81 / 2; Mf = Fz * (P.hinge_e + P.wing_span / 2) / 1000      # portance au milieu de l'aile
+    Fz = P.foil_share * P.mass_ref * 9.81 / 2; Mf = Fz * (P.hinge_e + P.wing_span / 2) / 1000      # portance au milieu de l'aile
     bras = P.hinge_z - P.shoe_z; Fs = Mf / bras * 1000
     rep["foils_avant"] = {
         "forme": "L d'une seule pièce à coude arrondi", "corde_mm": P.mast_chord, "rayon_du_coude_mm": P.foil_elbow_r,
         "surface_portante_projetee_par_foil_m2": round(P.wing_span * P.wing_chord / 1e6, 4),
         "sabot_de_verrouillage": {
-            "hypothese": f"{round(P.foil_share * 100)} % de 135 kg sur les deux foils avant, portance au milieu de l'aile",
+            "hypothese": f"{round(P.foil_share * 100)} % de {P.mass_ref:g} kg sur les deux foils avant, portance au milieu de l'aile",
             "portance_par_foil_N": round(Fz), "moment_autour_de_la_charniere_Nm": round(Mf),
             "hauteur_goupille_mm": P.shoe_z, "bras_de_levier_sous_la_charniere_mm": round(bras),
             "effort_au_sabot_N": round(Fs), "effort_au_sabot_a_trois_fois_la_charge_N": round(3 * Fs),
             "par_tirant_a_trois_fois_la_charge_N": round(1.5 * Fs),
             "sans_sabot_effort_sur_la_goupille_de_charniere_a_trois_fois_la_charge_N": round(3 * Mf / P.hinge_lock_r * 1000),
-            "au_dessus_de_la_flottaison_mm": {f"{m} kg": round(P.shoe_z - 15 - P.z_keel - draft_for(m)) for m in (135, 165)},
+            "au_dessus_de_la_flottaison_mm": {f"{m:g} kg": round(P.shoe_z - 15 - P.z_keel - draft_for(m)) for m in (P.mass_ref, P.mass_ref + 30)},
             "depassement_du_flanc_mm": round(P.shoe_pin_y + 14 - hb(P.x_frame_foil / P.HL)),
         },
     }
@@ -1054,12 +1068,12 @@ def build(outdir, apercu=True):
         "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": round(3 * math.hypot(Fz, Fs) / (12 * 2 * P.t_cheek), 1),
     }
     # couple porteur arrière, sur route : tout le poids sur les deux roues arrière (majorant)
-    Rr = 135 * 9.81 / 2; port = P.arm_y - P.brg_y; Ma = Rr * port / 1000; Mc = Rr * P.brg_y / 1000
-    cpa = frame_poly(P.x_frame_axle, 'U'); Zs = math.pi * P.shaft_d ** 3 / 32
+    Rr = P.rear_share * P.mass_ref * 9.81 / 2; port = P.arm_y - P.brg_y; Ma = Rr * port / 1000; Mc = Rr * P.brg_y / 1000
+    cpa = frame_poly(P.x_frame_axle, 'U'); Zs = math.pi * (P.shaft_d ** 4 - P.shaft_bore ** 4) / (32 * P.shaft_d)
     def sga(g, ep, y): return round(Rr * (P.brg_y - abs(y)) / (ep * haut(g, y) ** 2 / 6), 1)
     Pg = Rr * abs(P.arm_dx) / P.arm_lock_r
     rep["couple_porteur_arriere"] = {
-        "hypothese": "135 kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
+        "hypothese": f"{round(P.rear_share * 100)} % de {P.mass_ref:g} kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
         "reaction_par_roue_N": round(Rr),
         "arbre": {"porte_a_faux_roue_palier_mm": round(port), "moment_Nm": round(Ma), "contrainte_MPa_a_une_fois_la_charge": round(Ma * 1000 / Zs),
                   "contrainte_MPa_a_trois_fois_la_charge": round(3 * Ma * 1000 / Zs)},
@@ -1071,6 +1085,18 @@ def build(outdir, apercu=True):
         "ferrure_masse_kg": round(fa.area * P.t_ferr_ar * 2.7e-6, 2),
         "goupille_de_bras": {"effort_N_a_une_fois_la_charge": round(Pg), "effort_N_a_trois_fois_la_charge": round(3 * Pg),
                              "direction": "d'avant en arrière, hors du plan du couple : renvoyé au plat-bord par une éclisse"},
+    }
+    # vol, à l'estime : vitesse à laquelle les foils portent le poids, puissance à l'hélice puis à la batterie
+    W = P.mass_ref * 9.81; S_av = P.wing_span * P.wing_chord / 1e6; S_ar = 600 * 110 / 1e6; CL = 0.6
+    v = math.sqrt(P.foil_share * W / 2 / (500 * CL * S_av))
+    rep["vol_a_l_estime"] = {
+        "hypotheses": {"masse_kg": P.mass_ref, "coefficient_de_portance_des_foils_avant": CL, "finesse_de_l_ensemble": [8, 12],
+                       "rendement_helice_moteur_variateur": [0.55, 0.65], "batterie_Wh": 1000},
+        "surface_portante_m2": {"un_foil_avant": round(S_av, 4), "foil_arriere": round(S_ar, 4)},
+        "vitesse_de_vol_kmh": round(v * 3.6, 1),
+        "coefficient_de_portance_du_foil_arriere_a_cette_vitesse": round((1 - P.foil_share) * W / (500 * v * v * S_ar), 2),
+        "puissance_electrique_W": [round(W / 12 * v / 0.65, -1), round(W / 8 * v / 0.55, -1)],
+        "autonomie_min": [round(1000 / (W / 8 * v / 0.55) * 60), round(1000 / (W / 12 * v / 0.65) * 60)],
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)
