@@ -44,7 +44,8 @@ Tous les réglages sont dans le bloc `Params` en tête du script. Unités : mill
 
 | Interface | Principe | Pièces du commerce supposées |
 |---|---|---|
-| Charnières des foils avant | Deux joues alu de 6 mm prennent le couple porteur en sandwich (4 vis M8). Une chape pivote autour d'un axe de 12 mm et se verrouille par goupille, repliée ou déployée. | Mât de foil à platine (entraxe 165 × 90 à vérifier) |
+| Charnières des foils avant | Deux joues alu de 6 mm prennent le couple porteur en sandwich (4 vis M8). Une chape pivote autour d'un axe de 12 mm et se verrouille par goupille, repliée ou déployée. | Foil en L d'une seule pièce à coude arrondi, sur platine (entraxe 165 × 90 à vérifier) |
+| Sabots de verrouillage des foils | Une console en aluminium sur le flanc, 152 mm sous la charnière, terminée par une chape. Un tenon fixé au mât y entre quand le foil se déploie ; une goupille les traverse. Deux tirants serrent le sabot autour du couple porteur, jusqu'à une contre-plaque intérieure. | Tirants M8, goupille de 10 mm |
 | Arbre arrière | Arbre de 25 mm, paliers à semelle vissés sur la face avant du couple porteur, contre-plaques alu à l'arrière. | Paliers type UCP205 |
 | Direction avant | Console pivotante entre deux joues alu boulonnées sur l'étrave, verrouillée par goupille. Elle porte un jeu de direction classique et une fourche de 20 pouces. | Fourche et jeu de direction 1 1/8 |
 | Bras des roues arrière | Deux flasques alu de 6 mm par roue, pivotant sur l'arbre. Une goupille les verrouille sur une équerre fixée au couple porteur, en position route ou relevée (69°). Chaîne entre les flasques. | Moyeu arrière de 110 mm à roue libre (type BMX), roue de 20 pouces |

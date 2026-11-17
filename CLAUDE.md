@@ -34,7 +34,7 @@ Intentions de départ : carrosserie low-tech, très légère mais solide ; passa
 - **Coque** : 2,58 m × 0,74 m, lattes d'épicéa de 18 × 18 mm et toile tendue vernie (skin-on-frame).
 - **Squelette en contreplaqué** : poutre de quille en caisson 120 × 60 mm, 13 couples dont 2 cloisons étanches et 2 couples porteurs doublés, étrave prolongée, tableau arrière et gousset.
 - **Pédalier** : sur une potence en contreplaqué de 18 mm encastrée dans la poutre, entre les couples +320 et +540 (x = 470, z = 570). Il est fixe : c'est le siège qui coulisse pour s'adapter au pilote. Il n'est plus sur l'étrave (voir « Pédalier reculé » plus bas).
-- **Foils avant** : deux foils en L articulés sur le couple porteur avant (x = +100), repliés vers le haut sur route.
+- **Foils avant** : deux foils en L d'une seule pièce, à coude arrondi (rayon 120 mm, corde constante de 150 mm), articulés sur le couple porteur avant (x = +100), repliés vers le haut sur route. Déployés, ils sont verrouillés en bas par un sabot (voir « Sabot de verrouillage »).
 - **Foil arrière** : en T, sur une tête de safran relevable et orientable fixée au tableau.
 - **Roues** : 20 pouces. Bras arrière relevables de 69° autour de l'arbre transversal ; console de direction avant relevable sur l'étrave.
 - **Transmission** : plateau de 42 dents, chaîne dans le caisson de quille (plan y = −35) jusqu'au pignon de 16 dents d'un moyeu à huit vitesses monté en renvoi sous le dossier (voir « Moyeu à vitesses en renvoi »). Un pignon de 16 dents vissé sur la fixation de disque du moyeu entraîne, par une chaîne courte à bâbord (plan y = +61), le pignon de 24 dents de l'arbre transversal de 25 mm (x ≈ −572), puis une chaîne et une roue libre par roue arrière. Brin tendu rectiligne entre deux galets vissés sur la semelle haute ; brin mou dans un fourreau au fond du caisson.
@@ -106,11 +106,21 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 
 ## Relevage des foils (modélisé le 17 novembre 2026)
 
-Principe : un secteur à gorge, solidaire du foil et centré sur son axe, garde un bras de levier constant sur les 180° de rotation. Le relevage ne porte que le poids du foil ; en vol, l'effort reste repris par les goupilles et les sabots. Masses supposées, à remplacer par celles des foils réels : 2,3 kg par foil avant (centre de gravité à 0,55 m de l'axe), 6 kg pour le foil arrière avec son moteur (à 0,60 m). Tout suit `lift_*`, `foil_*` et `rud_*` dans `Params`.
+Principe : un secteur à gorge, solidaire du foil et centré sur son axe, garde un bras de levier constant sur les 180° de rotation. Le relevage ne porte que le poids du foil ; en vol, l'effort est repris par les charnières et les sabots de verrouillage. Masses supposées, à remplacer par celles des foils réels : 2,3 kg par foil avant (centre de gravité à 0,55 m de l'axe), 6 kg pour le foil arrière avec son moteur (à 0,60 m). Tout suit `lift_*`, `foil_*` et `rud_*` dans `Params`.
 
 - **Foils avant** : secteur de 70 mm de rayon (limité par le plat-bord), vissé sur la platine de mât, devant la joue avant. Couple maximal de 12 N·m, soit 18 kg de traction sans aide, pour 22 cm de bout. Un sandow de rappel compense le poids : attaché au secteur, renvoyé sur un réa de la joue, ancré en bas de la joue, côté cockpit. Il lui faut environ 225 N à mi-course. Le bout passe par deux filoirs sur la joue et file au taquet coinceur sur le plat-bord (x = −120).
 - **Foil arrière** : secteur de 90 mm (limité par le palonnier), claveté sur l'axe de relevage, à bâbord de la tête de safran. L'axe doit donc être solidaire du mât et transmettre 35 N·m. Le bout descend à une poulie sur le tableau, à 15 mm de l'axe de direction pour ne pas gêner le braquage, passe sur le pont arrière et rejoint un palan à six brins le long du plat-bord bâbord. Environ 65 N au garant sans les frottements, pour 1,7 m de cordage à reprendre. Taquet à x = −200. Pas de rappel : un vérin à gaz est à étudier.
 - **Non traité** : départ de la descente (foil replié à la verticale, il faut le décoller de sa butée : ressort ou second bout), tenue du sandow, trajectoires pendant la rotation et pendant le braquage du mât arrière (seules les positions extrêmes sont contrôlées), contact des bouts avec la toile du pont.
+
+## Sabot de verrouillage et foil à coude arrondi (modélisés le 17 novembre 2026)
+
+En vol, la portance s'applique en dehors de la charnière : elle cherche à replier le foil vers l'extérieur, et le mât tire donc sur la coque. Le sabot le retient 152 mm sous la charnière (goupille à z = 335), au lieu des 35 mm de la goupille de charnière. Tout suit `shoe_*` et `foil_elbow_r` dans `Params`.
+
+- **Sabot** : une console en aluminium sur le flanc, terminée par une chape. Un tenon fixé à la face intérieure du mât y entre quand le foil se déploie ; une goupille de 10 mm les traverse. Le sabot est serré autour du couple porteur par deux tirants M8 qui passent de part et d'autre des joues, jusqu'à une contre-plaque appuyée sur le chant intérieur du couple. Une cale de contreplaqué remplit les 6 mm entre la toile et le couple. Rien n'est vissé dans le chant du contreplaqué.
+- **Efforts** (hypothèse : 70 % de 135 kg sur les deux foils avant, portance au milieu de l'aile) : 464 N par foil, 113 N·m autour de la charnière, 0,74 kN au sabot, 2,2 kN à trois fois la charge, soit 1,1 kN par tirant. Sans sabot, la goupille de charnière prendrait 9,7 kN à trois fois la charge.
+- **Encombrement** : il dépasse le flanc de 110 mm et reste dans la largeur sur route. Son dessous est à 26 mm de la flottaison à 135 kg, 6 mm à 165 kg : il traîne dans l'eau au clapot.
+- **Foil** : le coude arrondi remplace l'assemblage d'un mât et d'une aile. La corde est constante (150 mm au lieu de 120 pour le mât et 180 pour l'aile) : la surface portante projetée passe de 0,067 à 0,056 m² par foil, à envergure égale (1,74 m). Ce n'est plus un mât de foil du commerce : pièce à faire faire, en carbone ou en profilé d'aluminium cintré (masse à revoir, l'hypothèse de 2,3 kg date du carbone).
+- **Non traité** : étanchéité des deux tirants à travers la toile, fixation du tenon sur le mât, mise en place de la goupille depuis le siège (le sabot est hors de la coque, à bout de bras), efforts latéraux en virage, vitesse de décollage avec la surface réduite.
 
 ## Foils coulissant dans un puits : écarté (17 novembre 2026)
 
@@ -136,7 +146,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 
 ## Points durs connus
 
-1. **Charnières des foils avant** : environ 3 kN par vis dans le contreplaqué à trois fois la charge. À valider par essai statique.
+1. **Charnières et sabots des foils avant** : environ 3 kN par vis dans le contreplaqué à trois fois la charge, estimés avant le sabot ; à recalculer, le sabot reprend maintenant le moment (2,2 kN à trois fois la charge). À valider par essai statique. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
 2. **Verrou des bras arrière** : il porte le poids sur route, environ 2,6 kN par vis à trois fois la charge.
 3. **Régulation d'altitude des foils** : non conçue (palpeurs, foils en V ou volets).
 4. **Largeur de 1,00 m**, imposée par les moyeux arrière standard. La réduire demande des roues en porte-à-faux.
@@ -164,6 +174,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
 - Version siège enfant dans le modèle CAO (roues arrière reculées : `arm_dx` négatif).
+- Sabots de foil : verrou manœuvrable depuis le siège, étanchéité des tirants, tenon sur le mât.
 - Relevage des foils : peser ou estimer les foils réels, dimensionner sandows et palan, dessiner le départ de la descente et un rappel pour le foil arrière.
 - Capote solaire, housses, éclairage : présents dans la maquette, absents de la CAO.
 - Propriété intellectuelle : consulter un conseil (voir « Propriété intellectuelle »).
@@ -179,7 +190,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 - Sur le poste Windows de Guillaume, Python n'est pas dans le PATH : l'environnement est dans `.venv` (créé avec `uv venv --python 3.12`), à lancer par `.venv/Scripts/python.exe`. Préfixer par `PYTHONIOENCODING=utf-8` pour l'affichage des accents.
 - Les tubes souples (gaines, fourreau de chaîne) sont des balayages le long d'une liste de points de passage. Ils montrent un cheminement, pas une longueur de câble.
 - Les cotes des pièces du commerce (paliers UCP205, platine de mât 165 × 90, moyeu de 110 mm) sont notées de mémoire : les vérifier sur les fiches des fournisseurs avant de découper.
-- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter. Réalignée sur la CAO le 16 novembre 2026 (largeur, foils, fourche, pédalier, chaîne, leviers, câbles, pilote de 1,85 m), puis le 17 pour le moyeu à vitesses et la machine d'arbre : ses cotes sont recopiées à la main, à reprendre après chaque évolution du modèle. Pour la contrôler sans navigateur piloté : capture avec Chrome en mode headless, l'ancre `#capture` masque l'interface.
+- `maquette/index.html` : maquette 3D de communication (three.js, un seul fichier). Elle sert à montrer le concept, pas à coter. Réalignée sur la CAO le 16 novembre 2026 (largeur, foils, fourche, pédalier, chaîne, leviers, câbles, pilote de 1,85 m), puis le 17 pour le moyeu à vitesses, la machine d'arbre, les sabots et les foils à coude arrondi : ses cotes sont recopiées à la main, à reprendre après chaque évolution du modèle. Pour la contrôler sans navigateur piloté : capture avec Chrome en mode headless, l'ancre `#capture` masque l'interface.
 - Langue du projet : français. Messages de commit en français.
 
 ## Identité graphique et site

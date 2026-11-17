@@ -154,7 +154,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <li>Poutre de quille en caisson d'épicéa et contreplaqué, de l'étrave au tableau arrière. Elle porte le siège, la potence du pédalier, et abrite la chaîne.</li>
     <li>Deux couples porteurs en U, en contreplaqué doublé : un au droit des foils avant, un au droit de l'axe arrière, avec ses paliers.</li>
     <li>Étrave et tableau arrière pleins, liés à la poutre, pour la fourche avant et le foil arrière.</li>
-    <li>Un sabot de verrouillage en bas de chaque flanc reprend l'effort qui cherche à replier le foil en vol.</li>
+    <li>Un sabot de verrouillage sur chaque flanc, sous la charnière, retient le mât du foil déployé : en vol, la portance cherche à le replier vers l'extérieur.</li>
     <li>La coque en lattes et toile n'est plus qu'un carénage flottant accroché à ce squelette. Surpoids estimé : 4 à 6 kg.</li>
   </ul>
   <h3>Coque low-tech</h3>
@@ -388,7 +388,8 @@ const structM=new THREE.MeshStandardMaterial({color:0x8a5a30,roughness:0.75,side
   // paliers de l'arbre arrière, sabots de verrouillage des foils
   [-1,1].forEach(s=>{
     const bo=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.05,14),M.alu);bo.rotation.x=Math.PI/2;bo.position.set(-0.5715,0.36,s*0.265);craft.add(bo);
-    const sb=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.03,0.12),M.alu);sb.position.set(0.1,0.22,s*0.345);craft.add(sb);
+    const sb=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.05,0.115),M.alu);sb.position.set(0.1,0.335,s*0.4215);craft.add(sb);   // console et chape du sabot
+    craft.add(cyl(V(0.07,0.335,s*0.465),V(0.13,0.335,s*0.465),0.005,M.tyre,8));                                               // sa goupille
   });
 })();
 function plank(a,b,w,mat){
@@ -497,9 +498,13 @@ craft.add(tube([V(0.215,0.1744,CZ),V(0.113,0.1732,CZ),V(-0.13,0.1731,CZ),V(-0.37
 const DEPTH=0.85;
 const fronts=[-1,1].map(s=>{
   const g=new THREE.Group();g.position.set(0.1,0.487,s*0.44);const E=s*0.058;   // E : déport de la chape
-  const strut=new THREE.Mesh(airfoil(0.12,0.13,DEPTH),M.carbon);strut.rotation.x=Math.PI/2;strut.position.z=E;strut.castShadow=true;g.add(strut);
-  const wing=new THREE.Mesh(airfoil(0.18,0.11,0.37),M.carbon);
-  wing.position.set(0,-DEPTH,(s>0?0:-0.37)+E);wing.castShadow=true;g.add(wing);
+  // foil en L d'une seule pièce, à coude arrondi : un tube aplati le long de sa ligne moyenne (corde de 150 mm)
+  const RC=0.12,lp=[V(0,-0.008,E),V(0,-0.25,E),V(0,-0.5,E),V(0,-(DEPTH-RC),E)];
+  for(let k=1;k<=5;k++){const a=k/5*Math.PI/2;lp.push(V(0,-(DEPTH-RC)-RC*Math.sin(a),E+s*RC*(1-Math.cos(a))));}
+  lp.push(V(0,-DEPTH,E+s*0.25),V(0,-DEPTH,E+s*0.37));
+  const foilL=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(lp,false,'centripetal'),60,0.009,10,false),M.carbon);
+  foilL.scale.x=0.075/0.009;foilL.castShadow=true;g.add(foilL);
+  const tn=new THREE.Mesh(new THREE.BoxGeometry(0.019,0.026,0.039),M.alu);tn.position.set(0,-0.152,s*0.0305);g.add(tn);   // tenon qui entre dans le sabot
   const tip=new THREE.Mesh(new THREE.SphereGeometry(0.012,8,6),M.accent);tip.position.set(0,-DEPTH,s*0.37+E);g.add(tip);
   const hinge=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.2,10),M.alu);hinge.rotation.z=Math.PI/2;g.add(hinge);
   const sec=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.008,28),M.alu);sec.rotation.z=Math.PI/2;sec.position.x=0.027;g.add(sec);   // secteur de relevage

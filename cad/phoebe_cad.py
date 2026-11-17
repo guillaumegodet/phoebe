@@ -83,10 +83,21 @@ class Params:
     plate_L: float = 190.0          # platine de mât (entraxe courant 165 x 90, à vérifier)
     plate_W: float = 110.0
     mast_len: float = 850.0
-    mast_chord: float = 120.0
+    # Foil avant d'une seule pièce : un L à coude arrondi, de corde constante (profilé cintré), au lieu d'un mât
+    # et d'une aile assemblés. La platine de mât reste l'interface avec la chape.
+    mast_chord: float = 150.0
     mast_thk: float = 16.0
-    wing_span: float = 370.0
-    wing_chord: float = 180.0
+    wing_span: float = 370.0        # du mât au bout de l'aile
+    wing_chord: float = 150.0
+    foil_elbow_r: float = 120.0     # rayon du coude, sur la ligne moyenne
+    # Sabot de verrouillage : une chape sur le flanc, sous la charnière, reçoit un tenon fixé au mât. Une goupille
+    # les traverse. En vol la portance cherche à replier le foil vers l'extérieur : le sabot retient le mât, avec
+    # un bras de levier bien plus grand que la goupille de la charnière. Il est serré autour du couple porteur
+    # par deux tirants et une contre-plaque : rien n'est vissé dans le chant du contreplaqué.
+    shoe_z: float = 335.0           # hauteur de la goupille du sabot (au-dessus de la flottaison à 165 kg)
+    shoe_w: float = 80.0            # largeur du sabot, le long de la coque
+    shoe_pin_y: float = 465.0
+    foil_share: float = 0.7         # part du poids portée par les deux foils avant (hypothèse)
     # arbre arrière et paliers à semelle vissés sur la face avant du couple
     shaft_d: float = 25.0
     shaft_z: float = 360.0
@@ -524,8 +535,8 @@ def build(outdir, apercu=True):
         ym = hy + P.hinge_e; zt = hz - 21
         mov = [("chape_pivotante", bx(hx - tU + 1, hx + tU - 1, hy - 45, hy + 70, zt, hz + 13), ALU),
                ("platine_de_mat", bx(hx - P.plate_L / 2, hx + P.plate_L / 2, ym - P.plate_W / 2, ym + P.plate_W / 2, zt - 8, zt), ALU),
-               ("mat_foil_encombrement", bx(hx - P.mast_chord / 2, hx + P.mast_chord / 2, ym - P.mast_thk / 2, ym + P.mast_thk / 2, zt - 8 - P.mast_len, zt - 8), CARB),
-               ("aile_foil_encombrement", bx(hx - P.wing_chord / 2, hx + P.wing_chord / 2, ym, ym + P.wing_span, zt - 16 - P.mast_len, zt - P.mast_len), CARB)]
+               ("foil_L_encombrement", solid(foil_L, lambda a, b: (hx - P.mast_chord / 2, a, b), (P.mast_chord, 0, 0)), CARB),
+               ("tenon_sabot", bx(hx - 9.5, hx + 9.5, P.shoe_pin_y - 14, ym - P.mast_thk / 2, P.shoe_z - 13, P.shoe_z + 13), ALU)]
         # relevage : secteur à gorge fixé sur la platine de mât, devant la joue avant
         xs0 = hx + tU + P.t_cheek + 5; xc = xs0 + 4; xe = xs0 + 16       # plan du secteur, plan du sandow
         mov += [("secteur_relevage", solid(sect_f, lambda a, b: (xs0, a, b), (8, 0, 0)), ALU),
@@ -553,7 +564,30 @@ def build(outdir, apercu=True):
         for k, y0 in enumerate((311, 252)):
             out.append((f"filoir_relevage_{k + 1}_{tag}", bx(hx + tU + P.t_cheek, xc + 6, y0, y0 + 16, B[1] - 9, B[1] - 3.5), ALU))
         out.append((f"taquet_relevage_{tag}", bx(xq - 18, xq + 18, yq_ - 8, yq_ + 8, zg(tq), zg(tq) + 5.5), ALU))
+        # sabot de verrouillage : corps et chape hors de la coque, cale entre la toile et le couple, contre-plaque
+        # contre le chant intérieur du couple, deux tirants de part et d'autre des joues
+        w2 = P.shoe_w / 2; zsb = P.shoe_z
+        out.append((f"sabot_corps_{tag}", solid(sabot_p, lambda a, b: (hx - w2, a, b), (P.shoe_w, 0, 0)), ALU))
+        for k, x0 in enumerate((hx - 24, hx + 12)):
+            out.append((f"sabot_oreille_{k + 1}_{tag}", bx(x0, x0 + 12, y_sab, P.shoe_pin_y + 14, zsb - 15, zsb + 15), ALU))
+        out.append((f"goupille_sabot_{tag}", cyl((hx - 30, P.shoe_pin_y, zsb), (hx + 30, P.shoe_pin_y, zsb), 5), STEEL))
+        out.append((f"cale_sabot_{tag}", solid(cale_p, lambda a, b: (hx - tU, a, b), (2 * tU, 0, 0)), PLY))
+        out.append((f"contre_plaque_sabot_{tag}", bx(hx - w2 + 2, hx + w2 - 2, y_cp - 10, y_cp, zsb - 15, zsb + 15), ALU))
+        for k, sgx in enumerate((-1, 1)):
+            out.append((f"tirant_sabot_{k + 1}_{tag}", cyl((hx + sgx * (w2 - 12), y_cp - 16, zsb), (hx + sgx * (w2 - 12), y_sab - 22, zsb), 4), STEEL))
         return [(nm, sd.mirror("XZ") if mirror else sd, c) for nm, sd, c in out]
+    # foil en L d'une seule pièce : mât droit, coude arrondi, aile droite (profil dans le plan YZ)
+    ym_ = hy + P.hinge_e; zw_ = hz - 29 - P.mast_len; re = P.foil_elbow_r
+    ligne = [(ym_, hz - 29), (ym_, zw_ + re)] + [(ym_ + re - re * math.cos(a), zw_ + re - re * math.sin(a)) for a in np.linspace(0, math.pi / 2, 14)[1:]] + [(ym_ + P.wing_span, zw_)]
+    foil_L = LineString(ligne).buffer(P.mast_thk / 2, cap_style=2, resolution=8)
+    # sabot : console trapézoïdale entre la toile et la chape
+    Hs = hull_poly(hx / P.HL, deck=False); y_sab = P.shoe_pin_y - 25
+    sabot_p = biggest(Polygon([(320, P.shoe_z - 32), (320, P.shoe_z + 32), (y_sab, P.shoe_z + 15), (y_sab, P.shoe_z - 15)]).difference(Hs))
+    cale_p = biggest(Hs.difference(Hs.buffer(-P.skin_gap, 24)).intersection(box(200, P.shoe_z - 30, 500, P.shoe_z + 30)))
+    seg = frame_poly(hx, 'U').intersection(LineString([(150, P.shoe_z), (500, P.shoe_z)]))
+    y_cp = seg.bounds[0] - 7                                              # chant intérieur du couple porteur, à cette hauteur
+    flats.append(("cale_sabot", 2 * tU, 2, cale_p, []))
+    flats.append(("sabot_corps", P.shoe_w, 2, sabot_p, [], 'ALU'))
     zt_ = hz - 21                                                        # secteur : disque tronqué au ras de son équerre
     sect_f = Point(hy, hz).buffer(P.lift_r, 48).intersection(box(0, zt_ + 6, 1000, 1000)).difference(circ(hy, hz, 12.5))
     flats.append(("secteur_relevage_foil", 8.0, 2, sect_f, [], 'ALU'))
@@ -941,6 +975,22 @@ def build(outdir, apercu=True):
         "foil_arriere": {"couple_maxi_Nm": round(c_ar, 1), "rayon_secteur_mm": P.rud_lift_r, "palan_brins": P.rud_tackle,
                          "traction_au_garant_N_sans_frottement": round(c_ar / P.rud_lift_r * 1000 / P.rud_tackle),
                          "garant_a_reprendre_mm": round(math.pi * P.rud_lift_r * P.rud_tackle)},
+    }
+    Fz = P.foil_share * 135 * 9.81 / 2; Mf = Fz * (P.hinge_e + P.wing_span / 2) / 1000      # portance au milieu de l'aile
+    bras = P.hinge_z - P.shoe_z; Fs = Mf / bras * 1000
+    rep["foils_avant"] = {
+        "forme": "L d'une seule pièce à coude arrondi", "corde_mm": P.mast_chord, "rayon_du_coude_mm": P.foil_elbow_r,
+        "surface_portante_projetee_par_foil_m2": round(P.wing_span * P.wing_chord / 1e6, 4),
+        "sabot_de_verrouillage": {
+            "hypothese": f"{round(P.foil_share * 100)} % de 135 kg sur les deux foils avant, portance au milieu de l'aile",
+            "portance_par_foil_N": round(Fz), "moment_autour_de_la_charniere_Nm": round(Mf),
+            "hauteur_goupille_mm": P.shoe_z, "bras_de_levier_sous_la_charniere_mm": round(bras),
+            "effort_au_sabot_N": round(Fs), "effort_au_sabot_a_trois_fois_la_charge_N": round(3 * Fs),
+            "par_tirant_a_trois_fois_la_charge_N": round(1.5 * Fs),
+            "sans_sabot_effort_sur_la_goupille_de_charniere_a_trois_fois_la_charge_N": round(3 * Mf / P.hinge_lock_r * 1000),
+            "au_dessus_de_la_flottaison_mm": {f"{m} kg": round(P.shoe_z - 15 - P.z_keel - draft_for(m)) for m in (135, 165)},
+            "depassement_du_flanc_mm": round(P.shoe_pin_y + 14 - hb(P.x_frame_foil / P.HL)),
+        },
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)

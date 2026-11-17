@@ -12,12 +12,13 @@
   "6 mm": 0.54,
   "9 mm": 1.07,
   "12 mm": 0.52,
-  "18 mm": 0.3
+  "18 mm": 0.3,
+  "24 mm": 0.0
  },
  "masse_contreplaque_kg": 12.3,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 226,
+ "nb_pieces_3D": 242,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
@@ -121,6 +122,28 @@
    "palan_brins": 6,
    "traction_au_garant_N_sans_frottement": 65,
    "garant_a_reprendre_mm": 1696
+  }
+ },
+ "foils_avant": {
+  "forme": "L d'une seule pièce à coude arrondi",
+  "corde_mm": 150.0,
+  "rayon_du_coude_mm": 120.0,
+  "surface_portante_projetee_par_foil_m2": 0.0555,
+  "sabot_de_verrouillage": {
+   "hypothese": "70 % de 135 kg sur les deux foils avant, portance au milieu de l'aile",
+   "portance_par_foil_N": 464,
+   "moment_autour_de_la_charniere_Nm": 113,
+   "hauteur_goupille_mm": 335.0,
+   "bras_de_levier_sous_la_charniere_mm": 152,
+   "effort_au_sabot_N": 741,
+   "effort_au_sabot_a_trois_fois_la_charge_N": 2223,
+   "par_tirant_a_trois_fois_la_charge_N": 1112,
+   "sans_sabot_effort_sur_la_goupille_de_charniere_a_trois_fois_la_charge_N": 9655,
+   "au_dessus_de_la_flottaison_mm": {
+    "135 kg": 26,
+    "165 kg": 6
+   },
+   "depassement_du_flanc_mm": 110
   }
  },
  "reglage_siege": {
