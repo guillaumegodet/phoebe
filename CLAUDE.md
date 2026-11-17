@@ -135,13 +135,13 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 15. **Direction reliée en permanence** : sur route le mât arrière relevé pivote avec la roue avant. À découpler si cela gêne (capote, housses).
 16. **Ligne de chaîne** : le caisson impose y = −35, un pédalier courant donne environ 45 mm. Le boîtier est décalé de 10 mm vers bâbord, donc les pédales aussi.
 17. **Eau dans le caisson** : les lumières l'ouvrent sur le cockpit. Prévoir un nable de vidange, et vérifier que le caisson ne relie pas les deux compartiments étanches.
-18. **Mode sieste et couronne** : la maquette incline le dossier à 24° avec le siège avancé de 20 cm. D'après les cotes de la CAO, le dossier touche alors la couronne de la machine d'arbre (environ 3 mm d'interférence) ; il passe au-dessus du moyeu. Limiter l'inclinaison vers 27° ou avancer davantage le siège. Non modélisé dans la CAO.
+18. **Mode sieste et couronne** : la couronne de la machine d'arbre limite l'inclinaison du dossier. La maquette prend 28° avec le siège avancé de 180 mm (toute la course des rails) : 16 mm au-dessus de la couronne d'après les cotes de la CAO. À 24°, il la touchait. Non modélisé dans la CAO.
 
 ## Ce qui reste à faire
 
 - Crans et verrou du siège sur ses rails (la course est chiffrée, le mécanisme n'est pas dessiné). Voir si les leviers doivent suivre le siège.
 - Moyeu à vitesses : vérifier ses cotes sur la fiche, trouver le pignon de sortie (Center Lock ou adaptateur six trous), dessiner un tendeur de chaîne primaire. Puis les carters de chaîne et les chaînes des bras arrière.
-- Mode sieste : revoir l'inclinaison du dossier (voir point dur 18). Images `assets/cao-*.png` du site à refaire depuis le nouvel aperçu.
+- Mode sieste : dessiner la béquille à crans du dossier dans la CAO, avec sa butée à 28° (voir point dur 18).
 - Pédalier électrique : essai sur établi de la sensation de pédalage, puis choix de la machine d'arbre, des deux variateurs et de la loi de commande. Placer variateurs et batterie, à l'abri des projections.
 - Dernier tronçon des gaines de frein arrière : la boucle qui suit le relevage du bras, jusqu'au levier du tambour.
 - Capteur de pédalage au pédalier pour l'assistance sur route (cadence, ou boîtier à capteur de couple du commerce). Tension de la chaîne de la machine d'arbre (trous oblongs dans sa platine, non dessinés).
@@ -169,4 +169,4 @@ Un moteur sans balais (encombrement retenu : 63 mm de diamètre, 74 mm de long, 
 - Logo : un croissant orange (la coque, et la lune de Phoebé) porté par un foil au-dessus d'une vague. Fichiers SVG dans `identite/`, mot « phoebe » vectorisé en Bricolage Grotesque gras.
 - Couleurs : encre `#16252b`, Erdre `#0f6f86`, housse (orange) `#d9622b`, toile `#f6f3ea`, ciel `#dfe9ec`, écume `#7cc4d6`, okoumé `#cfa873`. Polices : Bricolage Grotesque (titres), Barlow (texte).
 - Ton : phrase signature « Je vais en Phoebe. », Phoebe au féminin, toujours rappeler que c'est une étude de concept, distinguer chiffres calculés et estimés. Projet personnel, tous droits réservés : pas de fichiers à télécharger. La section « Participer » (ancre `#participer`, bouton dans l'en-tête) est revenue à la demande de Guillaume : chaque carte a un lien « En discuter » qui ouvre un ticket GitHub au sujet prérempli, suivie du bloc d'appel aux contributions et du bouton « Proposer une idée ». On invite à discuter, sans écrire « projet ouvert ».
-- Le site reprend les chiffres de référence et les points durs de ce fichier : les mettre à jour ensemble. `assets/cao-apercu.png` et `assets/cao-gabarits.png` sont des recadrages de `cad/out/phoebe-apercu.png`.
+- Le site reprend les chiffres de référence et les points durs de ce fichier : les mettre à jour ensemble. `assets/cao-apercu.png` et `assets/cao-gabarits.png` sont des recadrages de `cad/out/phoebe-apercu.png` : cadres (130, 150, 1700, 575) et (630, 748, 1090, 1503), refaits le 17 novembre 2026.

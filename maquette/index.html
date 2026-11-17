@@ -213,7 +213,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </ul>
   <h3>Mode sieste</h3>
   <ul>
-    <li>L'assise coulisse de 20 cm vers l'avant et le dossier s'incline d'environ 50° à 24°, tenu par une béquille à crans.</li>
+    <li>L'assise coulisse de 18 cm vers l'avant, sur toute la course de ses rails, et le dossier s'incline d'environ 50° à 28°, tenu par une béquille à crans.</li>
     <li>Le coulissement évite que le dossier bute sur la cloison arrière et sur l'arbre transversal.</li>
     <li>Disponible en configuration route : à l'arrêt à terre, ou amarré avec le moteur relevé et la capote en place.</li>
   </ul>
@@ -224,7 +224,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <li>Vitesse réglementée sur l'Erdre : limites à vérifier avant de voler à 20 km/h.</li>
     <li>Sorties de l'arbre transversal, 5 à 7 cm au-dessus de la flottaison : tube traversant, toile pincée entre deux brides, joint à lèvre. À essayer.</li>
     <li>Pédalier haut, lumières de chaîne dans la poutre de quille : à valider sur un gabarit grandeur.</li>
-    <li>Le moyeu à vitesses et la couronne de la machine passent à moins de 2 cm sous le dossier. Le dossier incliné du mode sieste est à revoir.</li>
+    <li>Le moyeu à vitesses et la couronne de la machine passent à moins de 2 cm sous le dossier. En mode sieste, l'inclinaison du dossier est limitée à 28° pour passer au-dessus de la couronne.</li>
     <li>Trike non inclinable et roue avant peu chargée : vitesse modérée en virage.</li>
     <li>Stabilité en roulis à l'arrêt avec une coque de 0,74 m de large.</li>
     <li>Régulation d'altitude des foils (palpeurs ou foils en V) non représentée.</li>
@@ -746,9 +746,9 @@ let napShown=-1,napOn=false,napCur=0;
 function buildSeat(n){
   if(Math.abs(n-napShown)<0.002)return;napShown=n;
   clearG(seatG);clearG(rider);
-  const d=0.2*n,beta=lerp(49.4,24,n)*Math.PI/180;
-  const piv=V(-0.36+d,0.25,0),top=V(piv.x-0.645*Math.cos(beta),piv.y+0.645*Math.sin(beta),0);
-  seatG.add(plank(piv,V(-0.02+d,0.28,0),0.38,seatMat));
+  const d=0.18*n,beta=lerp(49.4,28,n)*Math.PI/180;   // 28 degrés : le dossier passe 16 mm au-dessus de la couronne de la machine d'arbre
+  const piv=V(-0.36+d,0.263,0),top=V(piv.x-0.645*Math.cos(beta),piv.y+0.645*Math.sin(beta),0);
+  seatG.add(plank(piv,V(-0.02+d,0.293,0),0.38,seatMat));
   seatG.add(plank(piv,top,0.38,seatMat));
   const mid=V(piv.x-0.42*Math.cos(beta),piv.y+0.42*Math.sin(beta)-0.012,0);
   [-1,1].forEach(s=>seatG.add(cyl(V(mid.x,mid.y,s*0.15),V(mid.x+0.12,0.215,s*0.07),0.008,M.alu,6)));
