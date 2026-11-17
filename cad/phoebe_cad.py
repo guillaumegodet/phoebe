@@ -81,6 +81,8 @@ class Params:
     hinge_e: float = 58.0           # déport pivot -> mât
     hinge_lock_r: float = 35.0      # rayon de la goupille de verrouillage
     t_cheek: float = 6.0            # joues en aluminium
+    t_ferr_ar: float = 4.0          # ferrure porteuse arrière : 4 mm, la machine d'arbre est juste derrière
+    ferr_ar_top: float = 330.0      # haut de son âme, au-dessus de la poutre
     plate_L: float = 190.0          # platine de mât (entraxe courant 165 x 90, à vérifier)
     plate_W: float = 110.0
     mast_len: float = 850.0
@@ -212,6 +214,7 @@ class Params:
 
 P = Params()
 HINGE_BOLTS = [(300, 315), (325, 360), (300, 405), (325, 438)]          # (y, z) dans le couple porteur des foils
+FERR_AR_BOLTS = [(215, 250), (120, 222)]                                # (y, z) vis de couture de la ferrure porteuse arrière
 FERRURE_BOLTS = [(270, 250), (190, 228), (82, 215)]                     # (y, z) vis de couture de la ferrure porteuse, le long du couple
 LOCK_BOLTS = [(300, 440), (325, 415)]                                   # (y, z) équerre de verrou des bras
 STEM_BOLTS = [(1200, 435), (1200, 500), (1262, 440), (1262, 500)]        # (x, z) dans l'étrave
@@ -329,7 +332,7 @@ def frame_poly(x, kind):
     holes = []
     if abs(x - P.x_frame_foil) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in HINGE_BOLTS + FERRURE_BOLTS]
     if kind == 'transom': holes += [(sg * 30, zz, 8.5) for sg in (1, -1) for zz in P.rud_gz]
-    if abs(x - P.x_frame_axle) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in LOCK_BOLTS]
+    if abs(x - P.x_frame_axle) < 1: holes += [(sg * yy, zz, 8.5) for sg in (1, -1) for yy, zz in LOCK_BOLTS + FERR_AR_BOLTS]
     if abs(x - P.x_frame_axle) < 1: holes += [(sg * (P.brg_y + d), P.shaft_z, P.brg_bolt) for sg in (1, -1) for d in (-P.brg_J / 2, P.brg_J / 2)]
     for yy, zz, d in holes: body = body.difference(Point(yy, zz).buffer(d / 2, 16))
     return biggest(body.buffer(0)).simplify(0.1)
@@ -617,10 +620,29 @@ def build(outdir, apercu=True):
     parts.append(("arbre_arriere", cyl((xa, -ys, zS), (xa, ys, zS), P.shaft_d / 2), STEEL))
     zB = zg(xa / P.HL) + 5                                   # au-dessus du plat-bord
     yin = P.arm_y - P.hub_old / 2 - 6                        # face intérieure du flasque de bras
-    brk = unary_union([box(190, zS - 25, 338, zS + 25), box(285, zS + 25, 338, zB + 37), box(285, zB, yin - 2, zB + 37)])
+    brk = unary_union([box(190, zS - 25, 338, zS + 25), box(285, zS + 25, 336, zB + 37), box(285, zB, yin - 2, zB + 37)])
     for d in (-P.brg_J / 2, P.brg_J / 2): brk = brk.difference(circ(P.brg_y + d, zS, P.brg_bolt))
     for yy, zz in LOCK_BOLTS: brk = brk.difference(circ(yy, zz, 8.5))
-    flats.append(("equerre_verrou_bras", 6.0, 2, brk, [], 'ALU'))
+    # Ferrure porteuse arrière : les deux équerres de verrou deviennent une seule tôle, d'un palier à l'autre, sur la
+    # face arrière du couple. Son âme monte au-dessus de la poutre, là où le contreplaqué n'a que 25 mm, et laisse
+    # passer la chaîne et la couronne de la machine d'arbre (à tribord). Un bord tombé raidit son bord supérieur.
+    xA = P.x_frame_axle; tA = P.t_ferr_ar; zw = P.ferr_ar_top
+    dedA = hull_poly(xA / P.HL, deck=False).buffer(-(P.skin_gap + P.stringer + 2), 24)
+    fa = frame_poly(xA, 'U').intersection(dedA).intersection(box(-338, 0, 338, zS + 25))
+    fa = fa.union(Polygon([(-68, zw), (110, zw), (170, 258), (170, 215), (-68, 215)]))
+    fa = fa.union(brk).union(affinity.scale(brk, xfact=-1, origin=(0, 0)))
+    fa = fa.difference(box(-P.beam_w / 2 - P.tol, 0, P.beam_w / 2 + P.tol, beam_top(xA - tU - tA) + 1.5)).difference(box(-94, 266, -70, 1000))
+    fa = biggest(fa.buffer(0)); plein = Polygon(fa.exterior).buffer(-9)
+    for sg in (1, -1):
+        for yy, zz in FERR_AR_BOLTS:
+            assert plein.contains(Point(sg * yy, zz)), ("vis de ferrure arrière trop près du bord", yy, zz)
+            fa = fa.difference(circ(sg * yy, zz, 8.5))
+        for d in (-P.brg_J / 2, P.brg_J / 2): fa = fa.difference(circ(sg * (P.brg_y + d), zS, P.brg_bolt))
+        for yy, zz in LOCK_BOLTS: fa = fa.difference(circ(sg * yy, zz, 8.5))
+    fa = biggest(fa.buffer(0)).simplify(0.1)
+    flats.append(("ferrure_porteuse_arriere", tA, 1, fa, [], 'ALU'))
+    parts.append(("ferrure_porteuse_arriere", solid(fa, lambda a, b: (xA - tU - tA, a, b), (tA, 0, 0)), ALU))
+    parts.append(("ferrure_porteuse_arriere_bord_tombe", bx(xA - tU, xA - tU + 22, -54, 48, zw - tA, zw), ALU))
     # flasque de bras : pivot, axe de roue et deux trous de goupille (route / relevé)
     lift = math.radians(P.arm_lift); a0 = math.atan2(P.arm_dz, P.arm_dx)
     hornA = (xa, zS + P.arm_lock_r)
@@ -635,9 +657,11 @@ def build(outdir, apercu=True):
         yc = P.brg_y
         out.append((f"palier_semelle_{tag}", bx(xf, xf + 15, yc - 70, yc + 70, zS - 19, zS + 19), ALU))
         out.append((f"palier_corps_{tag}", cyl((xa, yc - 17, zS), (xa, yc + 17, zS), 32), ALU))
-        x0 = P.x_frame_axle - tU - 6
-        out.append((f"equerre_verrou_{tag}", solid(brk, lambda a, b: (x0, a, b), (6, 0, 0)), ALU))
-        out.append((f"equerre_verrou_patte_{tag}", bx(x0, xa + 32, yin - 8, yin - 2, zB, zB + 37), ALU))
+        x0 = P.x_frame_axle - tU - P.t_ferr_ar
+        out.append((f"equerre_verrou_patte_{tag}", bx(x0 + P.t_ferr_ar, xa + 32, yin - 8, yin - 2, zB, zB + 37), ALU))
+        # éclisse : elle renvoie dans le plat-bord l'effort de la goupille, qui pousse d'avant en arrière
+        ecl = Polygon([(x, zg(x / P.HL) + 0.5) for x in np.linspace(xa + 32, xa + 192, 9)] + [(x, zg(x / P.HL) + 4.5) for x in np.linspace(xa + 192, xa + 32, 9)])
+        out.append((f"eclisse_verrou_plat_bord_{tag}", solid(ecl, lambda a, b: (a, 345, b), (0, 14, 0)), ALU))
         out.append((f"goupille_bras_{tag}", cyl((xa, yin - 14, hornA[1]), (xa, yin + 12, hornA[1]), 5), STEEL))
         # sortie d'arbre : platine rigide collée contre le couple, tube traversant, toile pincée entre deux brides, joint à lèvre
         yp = yc + 71; rt = P.seal_tube_r
@@ -1028,6 +1052,25 @@ def build(outdir, apercu=True):
             "contreplaque_seul_au_milieu": sig(cp, 2 * P.t_U, 1, y=0), "contreplaque_seul_dans_le_bras_z350": sig(cp, 2 * P.t_U, 1, z=350)},
         "contrainte_toles_seules_au_milieu_a_trois_fois_la_charge_MPa": round(3 * sig(ferr, P.t_cheek, 2, y=0)),
         "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": round(3 * math.hypot(Fz, Fs) / (12 * 2 * P.t_cheek), 1),
+    }
+    # couple porteur arrière, sur route : tout le poids sur les deux roues arrière (majorant)
+    Rr = 135 * 9.81 / 2; port = P.arm_y - P.brg_y; Ma = Rr * port / 1000; Mc = Rr * P.brg_y / 1000
+    cpa = frame_poly(P.x_frame_axle, 'U'); Zs = math.pi * P.shaft_d ** 3 / 32
+    def sga(g, ep, y): return round(Rr * (P.brg_y - abs(y)) / (ep * haut(g, y) ** 2 / 6), 1)
+    Pg = Rr * abs(P.arm_dx) / P.arm_lock_r
+    rep["couple_porteur_arriere"] = {
+        "hypothese": "135 kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
+        "reaction_par_roue_N": round(Rr),
+        "arbre": {"porte_a_faux_roue_palier_mm": round(port), "moment_Nm": round(Ma), "contrainte_MPa_a_une_fois_la_charge": round(Ma * 1000 / Zs),
+                  "contrainte_MPa_a_trois_fois_la_charge": round(3 * Ma * 1000 / Zs)},
+        "moment_au_milieu_du_couple_Nm": round(Mc),
+        "contrainte_de_flexion_MPa_a_une_fois_la_charge": {
+            "contreplaque_seul_au_milieu": sga(cpa, 2 * P.t_U, 0), "ferrure_seule_au_milieu": sga(fa, P.t_ferr_ar, 0),
+            "ferrure_seule_sous_la_chaine_de_la_machine": sga(fa, P.t_ferr_ar, -80)},
+        "ferrure_seule_au_milieu_a_trois_fois_la_charge_MPa": round(3 * sga(fa, P.t_ferr_ar, 0)),
+        "ferrure_masse_kg": round(fa.area * P.t_ferr_ar * 2.7e-6, 2),
+        "goupille_de_bras": {"effort_N_a_une_fois_la_charge": round(Pg), "effort_N_a_trois_fois_la_charge": round(3 * Pg),
+                             "direction": "d'avant en arrière, hors du plan du couple : renvoyé au plat-bord par une éclisse"},
     }
     def taille(avance):
         return round((math.hypot(P.bb_x - P.hip_x - avance, P.bb_z - P.hip_z) + P.crank) / P.leg_ratio / 1000, 2)

@@ -18,7 +18,7 @@
  "masse_contreplaque_kg": 12.4,
  "lisses_m": 18.3,
  "masse_lisses_kg": 2.7,
- "nb_pieces_3D": 242,
+ "nb_pieces_3D": 244,
  "largeur_hors_tout_route_mm": 998,
  "envergure_foils_avant_mm": 1736,
  "transmission": {
@@ -158,6 +158,29 @@
    },
    "contrainte_toles_seules_au_milieu_a_trois_fois_la_charge_MPa": 125,
    "pression_axe_de_charniere_sur_les_toles_a_trois_fois_la_charge_MPa": 18.2
+  }
+ },
+ "couple_porteur_arriere": {
+  "hypothese": "135 kg sur les deux roues arrière, paliers assimilés à des appuis simples, poids repris au milieu du couple",
+  "reaction_par_roue_N": 662,
+  "arbre": {
+   "porte_a_faux_roue_palier_mm": 165,
+   "moment_Nm": 109,
+   "contrainte_MPa_a_une_fois_la_charge": 71,
+   "contrainte_MPa_a_trois_fois_la_charge": 214
+  },
+  "moment_au_milieu_du_couple_Nm": 175,
+  "contrainte_de_flexion_MPa_a_une_fois_la_charge": {
+   "contreplaque_seul_au_milieu": 72.5,
+   "ferrure_seule_au_milieu": 28.3,
+   "ferrure_seule_sous_la_chaine_de_la_machine": 35.6
+  },
+  "ferrure_seule_au_milieu_a_trois_fois_la_charge_MPa": 85,
+  "ferrure_masse_kg": 0.9,
+  "goupille_de_bras": {
+   "effort_N_a_une_fois_la_charge": 1375,
+   "effort_N_a_trois_fois_la_charge": 4126,
+   "direction": "d'avant en arrière, hors du plan du couple : renvoyé au plat-bord par une éclisse"
   }
  },
  "reglage_siege": {

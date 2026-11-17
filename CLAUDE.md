@@ -122,7 +122,18 @@ Guillaume a ouvert la porte à l'aluminium là où le bois ne convient pas. Les 
 - **Varangue haute** : au-dessus de la poutre, tôles et contreplaqué montent à 62 mm au lieu de 25. C'est le maximum : l'assise du siège avancé passe 5 mm au-dessus. Les rails du siège s'arrêtent contre la ferrure, sur une équerre.
 - **Contraintes de flexion, tôles seules** (70 % de 135 kg sur les foils avant) : 42 MPa au milieu à une fois la charge, 125 MPa à trois fois ; 22 MPa dans le bras. À comparer à la limite élastique de l'alliage choisi (de l'ordre de 240 MPa pour du 6061-T6, de mémoire, à vérifier).
 - **Masse** : 2,6 kg pour les deux tôles, soit environ 1,3 kg de plus que les quatre joues.
-- **Non traité** : flambement du bord comprimé des tôles, corrosion et isolation entre aluminium et vis inox, découpe (laser ou jet d'eau, la pièce fait 0,96 m de large). Le couple porteur arrière a la même entaille de 25 mm : sur route c'est l'arbre d'acier de 25 mm qui passe le moment, à vérifier.
+- **Non traité** : flambement du bord comprimé des tôles, corrosion et isolation entre aluminium et vis inox, découpe (laser ou jet d'eau, la pièce fait 0,96 m de large). Le couple porteur arrière avait le même défaut : voir « Ferrure porteuse arrière ».
+
+## Ferrure porteuse arrière (modélisée le 17 novembre 2026)
+
+Même défaut qu'à l'avant : sur route, les roues poussent vers le haut à ±430 mm et le poids descend au milieu, or le couple porteur arrière n'a que 25 mm de contreplaqué au-dessus de la poutre. L'arbre d'acier ne passe pas ce moment : ses paliers à rotule sont des appuis simples, il ne porte que son propre porte-à-faux. Calcul majorant : 135 kg sur les deux roues arrière, poids repris au milieu. Tout suit `t_ferr_ar`, `ferr_ar_top` et `FERR_AR_BOLTS`.
+
+- **Contreplaqué seul** : 73 MPa au milieu dès une fois la charge. Il ne tenait pas.
+- **Ferrure** : les deux équerres de verrou des bras deviennent une seule tôle d'aluminium, d'un palier à l'autre, sur la face arrière du couple. Son âme monte à z = 330 au-dessus de la poutre, avec un bord tombé de 22 mm pour la raidir. Une encoche à tribord laisse passer la chaîne et la couronne de la machine d'arbre. Épaisseur de 4 mm seulement : la machine d'arbre est 1 mm derrière. 28 MPa au milieu à une fois la charge, 85 MPa à trois fois ; 36 MPa sous l'encoche. Masse : 0,9 kg.
+- **Arbre** : 165 mm de porte-à-faux entre la roue et le palier, 71 MPa à une fois la charge, 214 MPa à trois fois. Il faut un acier à plus de 300 MPa de limite élastique : pas un inox courant.
+- **Goupille de bras** : la roue est 270 mm devant l'arbre et la goupille à 130 mm au-dessus. Elle reçoit 1,4 kN à une fois la charge, 4,1 kN à trois fois, d'avant en arrière, donc hors du plan du couple. Une éclisse d'aluminium de 160 mm, vissée sur le plat-bord, renvoie cet effort dans la lisse.
+- **Centrage** : les roues arrière sont à x ≈ −300 et la hanche du pilote à −280. Presque tout le poids est sur les roues arrière et la roue avant est très peu chargée : à vérifier avec un vrai devis de masses, pour la direction et le risque de cabrage.
+- **Non traité** : vissage de l'éclisse dans l'épicéa (environ 0,8 kN par vis à trois fois la charge avec cinq vis), flambement, part réelle du poids qui arrive par les lisses plutôt que par le milieu.
 
 ## Sabot de verrouillage et foil à coude arrondi (modélisés le 17 novembre 2026)
 
@@ -159,7 +170,7 @@ Idée venue des dériveurs à foils BirdyFish et Ioda (Saint-Herblain). Une vari
 ## Points durs connus
 
 1. **Couple porteur des foils avant** : le contreplaqué seul ne passait pas le moment des foils au-dessus de la poutre. Une ferrure porteuse en aluminium le reprend (125 MPa à trois fois la charge, voir « Ferrure porteuse »). À valider par essai statique, flambement compris. La goupille du sabot est hors de la coque : à rendre manœuvrable depuis le siège.
-2. **Verrou des bras arrière** : il porte le poids sur route, environ 2,6 kN par vis à trois fois la charge.
+2. **Couple porteur arrière et verrou des bras** : le contreplaqué seul ne passait pas le poids d'une roue à l'autre ; une ferrure en aluminium le reprend. La goupille de bras reçoit 4,1 kN à trois fois la charge, renvoyés au plat-bord par une éclisse. L'arbre demande un acier à haute limite élastique. Voir « Ferrure porteuse arrière ».
 3. **Régulation d'altitude des foils** : non conçue (palpeurs, foils en V ou volets).
 4. **Largeur de 1,00 m**, imposée par les moyeux arrière standard. La réduire demande des roues en porte-à-faux.
 5. **Roue arrière relevée proche de l'eau** : environ 3 cm au-dessus de la flottaison à 135 kg.
