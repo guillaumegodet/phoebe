@@ -116,7 +116,7 @@ class Params:
     hub_old: float = 110.0          # largeur du moyeu arrière (type BMX à roue libre)
     arm_dx: float = -270.0          # axe de roue par rapport au pivot : roues derrière l'arbre, pour charger la roue avant (devis de masses)
     arm_dz: float = -110.0
-    arm_lift: float = 69.0          # angle de relevage des roues, en degrés
+    arm_lift: float = 90.0          # angle de relevage des roues, en degrés (69 jusqu'au 18 novembre 2026 : les roues trempaient)
     arm_lock_r: float = 130.0       # rayon de la goupille de verrouillage du bras
     # foil arrière : tête de safran relevable et orientable sur le tableau
     rud_pin_x: float = -1325.0      # axe vertical de direction

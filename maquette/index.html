@@ -916,7 +916,7 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();orb.auto=false;orb.r=Math
 const ss=(a,b,t)=>{const u=Math.min(1,Math.max(0,(t-a)/(b-a)));return u*u*(3-2*u);};
 const FILM_LEN=21,capLabel=document.getElementById('caplabel');
 function pose(wheels,stow,rstow){
-  arms.forEach(a=>{a.rotation.z=-1.2*wheels;});
+  arms.forEach(a=>{a.rotation.z=-Math.PI/2*wheels;});   // relevage des bras : 90°
   fork.rotation.z=1.75*wheels;
   fronts.forEach(f=>{f.g.rotation.x=-f.s*Math.PI*stow;});
   rear.rotation.z=-Math.PI*rstow;

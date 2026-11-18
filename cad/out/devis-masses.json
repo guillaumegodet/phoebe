@@ -5,7 +5,7 @@
   "divers": 1.8,
   "foils, ferrures et relevage": 19.1,
   "non modélisé (à l'estime)": 14.5,
-  "roues, direction, freins": 17.6,
+  "roues, direction, freins": 17.7,
   "siège": 0.4,
   "transmission et machine d'arbre": 7.4
  },
@@ -28,12 +28,12 @@
  "pilote_cg_x_mm_siege_recule": -332,
  "empattement_mm": 2402,
  "roue_arriere_relevee": {
-  "bas_z_mm": 323,
-  "haut_z_mm": 823,
-  "arriere_x_mm": -1021,
+  "bas_z_mm": 380,
+  "haut_z_mm": 880,
+  "arriere_x_mm": -932,
   "au_dessus_de_la_flottaison_mm": {
-   "170 kg": 5,
-   "200 kg": -15
+   "170 kg": 62,
+   "200 kg": 42
   }
  },
  "roue_avant_x_mm": 1560,
@@ -71,7 +71,7 @@
    "masse_a_vide_kg": 88.3,
    "cg_a_vide_x_mm": -101,
    "masse_totale_kg": 168.3,
-   "cg_x_mm": -156,
+   "cg_x_mm": -157,
    "cg_z_mm": 485,
    "roues_arriere_x_mm": -841,
    "part_sur_les_roues_arriere_pct": 71.5,
@@ -82,7 +82,7 @@
   },
   "pour mémoire, batterie derrière le siège (x = -750)": {
    "masse_a_vide_kg": 88.3,
-   "cg_a_vide_x_mm": -323,
+   "cg_a_vide_x_mm": -324,
    "masse_totale_kg": 168.3,
    "cg_x_mm": -327,
    "cg_z_mm": 480,
