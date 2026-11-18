@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoebe, relevage des foils</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --encre:#16252b; --erdre:#0f6f86; --housse:#d9622b; --toile:#f6f3ea; --ciel:#dfe9ec;
+  --ecume:#7cc4d6; --okoume:#cfa873; --gris:#8a979c; --carte:#fffdf7; --trait:#16252b;
+  --coque:#efe4cc; --alu:#a9b4b9; --carbone:#2b3438; --faible:#5b6a70; --eau:rgba(124,196,214,.28); --sandow:#2f2f2f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+    --coque:#3a3326; --alu:#7d8a90; --carbone:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82; --eau:rgba(63,169,196,.22); --sandow:#d0d0d0;
+  }
+}
+:root[data-theme="dark"]{
+  --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+  --coque:#3a3326; --alu:#7d8a90; --carbone:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82; --eau:rgba(63,169,196,.22); --sandow:#d0d0d0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--toile);color:var(--encre);font:16px/1.5 Barlow,system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{font:800 clamp(1.7rem,4vw,2.4rem)/1.1 "Bricolage Grotesque",sans-serif;margin:0 0 4px}
+h2{font:800 1.45rem/1.2 "Bricolage Grotesque",sans-serif;margin:34px 0 4px}
+h3{font:600 1.05rem/1.2 "Bricolage Grotesque",sans-serif;margin:0 0 6px}
+.sous{color:var(--faible);margin:0 0 18px}
+.carte{background:var(--carte);border-radius:14px;padding:14px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 6px 24px rgba(22,37,43,.06)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:Barlow,sans-serif;fill:var(--encre)}
+.commandes{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0}
+button{font:600 .95rem Barlow,sans-serif;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;background:var(--encre);color:var(--toile)}
+button.sec{background:transparent;color:var(--encre);box-shadow:inset 0 0 0 1.5px var(--encre)}
+input[type=range]{flex:1;min-width:200px;accent-color:var(--housse)}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.mesure{background:var(--carte);border-radius:12px;padding:10px 12px}
+.mesure b{display:block;font:800 1.5rem "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.mesure span{color:var(--faible);font-size:.85rem}
+.grille{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+@media (max-width:820px){.grille{grid-template-columns:1fr}}
+ol.etapes{list-style:none;padding:0;margin:0;counter-reset:e}
+ol.etapes li{counter-increment:e;padding:9px 10px 9px 44px;border-radius:10px;position:relative;margin:2px 0;transition:background .3s,opacity .3s;opacity:.55}
+ol.etapes li::before{content:counter(e);position:absolute;left:10px;top:9px;width:24px;height:24px;border-radius:50%;background:var(--gris);color:var(--toile);font:600 .85rem/24px Barlow;text-align:center}
+ol.etapes li.actif{background:var(--ciel);opacity:1}
+ol.etapes li.actif::before{background:var(--housse)}
+.code{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;color:var(--faible);margin-top:8px}
+.code i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.note{font-size:.85rem;color:var(--faible);margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Relever les foils</h1>
+  <p class="sous">Trois foils, trois bouts, tout depuis le siège. Schémas animés d'après les cotes de la CAO, sur l'eau, coque à plat, à 170 kg.</p>
+
+  <!-- ===================== FOILS AVANT ===================== -->
+  <h2>Les deux foils avant</h2>
+  <p class="sous">Vue de l'arrière, coupe au couple porteur avant (x = +100), comme les voit le pilote : bâbord à gauche.</p>
+  <div class="mesures">
+    <div class="mesure"><b id="avAng">0°</b><span>relevage</span></div>
+    <div class="mesure"><b id="avBout">0 mm</b><span>bout repris</span></div>
+    <div class="mesure"><b id="avCouple">0 N·m</b><span>couple du poids du foil</span></div>
+    <div class="mesure"><b id="avTraction">0 N</b><span>traction au bout sans sandow</span></div>
+  </div>
+  <div class="carte">
+    <svg id="avVue" viewBox="-1420 -1460 2840 1960" aria-label="Foils avant vus de l'arrière, relevage animé"></svg>
+    <div class="code">
+      <span><i style="background:var(--housse)"></i>bout de relevage</span>
+      <span><i style="background:var(--sandow)"></i>sandow de rappel</span>
+      <span><i style="background:var(--eau);height:10px"></i>eau à 170 kg</span>
+    </div>
+  </div>
+  <div class="commandes">
+    <button id="avLecture">Pause</button>
+    <button class="sec" data-av="0">Déployé</button>
+    <button class="sec" data-av="180">Relevé</button>
+    <input id="avCurseur" type="range" min="0" max="180" step="0.5" value="0" aria-label="Angle de relevage des foils avant">
+  </div>
+  <div class="grille">
+    <div class="carte">
+      <h3>Zoom sur la charnière bâbord</h3>
+      <svg id="avZoom" viewBox="-640 -720 460 520"></svg>
+    </div>
+    <div class="carte">
+      <h3>La manœuvre</h3>
+      <ol class="etapes" id="avEtapes">
+        <li><b>Retirer la goupille du sabot.</b> En vol, le sabot retient le mât 152 mm sous la charnière : c'est lui qui empêche la portance de replier le foil. Sa goupille de 10 mm traverse le tenon du mât.</li>
+        <li><b>Tirer le bout.</b> Il s'enroule sur un secteur à gorge de 70 mm de rayon, solidaire du foil : le bras de levier reste le même sur tout le demi-tour. Il passe par deux filoirs sur la ferrure puis file vers le taquet, sur le plat-bord.</li>
+        <li><b>Le sandow aide.</b> Accroché au secteur, renvoyé sur un réa, ancré en bas de la ferrure : il compense le poids du foil, surtout à mi-course, quand le mât est à l'horizontale et pèse le plus.</li>
+        <li><b>Foil relevé : bloquer au taquet coinceur.</b> Le foil a fait un demi-tour par l'extérieur. Le mât est vertical au-dessus du plat-bord, l'aile tournée vers l'intérieur.</li>
+        <li><b>Pour redescendre :</b> choquer le bout en le retenant. Le foil redescend par l'extérieur sous son poids, puis on remet la goupille du sabot.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ===================== FOIL ARRIÈRE ===================== -->
+  <h2>Le foil arrière</h2>
+  <p class="sous">Vue de côté, depuis bâbord : l'avant est à droite. Le mât, avec son moteur immergé, bascule vers l'arrière autour d'un axe porté par la tête de safran.</p>
+  <div class="mesures">
+    <div class="mesure"><b id="arAng">0°</b><span>relevage</span></div>
+    <div class="mesure"><b id="arGarant">0 mm</b><span>garant repris (palan à 6 brins)</span></div>
+    <div class="mesure"><b id="arCouple">0 N·m</b><span>couple du poids (mât, aile, moteur)</span></div>
+    <div class="mesure"><b id="arTraction">0 N</b><span>traction au garant, sans frottement</span></div>
+  </div>
+  <div class="carte">
+    <svg id="arVue" viewBox="-2380 -1470 2280 1950" aria-label="Foil arrière vu de côté, relevage animé"></svg>
+  </div>
+  <div class="commandes">
+    <button id="arLecture">Pause</button>
+    <button class="sec" data-ar="0">Déployé</button>
+    <button class="sec" data-ar="54">Cran intermédiaire</button>
+    <button class="sec" data-ar="180">Relevé</button>
+    <input id="arCurseur" type="range" min="0" max="180" step="0.5" value="0" aria-label="Angle de relevage du foil arrière">
+  </div>
+  <div class="grille">
+    <div class="carte">
+      <h3>Zoom sur la tête de safran</h3>
+      <svg id="arZoom" viewBox="-1660 -795 500 470"></svg>
+    </div>
+    <div class="carte">
+      <h3>La manœuvre</h3>
+      <ol class="etapes" id="arEtapes">
+        <li><b>Retirer la goupille.</b> Elle traverse le mât et la tête de safran, à 120 mm de l'axe. La tête a trois trous : déployé, un cran intermédiaire, relevé.</li>
+        <li><b>Haler le garant du palan.</b> Le bout s'enroule sur un secteur à rayons de 90 mm, claveté sur l'axe, à bâbord de la tête. Il descend à une poulie sur le tableau, juste à côté de l'axe de direction pour ne pas gêner le braquage, passe sur le pont arrière et rejoint un palan à six brins le long du plat-bord bâbord.</li>
+        <li><b>Le mât bascule vers l'arrière.</b> Il pèse le plus quand il est à l'horizontale : 35 N·m, soit 65 N au garant grâce au palan, sans compter les frottements. Il faut reprendre 1,7 m de garant.</li>
+        <li><b>Mât relevé : bloquer au taquet</b> (x = −200), remettre la goupille dans le trou du haut.</li>
+        <li><b>Pour redescendre :</b> retirer la goupille, choquer le garant en le retenant, remettre la goupille en bas. Pas de rappel pour l'instant : un vérin à gaz est à étudier.</li>
+      </ol>
+    </div>
+  </div>
+
+  <p class="note">Hypothèses du bilan de la CAO : 2,3 kg par foil avant, centre de gravité à 0,55 m de l'axe ; 6 kg pour le foil arrière avec son moteur, à 0,60 m. Ce sont des masses supposées, à remplacer par celles des foils réels. Les tractions sont calculées sans le sandow et sans frottement.<br>
+  Pas encore traités : le départ de la descente (relevé à la verticale, le foil ne redescend pas tout seul : il faut le décoller de sa butée), la tenue du sandow, la goupille du sabot à manœuvrer depuis le siège (elle est hors de la coque, à bout de bras), le contact des bouts avec la toile du pont.<br>
+  Schéma de principe à l'échelle, cotes tirées de <code>cad/phoebe_cad.py</code>. Étude de concept : rien n'est construit ni essayé.</p>
+</main>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (parent, tag, attrs = {}, txt) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    parent.appendChild(e); return e;
+  };
+  const set = (e, attrs) => { for (const k in attrs) e.setAttribute(k, attrs[k]); };
+  const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  const lisse = k => k * k * (3 - 2 * k);
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const poly = pts => pts.map(p => p.join(',')).join(' ');
+  // enveloppe convexe d'une liste de points
+  function enveloppe(pts) {
+    pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], hi = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+    for (const p of pts.slice().reverse()) { while (hi.length >= 2 && cr(hi[hi.length - 2], hi[hi.length - 1], p) <= 0) hi.pop(); hi.push(p); }
+    return lo.slice(0, -1).concat(hi.slice(0, -1));
+  }
+  const cercle = (cx, cy, r, n = 20) => Array.from({ length: n }, (_, i) => [cx + r * Math.cos(2 * Math.PI * i / n), cy + r * Math.sin(2 * Math.PI * i / n)]);
+
+  const Z_EAU = 318;   // flottaison à 170 kg (quille à z = 140, tirant d'eau 178 mm)
+
+  // =====================================================================
+  //  FOILS AVANT  (repère de la coupe : y vers bâbord, z vers le haut)
+  //  écran : X = -y (vu de l'arrière, bâbord à gauche), Y = -z
+  // =====================================================================
+  const HY = 440, HZ = 487, R_SEC = 70, Q_SAN = 60, E = 58, MAT = 850, CR = 120, AILE = 370;
+  const REA = [300, 487], ANCRE = [300, 300], FIL = [318, 498];
+  const A_ATT0 = deg(Math.asin(-15 / R_SEC));                         // -12,4° : attache du bout sur le bord du secteur
+  const dF = Math.hypot(FIL[0] - HY, FIL[1] - HZ);
+  const A_TAN = deg(Math.atan2(FIL[1] - HZ, FIL[0] - HY) - Math.acos(R_SEC / dF));   // ≈ 119,6° : point où le bout quitte le secteur
+  const SECTION = [[369,460],[369,430],[368,392],[367,371],[364,350],[360,328],[353,306],[344,285],[331,264],[315,243],[295,224],[270,206],[242,190],[209,175],[172,163],[132,153],[90,146],[45,142],[0,140]];
+  const PONT = [[369,460],[277,480],[185,494],[92,502],[0,505]];
+  const FERR = [[278,357],[278,508],[478,508],[478,467],[340,467],[340,434],[343,434],[343,412],[342,393],[340,365],[340,295],[320,295],[305,272],[284,249],[256,228],[220,208],[177,191],[127,179],[72,170],[60,169],[60,219],[0,219]];
+  const sym = arr => arr.concat(arr.slice().reverse().map(([y, z]) => [-y, z]));
+  const scr = ([y, z], s = 1) => [-s * y, -z];
+
+  // point du foil (u : vers l'extérieur, v : vers le haut, relatif à la charnière, foil déployé) après relevage a
+  const tourne = ([u, v], a) => [HY + u * Math.cos(a) - v * Math.sin(a), HZ + u * Math.sin(a) + v * Math.cos(a)];
+  const ligneFoil = (() => {
+    const p = [[E, -29], [E, -29 - MAT + CR]];
+    for (let i = 1; i <= 14; i++) { const t = Math.PI / 2 * i / 14; p.push([E + CR - CR * Math.cos(t), -29 - MAT + CR - CR * Math.sin(t)]); }
+    p.push([E + AILE, -29 - MAT]);
+    return p;
+  })();
+  const secteurLocal = (() => {                                       // disque tronqué au ras de son équerre (v ≥ -15)
+    const a0 = rad(A_ATT0), p = [];
+    for (let i = 0; i <= 30; i++) { const t = a0 + (Math.PI - 2 * a0) * i / 30; p.push([R_SEC * Math.cos(t), R_SEC * Math.sin(t)]); }
+    return p;
+  })();
+
+  // longueur du bout entre son attache et le filoir, pour un relevage a (rad)
+  function boutAvant(a) {
+    const aa = rad(A_ATT0) + a, at = rad(A_TAN);
+    if (aa < at) return R_SEC * (at - aa) + Math.sqrt(dF * dF - R_SEC * R_SEC);
+    const p = [HY + R_SEC * Math.cos(aa), HZ + R_SEC * Math.sin(aa)];
+    return Math.hypot(p[0] - FIL[0], p[1] - FIL[1]);
+  }
+  const L0_AV = boutAvant(0);
+
+  // construit les éléments d'un foil avant (côté s : 1 bâbord, -1 tribord) dans un groupe SVG
+  function foilAvant(g, s, epais = 1) {
+    const o = {};
+    o.sandow1 = el(g, 'line', { stroke: 'var(--sandow)', 'stroke-width': 7 * epais, 'stroke-linecap': 'round' });
+    o.sandow2 = el(g, 'line', { stroke: 'var(--sandow)', 'stroke-width': 7 * epais, 'stroke-linecap': 'round' });
+    o.mat = el(g, 'polyline', { fill: 'none', stroke: 'var(--carbone)', 'stroke-width': 16, 'stroke-linejoin': 'round' });
+    o.platine = el(g, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * epais });
+    o.chape = el(g, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * epais });
+    o.secteur = el(g, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * epais, opacity: .95 });
+    o.tenon = el(g, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * epais });
+    o.bout = el(g, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 6 * epais, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    o.attSan = el(g, 'circle', { r: 6 * epais, fill: 'var(--sandow)' });
+    o.axe = el(g, 'circle', { r: 7, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 3 });
+    o.s = s;
+    return o;
+  }
+  function majFoilAvant(o, a) {
+    const s = o.s, T = p => scr(tourne(p, a), s).join(',');
+    set(o.mat, { points: ligneFoil.map(T).join(' ') });
+    set(o.platine, { points: [[E - 45, -29], [E + 45, -29], [E + 45, -21], [E - 45, -21]].map(T).join(' ') });
+    set(o.chape, { points: [[-45, -21], [70, -21], [70, 13], [-45, 13]].map(T).join(' ') });
+    set(o.secteur, { points: secteurLocal.map(T).join(' ') });
+    set(o.tenon, { points: [[11, -165], [50, -165], [50, -139], [11, -139]].map(T).join(' ') });
+    const att = scr(tourne([Q_SAN, 0], a), s), rea = scr(REA, s), anc = scr(ANCRE, s);
+    set(o.sandow1, { x1: att[0], y1: att[1], x2: rea[0], y2: rea[1] });
+    set(o.sandow2, { x1: rea[0], y1: rea[1], x2: anc[0], y2: anc[1] });
+    set(o.attSan, { cx: att[0], cy: att[1] });
+    const ax = scr([HY, HZ], s); set(o.axe, { cx: ax[0], cy: ax[1] });
+    // bout : enroulé sur le secteur, puis droit jusqu'au filoir, puis vers le taquet
+    const aa = rad(A_ATT0) + a, at = rad(A_TAN), f = scr(FIL, s), suite = [scr([262, 498], s), scr([250, 470], s)];
+    let d;
+    if (aa < at) {
+      const p = [];
+      for (let i = 0; i <= 24; i++) { const t = aa + (at - aa) * i / 24; p.push(scr([HY + R_SEC * Math.cos(t), HZ + R_SEC * Math.sin(t)], s)); }
+      d = 'M' + p.map(q => q.join(',')).join(' L');
+    } else d = 'M' + scr([HY + R_SEC * Math.cos(aa), HZ + R_SEC * Math.sin(aa)], s).join(',');
+    d += ` L${f} L${suite[0]} L${suite[1]}`;
+    set(o.bout, { d });
+  }
+
+  // ---------- vue d'ensemble ----------
+  const V = document.getElementById('avVue');
+  el(V, 'rect', { x: -1420, y: -Z_EAU, width: 2840, height: 860, fill: 'var(--eau)' });
+  el(V, 'line', { x1: -1420, y1: -Z_EAU, x2: 1420, y2: -Z_EAU, stroke: 'var(--ecume)', 'stroke-width': 4 });
+  el(V, 'text', { x: 1400, y: -Z_EAU + 44, 'font-size': 34, 'text-anchor': 'end', fill: 'var(--faible)' }, 'flottaison à 170 kg');
+  el(V, 'polygon', { points: poly(sym(SECTION).map(p => scr(p))), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 5 });
+  el(V, 'polyline', { points: poly(sym(PONT).map(p => scr(p))), fill: 'none', stroke: 'var(--trait)', 'stroke-width': 4, 'stroke-dasharray': '14 10' });
+  el(V, 'polygon', { points: poly(sym(FERR).map(p => scr(p))), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2, opacity: .85 });
+  // sabots (fixes, hors de la coque)
+  const sabot = [[357, 303], [440, 320], [479, 320], [479, 350], [440, 350], [357, 367]];
+  for (const s of [1, -1]) el(V, 'polygon', { points: poly(sabot.map(p => scr(p, s))), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 });
+  const foilsV = [foilAvant(el(V, 'g'), 1), foilAvant(el(V, 'g'), -1)];
+  const goupV = [1, -1].map(s => el(V, 'circle', { cx: -s * 465, cy: -335, r: 9, stroke: 'var(--trait)', 'stroke-width': 2 }));
+  // étiquettes
+  el(V, 'text', { x: -1400, y: -1400, 'font-size': 36, fill: 'var(--faible)', 'letter-spacing': 3 }, 'BÂBORD');
+  el(V, 'text', { x: 1400, y: -1400, 'font-size': 36, fill: 'var(--faible)', 'letter-spacing': 3, 'text-anchor': 'end' }, 'TRIBORD');
+  el(V, 'text', { x: 0, y: -360, 'font-size': 36, 'text-anchor': 'middle', fill: 'var(--faible)' }, 'coque');
+  const lblAv = el(V, 'text', { 'font-size': 38, 'font-weight': 600, 'text-anchor': 'middle' });
+  const arcAv = el(V, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 5, 'stroke-dasharray': '16 12', opacity: .7 });
+
+  // ---------- zoom charnière bâbord ----------
+  const Zv = document.getElementById('avZoom');
+  el(Zv, 'rect', { x: -640, y: -Z_EAU, width: 460, height: 200, fill: 'var(--eau)' });
+  el(Zv, 'polygon', { points: poly(sym(SECTION).map(p => scr(p))), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(Zv, 'polygon', { points: poly(sym(FERR).map(p => scr(p))), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5, opacity: .85 });
+  el(Zv, 'polygon', { points: poly(sabot.map(p => scr(p))), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 });
+  for (const q of [REA, ANCRE]) el(Zv, 'circle', { cx: -q[0], cy: -q[1], r: 7, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2.5 });
+  for (const y0 of [311, 252]) el(Zv, 'rect', { x: -(y0 + 16), y: -492, width: 16, height: 6, fill: 'var(--trait)' });
+  const foilZ = foilAvant(el(Zv, 'g'), 1, .7);
+  const goupZ = el(Zv, 'circle', { cx: -465, cy: -335, r: 6, stroke: 'var(--trait)', 'stroke-width': 2 });
+  const tx = (x, y, t, o = {}) => el(Zv, 'text', { x, y, 'font-size': 15, ...o }, t);
+  tx(-632, -690, 'secteur à gorge (r = 70 mm)');
+  el(Zv, 'line', { x1: -500, y1: -684, x2: -452, y2: -560, stroke: 'var(--faible)', 'stroke-width': 1.2 });
+  tx(-300, -520, 'filoirs', { 'text-anchor': 'middle' });
+  tx(-286, -470, 'réa', {});
+  tx(-300, -278, 'ancrage', { 'text-anchor': 'middle' });
+  tx(-520, -296, 'sabot', { 'text-anchor': 'end' });
+  const lblGoup = tx(-470, -365, '', { 'text-anchor': 'middle', 'font-weight': 600 });
+  tx(-210, -560, 'vers le taquet →', { 'text-anchor': 'end', fill: 'var(--faible)' });
+  tx(-630, -330, 'eau', { fill: 'var(--faible)' });
+
+  const etapesAv = document.querySelectorAll('#avEtapes li');
+
+  function dessineAvant(aDeg, goupille, etape) {
+    const a = rad(aDeg);
+    foilsV.forEach(o => majFoilAvant(o, a));
+    majFoilAvant(foilZ, a);
+    for (const g of goupV.concat([goupZ])) set(g, { fill: goupille ? 'var(--trait)' : 'none', 'stroke-dasharray': goupille ? '' : '3 3' });
+    set(lblGoup, {}); lblGoup.textContent = goupille ? 'goupille en place' : 'goupille retirée';
+    lblGoup.setAttribute('fill', goupille ? 'var(--encre)' : 'var(--housse)');
+    // flèche de trajectoire du bout de l'aile (côté bâbord)
+    const tip = [E + AILE, -29 - MAT];
+    if (aDeg > 2 && aDeg < 178) {
+      const p = [];
+      for (let i = 0; i <= 30; i++) p.push(scr(tourne(tip, a * i / 30)).join(','));
+      set(arcAv, { d: 'M' + p.join(' L') }); arcAv.style.opacity = .7;
+    } else arcAv.style.opacity = 0;
+    const lp = scr(tourne([E, -480], a));
+    set(lblAv, { x: lp[0] + (aDeg > 60 && aDeg < 120 ? 0 : -150), y: lp[1] + (aDeg > 60 && aDeg < 120 ? -60 : 0) });
+    lblAv.textContent = 'foil';
+    // chiffres
+    const bout = L0_AV - boutAvant(a), c = 2.3 * 9.81 * 0.55 * Math.sin(a);
+    document.getElementById('avAng').textContent = `${aDeg.toFixed(0)}°`;
+    document.getElementById('avBout').textContent = `${bout.toFixed(0)} mm`;
+    document.getElementById('avCouple').textContent = `${c.toFixed(1)} N·m`;
+    document.getElementById('avTraction').textContent = `${(c / R_SEC * 1000).toFixed(0)} N`;
+    etapesAv.forEach((li, i) => li.classList.toggle('actif', etape.includes(i)));
+  }
+
+  // =====================================================================
+  //  FOIL ARRIÈRE  (vue de côté : x vers l'avant, z vers le haut ; écran X = x, Y = -z)
+  // =====================================================================
+  const LX = -1400, LZ = 520, R_AR = 90, R_GOU = 120, XP = -1325, XT = -1289, POULIE = [-1296, 503];
+  const PALAN_A = -612, PALAN_B = -330, TAQUET = -200, BRINS = 6;
+  const PROFIL = [[-1280,255,508],[-1200,234,503],[-1120,217,497],[-1040,201,492],[-960,188,487],[-880,177,483],[-800,168,479],[-720,160,475],[-640,154,472],[-560,150,469],[-480,146,467],[-400,143,465],[-320,142,463],[-240,141,462],[-120,140,461]];
+  const zPont = x => { let p = PROFIL[0]; for (const q of PROFIL) if (q[0] <= x) p = q; return p[2] + 26; };
+  const dA = Math.hypot(POULIE[0] - LX, POULIE[1] - LZ);
+  const A_TAN_AR = deg(Math.atan2(POULIE[1] - LZ, POULIE[0] - LX) + Math.acos(R_AR / dA));   // ≈ 22° : le bout quitte le dessus du secteur
+  const TROUS = [270, 216, 90];
+
+  // repère du mât : d le long du mât (vers le bas une fois déployé), f vers le bord d'attaque
+  function repere(b) {
+    const th = rad(270 - b), d = [Math.cos(th), Math.sin(th)], f = [-Math.sin(th), Math.cos(th)];
+    return (dd, ff) => [LX + dd * d[0] + ff * f[0], LZ + dd * d[1] + ff * f[1]];
+  }
+  const S2 = ([x, z]) => [x, -z];
+  const rectM = (M, d0, d1, f0, f1) => poly([[d0, f0], [d1, f0], [d1, f1], [d0, f1]].map(([d, f]) => S2(M(d, f))));
+
+  function construitArriere(svg, ep = 1) {
+    const o = {};
+    // joue de la tête de safran (fixe) et fémelots
+    const pj = [...cercle(XP, 390, 18), ...cercle(XP, 442, 18), ...cercle(LX, LZ, 45), ...cercle(XP, 600, 20),
+      ...TROUS.flatMap(a => cercle(LX + R_GOU * Math.cos(rad(a)), LZ + R_GOU * Math.sin(rad(a)), 22))];
+    for (const z0 of [360, 470]) el(svg, 'rect', { x: XP - 20, y: -(z0 + 6), width: XT - 6 - XP + 20, height: 12, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * ep });
+    el(svg, 'line', { x1: XP, y1: -330, x2: XP, y2: -650, stroke: 'var(--faible)', 'stroke-width': 2 * ep, 'stroke-dasharray': '10 8' });
+    o.mat = el(svg, 'polygon', { fill: 'var(--carbone)' });
+    o.aile = el(svg, 'polygon', { fill: 'var(--carbone)' });
+    o.pod = el(svg, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    o.tuyere = el(svg, 'polygon', { fill: 'var(--ecume)', stroke: 'var(--trait)', 'stroke-width': 2 * ep, opacity: .85 });
+    el(svg, 'polygon', { points: poly(enveloppe(pj).map(S2)), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep, opacity: .9 });
+    o.trous = TROUS.map(a => el(svg, 'circle', { cx: LX + R_GOU * Math.cos(rad(a)), cy: -(LZ + R_GOU * Math.sin(rad(a))), r: 10, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2 * ep }));
+    el(svg, 'circle', { cx: XP, cy: -600, r: 9, fill: 'var(--trait)' });
+    o.secteur = el(svg, 'g');
+    el(o.secteur, 'circle', { cx: LX, cy: -LZ, r: R_AR - 9, fill: 'none', stroke: 'var(--alu)', 'stroke-width': 18 });
+    el(o.secteur, 'circle', { cx: LX, cy: -LZ, r: R_AR, fill: 'none', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    el(o.secteur, 'circle', { cx: LX, cy: -LZ, r: 26, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    for (const a of [0, 60, 120]) el(o.secteur, 'line', { x1: LX - R_AR + 10, y1: -LZ, x2: LX + R_AR - 10, y2: -LZ, stroke: 'var(--alu)', 'stroke-width': 16, transform: `rotate(${a} ${LX} ${-LZ})` });
+    o.bout = el(svg, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 6 * ep, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    el(svg, 'circle', { cx: POULIE[0], cy: -POULIE[1], r: 9, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2.5 * ep });
+    o.goup = el(svg, 'circle', { r: 8, stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    el(svg, 'circle', { cx: LX, cy: -LZ, r: 8, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 3 * ep });
+    return o;
+  }
+  function majArriere(o, b, goupille) {
+    const M = repere(b);
+    set(o.mat, { points: rectM(M, -40, 830, -55, 55) });
+    set(o.aile, { points: rectM(M, 822, 838, -60, 70) });
+    set(o.pod, { points: rectM(M, 700, 780, -100, 170) });
+    set(o.tuyere, { points: rectM(M, 645, 835, -190, -105) });
+    o.secteur.setAttribute('transform', `rotate(${b} ${LX} ${-LZ})`);
+    const pg = S2(M(R_GOU, 0));
+    set(o.goup, { cx: pg[0], cy: pg[1], fill: goupille ? 'var(--trait)' : 'none', 'stroke-dasharray': goupille ? '' : '3 3' });
+    // bout : de son attache, enroulé par-dessus le secteur jusqu'au point de départ, puis la poulie du tableau
+    const aa = rad(202.1 - b), at = rad(A_TAN_AR), p = [];
+    const n = Math.max(1, Math.round(24 * (aa - at) / Math.PI));
+    for (let i = 0; i <= n; i++) { const t = aa + (at - aa) * i / n; p.push(S2([LX + R_AR * Math.cos(t), LZ + R_AR * Math.sin(t)])); }
+    p.push(S2([POULIE[0] + 9, POULIE[1]]), S2([XT + 2, 520]), S2([XT + 10, zPont(XT)]));
+    o.boutPts = p;
+    return p;
+  }
+
+  const A = document.getElementById('arVue');
+  el(A, 'rect', { x: -2380, y: -Z_EAU, width: 2280, height: 800, fill: 'var(--eau)' });
+  el(A, 'line', { x1: -2380, y1: -Z_EAU, x2: -100, y2: -Z_EAU, stroke: 'var(--ecume)', 'stroke-width': 4 });
+  el(A, 'text', { x: -120, y: -Z_EAU + 44, 'font-size': 34, 'text-anchor': 'end', fill: 'var(--faible)' }, 'flottaison à 170 kg (coque à plat)');
+  const coque = PROFIL.map(([x, k]) => [x, -k]).concat(PROFIL.slice().reverse().map(([x, , g]) => [x, -g]));
+  el(A, 'polygon', { points: poly(coque), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 5 });
+  el(A, 'rect', { x: XT - 9, y: -508, width: 18, height: 508 - 255, fill: 'var(--okoume)', stroke: 'var(--trait)', 'stroke-width': 2 });
+  el(A, 'text', { x: -700, y: -300, 'font-size': 36, 'text-anchor': 'middle', fill: 'var(--faible)' }, 'coque');
+  el(A, 'text', { x: -1240, y: -640, 'font-size': 32, fill: 'var(--faible)' }, 'tableau');
+  el(A, 'text', { x: -2360, y: -1410, 'font-size': 36, fill: 'var(--faible)', 'letter-spacing': 3 }, '← ARRIÈRE');
+  el(A, 'text', { x: -120, y: -1410, 'font-size': 36, fill: 'var(--faible)', 'letter-spacing': 3, 'text-anchor': 'end' }, 'AVANT →');
+  const oA = construitArriere(A, 1.6);
+  const boutPont = el(A, 'polyline', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 9, 'stroke-linejoin': 'round' });
+  const brins = el(A, 'g');
+  const poulieMob = el(A, 'circle', { r: 20, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(A, 'circle', { cx: PALAN_B, cy: -(zPont(PALAN_B) + 30), r: 20, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(A, 'rect', { x: TAQUET - 18, y: -(zPont(TAQUET) + 8), width: 36, height: 8, fill: 'var(--trait)' });
+  el(A, 'text', { x: (PALAN_A + PALAN_B) / 2, y: -(zPont(-470) + 80), 'font-size': 32, 'text-anchor': 'middle' }, 'palan à 6 brins');
+  el(A, 'text', { x: TAQUET, y: -(zPont(TAQUET) + 40), 'font-size': 30, 'text-anchor': 'middle' }, 'taquet');
+  const garant = el(A, 'polyline', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 9, 'stroke-linejoin': 'round' });
+  const lblMat = el(A, 'text', { 'font-size': 36, 'font-weight': 600, 'text-anchor': 'middle' }, 'mât et moteur immergé');
+  const arcAr = el(A, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 5, 'stroke-dasharray': '16 12', opacity: .7 });
+
+  const Za = document.getElementById('arZoom');
+  el(Za, 'rect', { x: -1660, y: -Z_EAU, width: 500, height: 200, fill: 'var(--eau)' });
+  el(Za, 'polygon', { points: poly(coque), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(Za, 'rect', { x: XT - 9, y: -508, width: 18, height: 508 - 255, fill: 'var(--okoume)', stroke: 'var(--trait)', 'stroke-width': 1.5 });
+  const oZ = construitArriere(Za, 1);
+  const boutZ = el(Za, 'polyline', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 5 });
+  const tz = (x, y, t, o = {}) => el(Za, 'text', { x, y, 'font-size': 12, ...o }, t);
+  tz(-1652, -778, 'secteur à rayons (r = 90 mm), claveté sur l’axe');
+  tz(-1652, -762, 'trois trous : déployé, cran intermédiaire, relevé', { fill: 'var(--faible)' });
+  tz(-1300, -655, 'palonnier de direction');
+  tz(-1268, -560, 'poulie du tableau');
+  tz(-1335, -338, 'axe de direction', { 'text-anchor': 'end', fill: 'var(--faible)' });
+  const lblGoupAr = tz(-1652, -740, '', { 'font-weight': 600 });
+
+  const etapesAr = document.querySelectorAll('#arEtapes li');
+  function dessineArriere(b, goupille, etape) {
+    majArriere(oA, b, goupille);
+    const p = majArriere(oZ, b, goupille);
+    const tirage = rad(b) * R_AR;                                  // bout repris au secteur
+    const xm = PALAN_A + tirage, zm = zPont(-470) + 30;
+    const pts = oA.boutPts.concat([[-1200, -zPont(-1200)], [-900, -zPont(-900)], [xm - 20, -zm]]);
+    set(oA.bout, { d: 'M' + pts.slice(0, oA.boutPts.length).map(q => q.join(',')).join(' L') });
+    set(boutPont, { points: poly(pts.slice(oA.boutPts.length - 1)) });
+    set(poulieMob, { cx: xm, cy: -zm });
+    brins.innerHTML = '';
+    for (let i = 0; i < BRINS; i++) {
+      const dz = (i - (BRINS - 1) / 2) * 6;
+      el(brins, 'line', { x1: xm, y1: -zm + dz, x2: PALAN_B, y2: -(zPont(PALAN_B) + 30) + dz, stroke: 'var(--housse)', 'stroke-width': 3 });
+    }
+    set(garant, { points: poly([[PALAN_B + 18, -(zPont(PALAN_B) + 36)], [TAQUET, -(zPont(TAQUET) + 8)], [TAQUET + 60, -(zPont(TAQUET) + 4)]]) });
+    set(oZ.bout, { d: 'M' + p.map(q => q.join(',')).join(' L') });
+    set(boutZ, { points: poly([p[p.length - 1], [XT + 60, -zPont(XT + 60)], [-1200, -zPont(-1200)]]) });
+    // trajectoire du pied de mât
+    if (b > 2 && b < 178) {
+      const q = []; for (let i = 0; i <= 30; i++) q.push(S2(repere(b * i / 30)(835, 0)).join(','));
+      set(arcAr, { d: 'M' + q.join(' L') }); arcAr.style.opacity = .7;
+    } else arcAr.style.opacity = 0;
+    const lp = S2(repere(b)(420, 0));
+    set(lblMat, { x: lp[0] + (b < 45 ? 230 : 0), y: lp[1] + (b < 45 ? 0 : (b > 135 ? 0 : -90)) });
+    if (b > 135) set(lblMat, { x: lp[0] - 240 });
+    lblGoupAr.textContent = goupille ? 'goupille en place' : 'goupille retirée';
+    lblGoupAr.setAttribute('fill', goupille ? 'var(--encre)' : 'var(--housse)');
+    const c = 6 * 9.81 * 0.6 * Math.sin(rad(b));
+    document.getElementById('arAng').textContent = `${b.toFixed(0)}°`;
+    document.getElementById('arGarant').textContent = `${(tirage * BRINS).toFixed(0)} mm`;
+    document.getElementById('arCouple').textContent = `${c.toFixed(1)} N·m`;
+    document.getElementById('arTraction').textContent = `${(c / R_AR * 1000 / BRINS).toFixed(0)} N`;
+    etapesAr.forEach((li, i) => li.classList.toggle('actif', etape.includes(i)));
+  }
+
+  // =====================================================================
+  //  ANIMATION : cycle commun aux deux scènes
+  //  goupille en place, retirée, relevage, blocage, descente, goupille remise
+  // =====================================================================
+  function cycle(ms, T = 15000) {
+    const u = (ms % T) / T;
+    if (u < .08) return { a: 0, g: true, e: [0] };
+    if (u < .14) return { a: 0, g: false, e: [0] };
+    if (u < .46) return { a: 180 * lisse((u - .14) / .32), g: false, e: [1, 2] };
+    if (u < .58) return { a: 180, g: false, e: [3] };
+    if (u < .9) return { a: 180 * (1 - lisse((u - .58) / .32)), g: false, e: [4] };
+    return { a: 0, g: true, e: [4] };
+  }
+  function etapeManuelle(a) {
+    if (a < .5) return { g: true, e: [0] };
+    if (a > 179.5) return { g: false, e: [3] };
+    return { g: false, e: [1, 2] };
+  }
+  function scene(prefixe, dessine, attr, etapesArriere) {
+    const bouton = document.getElementById(prefixe + 'Lecture'), curseur = document.getElementById(prefixe + 'Curseur');
+    const st = { lecture: true, t0: performance.now(), a: 0, cible: null };
+    bouton.addEventListener('click', () => {
+      st.lecture = !st.lecture; bouton.textContent = st.lecture ? 'Pause' : 'Lecture';
+      if (st.lecture) { st.cible = null; st.t0 = performance.now(); }
+    });
+    const pause = () => { st.lecture = false; bouton.textContent = 'Lecture'; };
+    curseur.addEventListener('input', () => { pause(); st.cible = null; st.a = +curseur.value; });
+    document.querySelectorAll(`button[data-${attr}]`).forEach(b => b.addEventListener('click', () => { pause(); st.cible = +b.dataset[attr]; }));
+    st.tick = now => {
+      let r;
+      if (st.lecture) { r = cycle(now - st.t0); st.a = r.a; }
+      else {
+        if (st.cible !== null) { st.a += (st.cible - st.a) * .1; if (Math.abs(st.cible - st.a) < .1) { st.a = st.cible; st.cible = null; } }
+        r = etapeManuelle(st.a);
+        if (etapesArriere && Math.abs(st.a - 54) < .5) r = { g: true, e: [3] };
+      }
+      curseur.value = st.a;
+      dessine(st.a, r.g, r.e);
+    };
+    return st;
+  }
+  const sAv = scene('av', dessineAvant, 'av', false);
+  const sAr = scene('ar', dessineArriere, 'ar', true);
+  if (location.hash === '#capture') { sAv.lecture = sAr.lecture = false; sAv.a = 75; sAr.a = 70; }
+  function boucle(now) { sAv.tick(now); sAr.tick(now); requestAnimationFrame(boucle); }
+  requestAnimationFrame(boucle);
+})();
+</script>
+</body>
+</html>

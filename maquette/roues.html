@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoebe, relevage des roues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --encre:#16252b; --erdre:#0f6f86; --housse:#d9622b; --toile:#f6f3ea; --ciel:#dfe9ec;
+  --ecume:#7cc4d6; --okoume:#cfa873; --gris:#8a979c; --carte:#fffdf7; --trait:#16252b;
+  --coque:#efe4cc; --alu:#a9b4b9; --pneu:#2b3438; --faible:#5b6a70; --eau:rgba(124,196,214,.30); --sol:#b9ad97;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+    --coque:#3a3326; --alu:#7d8a90; --pneu:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82; --eau:rgba(63,169,196,.22); --sol:#5c5446;
+  }
+}
+:root[data-theme="dark"]{
+  --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+  --coque:#3a3326; --alu:#7d8a90; --pneu:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82; --eau:rgba(63,169,196,.22); --sol:#5c5446;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--toile);color:var(--encre);font:16px/1.5 Barlow,system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{font:800 clamp(1.7rem,4vw,2.4rem)/1.1 "Bricolage Grotesque",sans-serif;margin:0 0 4px}
+h2{font:800 1.45rem/1.2 "Bricolage Grotesque",sans-serif;margin:34px 0 4px}
+h3{font:600 1.05rem/1.2 "Bricolage Grotesque",sans-serif;margin:0 0 6px}
+.sous{color:var(--faible);margin:0 0 18px}
+.carte{background:var(--carte);border-radius:14px;padding:14px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 6px 24px rgba(22,37,43,.06)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:Barlow,sans-serif;fill:var(--encre);paint-order:stroke;stroke:var(--carte);stroke-width:.22em;stroke-linejoin:round}
+.commandes{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0}
+button{font:600 .95rem Barlow,sans-serif;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;background:var(--encre);color:var(--toile)}
+button.sec{background:transparent;color:var(--encre);box-shadow:inset 0 0 0 1.5px var(--encre)}
+input[type=range]{flex:1;min-width:200px;accent-color:var(--housse)}
+label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.mesure{background:var(--carte);border-radius:12px;padding:10px 12px}
+.mesure b{display:block;font:800 1.5rem "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.mesure b.alerte{color:var(--housse)}
+.mesure span{color:var(--faible);font-size:.85rem}
+.grille{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+@media (max-width:820px){.grille{grid-template-columns:1fr}}
+ol.etapes{list-style:none;padding:0;margin:0;counter-reset:e}
+ol.etapes li{counter-increment:e;padding:9px 10px 9px 44px;border-radius:10px;position:relative;margin:2px 0;transition:background .3s,opacity .3s;opacity:.55}
+ol.etapes li::before{content:counter(e);position:absolute;left:10px;top:9px;width:24px;height:24px;border-radius:50%;background:var(--gris);color:var(--toile);font:600 .85rem/24px Barlow;text-align:center}
+ol.etapes li.actif{background:var(--ciel);opacity:1}
+ol.etapes li.actif::before{background:var(--housse)}
+.encart{background:var(--ciel);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:.95rem}
+.note{font-size:.85rem;color:var(--faible);margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Relever les roues</h1>
+  <p class="sous">Une fois Phoebe à flot, les roues ne portent plus rien : on les relève pour qu'elles sortent de l'eau. Schémas animés d'après les cotes de la CAO, vus depuis bâbord, l'avant à droite.</p>
+  <label style="margin-bottom:6px"><input id="assiette" type="checkbox"> montrer l'assiette réelle à 168 kg (arrière enfoncé de 1,6°, d'après le devis de masses) au lieu de la coque à plat</label>
+
+  <!-- ===================== ROUES ARRIÈRE ===================== -->
+  <h2>Les roues arrière</h2>
+  <p class="sous">Chaque roue est portée par un bras qui pivote autour de l'arbre transversal. Les deux bras sont indépendants : chacun a sa goupille.</p>
+  <div class="mesures">
+    <div class="mesure"><b id="arAng">0°</b><span>relevage du bras</span></div>
+    <div class="mesure"><b id="arGarde">0 mm</b><span>bas de la roue / flottaison</span></div>
+    <div class="mesure"><b>270 mm</b><span>roue derrière l'arbre (sur route)</span></div>
+    <div class="mesure"><b id="arChaine">100 %</b><span>longueur de chaîne du bras</span></div>
+  </div>
+  <div class="carte">
+    <svg id="arVue" viewBox="-1330 -930 1180 1000" aria-label="Roue arrière vue de côté, relevage animé"></svg>
+  </div>
+  <div class="commandes">
+    <button id="arLecture">Pause</button>
+    <button class="sec" data-ar="0">Route</button>
+    <button class="sec" data-ar="90">Relevée</button>
+    <input id="arCurseur" type="range" min="0" max="90" step="0.25" value="0" aria-label="Angle de relevage des bras arrière">
+  </div>
+  <div class="grille">
+    <div class="carte">
+      <h3>Zoom sur le pivot et la goupille</h3>
+      <svg id="arZoom" viewBox="-760 -640 330 330"></svg>
+    </div>
+    <div class="carte">
+      <h3>La manœuvre</h3>
+      <ol class="etapes" id="arEtapes">
+        <li><b>À flot, retirer la goupille.</b> Elle est fixée au-dessus du plat-bord, sur la ferrure porteuse arrière, et traverse le bras à 130 mm au-dessus de l'arbre. Sur route, c'est elle qui empêche le bras de tourner sous le poids : elle reçoit 1,3 kN à une fois la charge.</li>
+        <li><b>Relever le bras d'un quart de tour (90°).</b> Il tourne autour de l'arbre transversal : la roue bascule vers l'arrière et vers le haut.</li>
+        <li><b>La chaîne suit.</b> Le pignon d'entraînement est sur l'arbre, c'est-à-dire sur l'axe même du pivot : l'entraxe ne change pas, la chaîne reste tendue dans toutes les positions.</li>
+        <li><b>Remettre la goupille</b> dans le second trou du bras, qui vient se placer sous elle.</li>
+        <li><b>Pour sortir de l'eau :</b> faire l'inverse avant la cale. La goupille revient dans le premier trou.</li>
+      </ol>
+      <div class="encart">Relevée, la roue s'arrête 62 mm au-dessus de la flottaison coque à plat, et encore environ 5 cm avec l'assiette réelle (case en haut de page). Avec l'ancien relevage de 69°, elle n'avait que 5 mm de marge et trempait dès que l'arrière s'enfonçait.</div>
+    </div>
+  </div>
+
+  <!-- ===================== ROUE AVANT ===================== -->
+  <h2>La roue avant</h2>
+  <p class="sous">La fourche est tenue par une console qui pivote sur l'étrave prolongée, entre deux joues d'aluminium.</p>
+  <div class="mesures">
+    <div class="mesure"><b id="avAng">0°</b><span>relevage de la console</span></div>
+    <div class="mesure"><b id="avGarde">0 mm</b><span>bas de la roue / flottaison</span></div>
+    <div class="mesure"><b>72°</b><span>angle de l'axe de direction</span></div>
+    <div class="mesure"><b>70 mm</b><span>goupille sous le pivot</span></div>
+  </div>
+  <div class="carte">
+    <svg id="avVue" viewBox="780 -1110 1130 1180" aria-label="Roue avant vue de côté, relevage animé"></svg>
+  </div>
+  <div class="commandes">
+    <button id="avLecture">Pause</button>
+    <button class="sec" data-av="0">Route</button>
+    <button class="sec" data-av="100">Relevée</button>
+    <input id="avCurseur" type="range" min="0" max="100" step="0.25" value="0" aria-label="Angle de relevage de la console avant">
+  </div>
+  <div class="grille">
+    <div class="carte">
+      <h3>Zoom sur l'étrave</h3>
+      <svg id="avZoom" viewBox="1150 -700 420 360"></svg>
+    </div>
+    <div class="carte">
+      <h3>La manœuvre</h3>
+      <ol class="etapes" id="avEtapes">
+        <li><b>À flot, retirer la goupille de direction.</b> Elle traverse les deux joues et la patte de la console, 70 mm sous l'axe de relevage.</li>
+        <li><b>Relever la console</b> autour de son axe : la roue passe vers l'avant puis au-dessus de la flottaison. Toute la direction (jeu, fourche, palonnier) bascule avec elle.</li>
+        <li><b>Roue relevée :</b> bloquer la console dans cette position.</li>
+        <li><b>Pour sortir de l'eau :</b> redescendre la roue et remettre la goupille avant la cale.</li>
+      </ol>
+      <div class="encart">La CAO ne dessine que la position route : l'axe de relevage, la goupille et la console. L'angle de relevage (environ 100°) est celui de la maquette 3D, pas encore vérifié dans le modèle. Le verrou en position relevée n'est pas dessiné.</div>
+    </div>
+  </div>
+
+  <p class="note">Pas encore traités : la manœuvre depuis le siège (rien n'est conçu pour relever les roues sans quitter le siège, et la roue avant est à près de 2 m du pilote), les gaines de frein arrière qui doivent suivre le bras dans une boucle, les câbles de direction et la gaine du frein avant pendant le relevage de la console, l'étanchéité des sorties d'arbre.<br>
+  Schéma de principe à l'échelle, cotes tirées de <code>cad/phoebe_cad.py</code> (arbre à x = −572, z = 360 ; bras de 270 mm vers l'arrière et 110 mm vers le bas ; console pivotant en x = 1305, z = 495). La flottaison est à 170 kg. Étude de concept : rien n'est construit ni essayé.</p>
+</main>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (parent, tag, attrs = {}, txt) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    parent.appendChild(e); return e;
+  };
+  const set = (e, attrs) => { for (const k in attrs) e.setAttribute(k, attrs[k]); };
+  const rad = d => d * Math.PI / 180;
+  const lisse = k => k * k * (3 - 2 * k);
+  const poly = pts => pts.map(p => p.join(',')).join(' ');
+  const S = ([x, z]) => [x, -z];                                   // vue de côté : écran X = x, Y = -z
+  const rot = ([x, z], [cx, cz], a) => [cx + (x - cx) * Math.cos(a) - (z - cz) * Math.sin(a), cz + (x - cx) * Math.sin(a) + (z - cz) * Math.cos(a)];
+  function enveloppe(pts) {
+    pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], hi = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+    for (const p of pts.slice().reverse()) { while (hi.length >= 2 && cr(hi[hi.length - 2], hi[hi.length - 1], p) <= 0) hi.pop(); hi.push(p); }
+    return lo.slice(0, -1).concat(hi.slice(0, -1));
+  }
+  const cercle = (cx, cz, r, n = 24) => Array.from({ length: n }, (_, i) => [cx + r * Math.cos(2 * Math.PI * i / n), cz + r * Math.sin(2 * Math.PI * i / n)]);
+
+  // --- formes de coque (Params de la CAO)
+  const HL = 1300, RR = 250;
+  const zk = x => { const t = x / HL; return 140 + (t >= 0 ? 240 * t ** 3 : 120 * (-t) ** 3); };
+  const zg = x => 460 + 50 * (x / HL) ** 2;
+  // flottaison : à plat à 170 kg (z = 318), ou assiette du devis de masses (tableau calé de 94 mm, 1,6° sur l'arrière)
+  const assiette = document.getElementById('assiette');
+  const zEau = x => assiette.checked ? 349 - (x + 1280) * Math.tan(rad(1.6)) : 318;
+
+  function profilCoque(x0, x1) {
+    const xs = []; for (let x = x0; x <= x1 + 1e-6; x += (x1 - x0) / 40) xs.push(x);
+    return xs.map(x => [x, zk(x)]).concat(xs.slice().reverse().map(x => [x, zg(x)]));
+  }
+  function eau(svg, x0, x1) {
+    const g = el(svg, 'g', { 'pointer-events': 'none' });
+    const p = el(g, 'polygon', { fill: 'var(--eau)' });
+    const l = el(g, 'line', { stroke: 'var(--ecume)', 'stroke-width': 4 });
+    return () => {
+      set(p, { points: poly([[x0, zEau(x0)], [x1, zEau(x1)], [x1, -200], [x0, -200]].map(S)) });
+      set(l, { x1: x0, y1: -zEau(x0), x2: x1, y2: -zEau(x1) });
+    };
+  }
+  function sol(svg, x0, x1) {
+    el(svg, 'line', { x1: x0, y1: 0, x2: x1, y2: 0, stroke: 'var(--sol)', 'stroke-width': 4, 'stroke-dasharray': '18 12' });
+  }
+
+  // roue : pneu, jante, rayons, moyeu (rayons tournés de a pour voir la rotation)
+  function roue(svg, ep = 1) {
+    const g = el(svg, 'g');
+    el(g, 'circle', { r: RR - 11, fill: 'none', stroke: 'var(--pneu)', 'stroke-width': 22 });
+    el(g, 'circle', { r: RR - 26, fill: 'none', stroke: 'var(--alu)', 'stroke-width': 5 * ep });
+    const ray = el(g, 'g');
+    for (let i = 0; i < 12; i++) { const a = Math.PI * i / 6; el(ray, 'line', { x1: 0, y1: 0, x2: (RR - 28) * Math.cos(a), y2: (RR - 28) * Math.sin(a), stroke: 'var(--gris)', 'stroke-width': 1.5 * ep }); }
+    el(g, 'circle', { r: 22, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    return { g, ray };
+  }
+
+  // =====================================================================
+  //  ROUES ARRIÈRE
+  // =====================================================================
+  const XA = -572, ZS = 360, DX = -270, DZ = -110, LIFT = 90, R_GOU = 130, R_PIG = 33, XF = -620;
+  const PIV = [XA, ZS], AXE0 = [XA + DX, ZS + DZ];
+  const TROU_A = [0, R_GOU], TROU_B = [R_GOU * Math.cos(rad(90 + LIFT)), R_GOU * Math.sin(rad(90 + LIFT))];   // dans le repère du bras, route
+  const GOUP = [XA, ZS + R_GOU];
+  const zB = zg(XA) + 5;
+  const brasLocal = enveloppe([...cercle(0, 0, 36), ...cercle(DX, DZ, 30), ...cercle(...TROU_A, 16), ...cercle(...TROU_B, 16)]);
+
+  function sceneArriere(svg, ep, zoom) {
+    const o = {};
+    sol(svg, -1330, -150);
+    if (!zoom) {
+      el(svg, 'text', { x: -170, y: 40, 'font-size': 26, 'text-anchor': 'end', fill: 'var(--faible)' }, 'sol (sur route)');
+      o.lblEau = el(svg, 'text', { x: -170, y: -330, 'font-size': 26, 'text-anchor': 'end', fill: 'var(--faible)' }, 'flottaison');
+    }
+    el(svg, 'polygon', { points: poly(profilCoque(-1280, -150).map(S)), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 4 * ep });
+    el(svg, 'rect', { x: -1289, y: -zg(-1280), width: 18, height: zg(-1280) - zk(-1280), fill: 'var(--okoume)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    // couple porteur arrière et ferrure
+    el(svg, 'rect', { x: XF - 12, y: -zg(XF), width: 24, height: zg(XF) - zk(XF), fill: 'var(--okoume)', stroke: 'var(--trait)', 'stroke-width': 1.5 * ep });
+    el(svg, 'rect', { x: XF - 16, y: -(ZS + 25), width: 4, height: ZS + 25 - 215, fill: 'var(--alu)' });
+    // éclisse sur le plat-bord et équerre qui porte la goupille
+    el(svg, 'line', { x1: XA + 32, y1: -(zg(XA + 32) + 3), x2: XA + 192, y2: -(zg(XA + 192) + 3), stroke: 'var(--alu)', 'stroke-width': 8, 'stroke-linecap': 'round' });
+    o.chaine = el(svg, 'path', { fill: 'none', stroke: 'var(--trait)', 'stroke-width': 5 * ep, 'stroke-dasharray': `${6 * ep} ${4 * ep}` });
+    o.roue = roue(svg, ep);
+    o.tambour = el(svg, 'circle', { r: 50, fill: 'none', stroke: 'var(--alu)', 'stroke-width': 6 * ep });
+    o.pigR = el(svg, 'circle', { r: R_PIG, fill: 'none', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    o.bras = el(svg, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep, opacity: .92 });
+    o.trous = [el(svg, 'circle', { r: 10.5, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2 * ep }), el(svg, 'circle', { r: 10.5, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2 * ep })];
+    o.lblTrous = zoom ? [el(svg, 'text', { 'font-size': 13, 'text-anchor': 'middle' }, 'trou route'), el(svg, 'text', { 'font-size': 13, 'text-anchor': 'middle' }, 'trou relevé')] : null;
+    el(svg, 'rect', { x: XF + 12, y: -(zB + 37), width: XA + 32 - XF - 12, height: 37, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * ep, opacity: .55 });
+    el(svg, 'circle', { cx: XA, cy: -ZS, r: 32, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    el(svg, 'circle', { cx: XA, cy: -ZS, r: R_PIG, fill: 'none', stroke: 'var(--trait)', 'stroke-width': 2 * ep, 'stroke-dasharray': '4 3' });
+    el(svg, 'circle', { cx: XA, cy: -ZS, r: 12.5, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2.5 * ep });
+    o.goup = el(svg, 'circle', { cx: GOUP[0], cy: -GOUP[1], r: 7, stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    o.traj = el(svg, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 4 * ep, 'stroke-dasharray': '12 9' });
+    o.eau = eau(svg, -1330, -150);
+    o.garde = el(svg, 'line', { stroke: 'var(--housse)', 'stroke-width': 3 * ep });
+    return o;
+  }
+  // chaîne entre deux pignons de même rayon : deux brins parallèles et deux demi-tours
+  function chaine(p1, p2, r) {
+    const dx = p2[0] - p1[0], dz = p2[1] - p1[1], L = Math.hypot(dx, dz), n = [-dz / L * r, dx / L * r];
+    const a = S([p1[0] + n[0], p1[1] + n[1]]), b = S([p2[0] + n[0], p2[1] + n[1]]), c = S([p2[0] - n[0], p2[1] - n[1]]), d = S([p1[0] - n[0], p1[1] - n[1]]);
+    return `M${a} L${b} A${r},${r} 0 0 1 ${c} L${d} A${r},${r} 0 0 1 ${a} Z`;
+  }
+  function majArriere(o, ang, goupille, zoom) {
+    o.eau();
+    const a = -rad(ang);                                             // le bras tourne vers l'arrière et le haut (sens horaire vu de bâbord)
+    const B = p => rot([XA + p[0], ZS + p[1]], PIV, a);
+    set(o.bras, { points: poly(brasLocal.map(p => S(B(p)))) });
+    const ax = B([DX, DZ]), axS = S(ax);
+    o.roue.g.setAttribute('transform', `translate(${axS[0]} ${axS[1]})`);
+    o.roue.ray.setAttribute('transform', `rotate(${-ang * 1.0})`);
+    set(o.tambour, { cx: axS[0], cy: axS[1] }); set(o.pigR, { cx: axS[0], cy: axS[1] });
+    [TROU_A, TROU_B].forEach((t, i) => {
+      const p = S(B(t)); set(o.trous[i], { cx: p[0], cy: p[1] });
+      if (o.lblTrous) set(o.lblTrous[i], { x: p[0] + (i ? -48 : 0), y: p[1] + (i ? 4 : 30) });
+    });
+    set(o.chaine, { d: chaine(PIV, ax, R_PIG) });
+    set(o.goup, { fill: goupille ? 'var(--trait)' : 'none', 'stroke-dasharray': goupille ? '' : '3 3' });
+    if (ang > .5) {
+      const q = []; for (let i = 0; i <= 30; i++) q.push(S(rot(AXE0, PIV, a * i / 30)).join(','));
+      set(o.traj, { d: 'M' + q.join(' L') }); o.traj.style.opacity = 1;
+    } else o.traj.style.opacity = 0;
+    const bas = ax[1] - RR, ze = zEau(ax[0]);
+    set(o.garde, { x1: ax[0], y1: -bas, x2: ax[0], y2: -ze });
+    o.garde.style.opacity = ang > 40 ? 1 : 0;
+    if (o.lblEau) set(o.lblEau, { y: -zEau(-170) - 10 });
+    return bas - ze;
+  }
+
+  const oAr = sceneArriere(document.getElementById('arVue'), 1.6, false);
+  const vAr = document.getElementById('arVue');
+  el(vAr, 'text', { x: -1310, y: -880, 'font-size': 30, fill: 'var(--faible)', 'letter-spacing': 3 }, '← ARRIÈRE');
+  el(vAr, 'text', { x: -170, y: -880, 'font-size': 30, fill: 'var(--faible)', 'letter-spacing': 3, 'text-anchor': 'end' }, 'AVANT →');
+  el(vAr, 'text', { x: -1260, y: -560, 'font-size': 28, fill: 'var(--faible)' }, 'tableau');
+  el(vAr, 'text', { x: XF + 20, y: -230, 'font-size': 26, fill: 'var(--faible)' }, 'couple porteur arrière');
+  el(vAr, 'text', { x: XA + 50, y: -(zg(XA) + 70), 'font-size': 28, 'font-weight': 600 }, 'goupille');
+  el(vAr, 'text', { x: XA + 50, y: -ZS + 8, 'font-size': 28 }, 'arbre (pivot du bras)');
+  const lblRoueAr = el(vAr, 'text', { 'font-size': 30, 'font-weight': 600, 'text-anchor': 'middle' }, 'roue arrière bâbord');
+  const lblGardeAr = el(vAr, 'text', { 'font-size': 26, fill: 'var(--housse)', 'font-weight': 600 });
+
+  const oArZ = sceneArriere(document.getElementById('arZoom'), .7, true);
+  const zAr = document.getElementById('arZoom');
+  el(zAr, 'text', { x: -752, y: -620, 'font-size': 13 }, 'goupille fixe, sur l’équerre de la ferrure');
+  el(zAr, 'text', { x: -752, y: -604, 'font-size': 13, fill: 'var(--faible)' }, 'deux trous dans le bras : route et relevé');
+  const lblGoupAr = el(zAr, 'text', { x: GOUP[0] + 16, y: -GOUP[1] - 12, 'font-size': 13, 'font-weight': 600 });
+  el(zAr, 'text', { x: -470, y: -(ZS - 46), 'font-size': 12, 'text-anchor': 'middle', fill: 'var(--faible)' }, 'arbre et pignon');
+
+  const etArr = document.querySelectorAll('#arEtapes li');
+  function dessineArriere(ang, goupille, etapes) {
+    const g = majArriere(oAr, ang, goupille, false);
+    majArriere(oArZ, ang, goupille, true);
+    const ax = rot(AXE0, PIV, -rad(ang)), axS = S(ax);
+    set(lblRoueAr, { x: axS[0], y: axS[1] - RR - 22 });
+    set(lblGardeAr, { x: ax[0] + 14, y: -(ax[1] - RR) + 34 });
+    lblGardeAr.textContent = ang > 40 ? `${g >= 0 ? '+' : '−'}${Math.abs(g).toFixed(0)} mm` : '';
+    lblGoupAr.textContent = goupille ? 'goupille en place' : 'goupille retirée';
+    lblGoupAr.setAttribute('fill', goupille ? 'var(--encre)' : 'var(--housse)');
+    document.getElementById('arAng').textContent = `${ang.toFixed(0)}°`;
+    const mg = document.getElementById('arGarde');
+    mg.textContent = `${g >= 0 ? '+' : '−'}${Math.abs(g).toFixed(0)} mm`;
+    mg.classList.toggle('alerte', g < 0);
+    etArr.forEach((li, i) => li.classList.toggle('actif', etapes.includes(i)));
+  }
+
+  // =====================================================================
+  //  ROUE AVANT
+  // =====================================================================
+  const PX = 1305, PZ = 495, KZ = 425, AXL = [1560, 250], RAKE = 35, HA = rad(72);
+  const PIVAV = [PX, PZ];
+  const u = [-Math.cos(HA), Math.sin(HA)], wv = [Math.sin(HA), Math.cos(HA)];
+  const Q = [AXL[0] - RAKE * wv[0], AXL[1] - RAKE * wv[1]];
+  const at = s => [Q[0] + u[0] * s, Q[1] + u[1] * s];
+  const C = at(RR + 20), H = at(RR + 90), D0 = at(RR + 30), D1 = at(RR + 150), PIV1 = at(RR + 170), PAL = at(RR + 179);
+  const LIFT_AV = 100;
+
+  function sceneAvant(svg, ep, zoom) {
+    const o = {};
+    sol(svg, 780, 1910);
+    if (!zoom) el(svg, 'text', { x: 1890, y: 40, 'font-size': 26, 'text-anchor': 'end', fill: 'var(--faible)' }, 'sol (sur route)');
+    el(svg, 'polygon', { points: poly(profilCoque(780, 1290).map(S)), fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 4 * ep });
+    // étrave pleine, prolongée vers l'avant : elle porte les joues
+    el(svg, 'polygon', { points: poly([[1180, zk(1180)], [1290, zk(1290)], [1290, 405], [1335, 405], [1335, 520], [1180, 520]].map(S)), fill: 'var(--okoume)', stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    o.mobile = el(svg, 'g');
+    const m = o.mobile;
+    o.roue = roue(m, ep);
+    o.disque = el(m, 'circle', { r: 80, fill: 'none', stroke: 'var(--alu)', 'stroke-width': 4 * ep, 'stroke-dasharray': '8 5' });
+    o.fourreau = el(m, 'line', { stroke: 'var(--alu)', 'stroke-width': 20, 'stroke-linecap': 'round' });
+    o.douille = el(m, 'line', { stroke: 'var(--alu)', 'stroke-width': 44, 'stroke-linecap': 'round' });
+    o.pivotF = el(m, 'line', { stroke: 'var(--gris)', 'stroke-width': 26 });
+    o.bras = el(m, 'line', { stroke: 'var(--alu)', 'stroke-width': 36, 'stroke-linecap': 'round' });
+    o.patte = el(m, 'polygon', { fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 1.5 * ep });
+    o.palonnier = el(m, 'circle', { r: 10, fill: 'var(--trait)' });
+    o.axeDir = el(m, 'line', { stroke: 'var(--faible)', 'stroke-width': 2 * ep, 'stroke-dasharray': '10 8' });
+    o.trouPatte = el(m, 'circle', { r: 6, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 1.5 * ep });
+    // joue bâbord (fixe), devant la console
+    const joue = [[1185, 405], [PX + 30, 405], [PX + 30, 520], [1185, 520]];
+    el(svg, 'polygon', { points: poly(joue.map(S)), fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 2 * ep, opacity: .55 });
+    for (const [x, z] of [[1200, 435], [1200, 500], [1262, 440], [1262, 500]]) el(svg, 'circle', { cx: x, cy: -z, r: 5, fill: 'var(--trait)' });
+    el(svg, 'circle', { cx: PX, cy: -PZ, r: 12.5, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 2.5 * ep });
+    o.goup = el(svg, 'circle', { cx: PX, cy: -KZ, r: 8, stroke: 'var(--trait)', 'stroke-width': 2 * ep });
+    o.traj = el(svg, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 4 * ep, 'stroke-dasharray': '12 9' });
+    o.eau = eau(svg, 780, 1910);
+    o.garde = el(svg, 'line', { stroke: 'var(--housse)', 'stroke-width': 3 * ep });
+    return o;
+  }
+  function majAvant(o, ang, goupille) {
+    o.eau();
+    const a = rad(ang);                                              // la console tourne vers l'avant et le haut
+    const R = p => S(rot(p, PIVAV, a));
+    const ax = R(AXL);
+    o.roue.g.setAttribute('transform', `translate(${ax[0]} ${ax[1]})`);
+    o.roue.ray.setAttribute('transform', `rotate(${ang})`);
+    set(o.disque, { cx: ax[0], cy: ax[1] });
+    const L = (e, p, q) => { const a1 = R(p), b1 = R(q); set(e, { x1: a1[0], y1: a1[1], x2: b1[0], y2: b1[1] }); };
+    L(o.fourreau, C, AXL); L(o.douille, D0, D1); L(o.pivotF, C, PIV1); L(o.bras, PIVAV, H);
+    L(o.axeDir, at(0), at(RR + 230));
+    set(o.patte, { points: poly([[PX - 18, KZ - 18], [PX + 18, KZ - 18], [PX + 18, PZ + 18], [PX - 18, PZ + 18]].map(R)) });
+    const pl = R(PAL); set(o.palonnier, { cx: pl[0], cy: pl[1] });
+    const tp = R([PX, KZ]); set(o.trouPatte, { cx: tp[0], cy: tp[1] });
+    set(o.goup, { fill: goupille ? 'var(--trait)' : 'none', 'stroke-dasharray': goupille ? '' : '3 3' });
+    if (ang > .5) {
+      const q = []; for (let i = 0; i <= 30; i++) q.push(S(rot(AXL, PIVAV, a * i / 30)).join(','));
+      set(o.traj, { d: 'M' + q.join(' L') }); o.traj.style.opacity = 1;
+    } else o.traj.style.opacity = 0;
+    const axr = rot(AXL, PIVAV, a), bas = axr[1] - RR, ze = zEau(axr[0]);
+    set(o.garde, { x1: axr[0], y1: -bas, x2: axr[0], y2: -ze });
+    o.garde.style.opacity = bas > ze ? 1 : 0;
+    return bas - ze;
+  }
+  const vAv = document.getElementById('avVue');
+  const oAv = sceneAvant(vAv, 1.6, false);
+  el(vAv, 'text', { x: 800, y: -1060, 'font-size': 30, fill: 'var(--faible)', 'letter-spacing': 3 }, '← ARRIÈRE');
+  el(vAv, 'text', { x: 1890, y: -1060, 'font-size': 30, fill: 'var(--faible)', 'letter-spacing': 3, 'text-anchor': 'end' }, 'AVANT →');
+  el(vAv, 'text', { x: 1000, y: -290, 'font-size': 28, fill: 'var(--faible)', 'text-anchor': 'middle' }, 'coque');
+  el(vAv, 'text', { x: 1170, y: -545, 'font-size': 26, fill: 'var(--faible)', 'text-anchor': 'end' }, 'étrave et joues');
+  const lblRoueAv = el(vAv, 'text', { 'font-size': 30, 'font-weight': 600, 'text-anchor': 'middle' }, 'roue avant');
+  const lblGardeAv = el(vAv, 'text', { 'font-size': 26, fill: 'var(--housse)', 'font-weight': 600 });
+
+  const zAv = document.getElementById('avZoom');
+  const oAvZ = sceneAvant(zAv, .7, true);
+  el(zAv, 'text', { x: 1158, y: -680, 'font-size': 13 }, 'axe de relevage et goupille dans les deux joues');
+  el(zAv, 'text', { x: 1158, y: -664, 'font-size': 13, fill: 'var(--faible)' }, 'la patte de la console pivote entre elles');
+  const lblGoupAv = el(zAv, 'text', { x: PX + 40, y: -KZ + 30, 'font-size': 13, 'font-weight': 600 });
+  el(zAv, 'text', { x: PX + 22, y: -PZ - 20, 'font-size': 13 }, 'axe de relevage');
+
+  const etAv = document.querySelectorAll('#avEtapes li');
+  function dessineAvant(ang, goupille, etapes) {
+    const g = majAvant(oAv, ang, goupille);
+    majAvant(oAvZ, ang, goupille);
+    const axr = rot(AXL, PIVAV, rad(ang)), axS = S(axr);
+    set(lblRoueAv, { x: axS[0] + (ang > 50 ? 0 : 0), y: axS[1] + RR + 40 });
+    if (ang > 50) set(lblRoueAv, { y: axS[1] - RR - 22 });
+    set(lblGardeAv, { x: axr[0] + 14, y: -(axr[1] - RR) + 34 });
+    lblGardeAv.textContent = g > 0 ? `+${g.toFixed(0)} mm` : '';
+    lblGoupAv.textContent = goupille ? 'goupille en place' : 'goupille retirée';
+    lblGoupAv.setAttribute('fill', goupille ? 'var(--encre)' : 'var(--housse)');
+    document.getElementById('avAng').textContent = `${ang.toFixed(0)}°`;
+    const mg = document.getElementById('avGarde');
+    mg.textContent = `${g >= 0 ? '+' : '−'}${Math.abs(g).toFixed(0)} mm`;
+    mg.classList.toggle('alerte', g < 0);
+    etAv.forEach((li, i) => li.classList.toggle('actif', etapes.includes(i)));
+  }
+
+  // =====================================================================
+  //  ANIMATION
+  // =====================================================================
+  function scene(prefixe, max, dessine, etapesCycle, etapesManu) {
+    const bouton = document.getElementById(prefixe + 'Lecture'), curseur = document.getElementById(prefixe + 'Curseur');
+    const st = { lecture: true, t0: performance.now(), a: 0, cible: null };
+    bouton.addEventListener('click', () => {
+      st.lecture = !st.lecture; bouton.textContent = st.lecture ? 'Pause' : 'Lecture';
+      if (st.lecture) { st.cible = null; st.t0 = performance.now(); }
+    });
+    const pause = () => { st.lecture = false; bouton.textContent = 'Lecture'; };
+    curseur.addEventListener('input', () => { pause(); st.cible = null; st.a = +curseur.value; });
+    document.querySelectorAll(`button[data-${prefixe}]`).forEach(b => b.addEventListener('click', () => { pause(); st.cible = +b.dataset[prefixe]; }));
+    st.tick = now => {
+      let g, e;
+      if (st.lecture) {
+        const T = 13000, k = ((now - st.t0) % T) / T;
+        if (k < .1) { st.a = 0; g = true; e = etapesCycle.pose; }
+        else if (k < .17) { st.a = 0; g = false; e = etapesCycle.retire; }
+        else if (k < .47) { st.a = max * lisse((k - .17) / .3); g = false; e = etapesCycle.monte; }
+        else if (k < .6) { st.a = max; g = true; e = etapesCycle.haut; }
+        else if (k < .9) { st.a = max * (1 - lisse((k - .6) / .3)); g = false; e = etapesCycle.descend; }
+        else { st.a = 0; g = true; e = etapesCycle.descend; }
+      } else {
+        if (st.cible !== null) { st.a += (st.cible - st.a) * .1; if (Math.abs(st.cible - st.a) < .05) { st.a = st.cible; st.cible = null; } }
+        if (st.a < .2) { g = true; e = etapesManu.bas; }
+        else if (st.a > max - .2) { g = true; e = etapesManu.haut; }
+        else { g = false; e = etapesManu.milieu; }
+      }
+      curseur.value = st.a;
+      dessine(st.a, g, e);
+    };
+    return st;
+  }
+  const sAr = scene('ar', LIFT, dessineArriere,
+    { pose: [0], retire: [0], monte: [1, 2], haut: [3], descend: [4] },
+    { bas: [0], milieu: [1, 2], haut: [3] });
+  const sAv = scene('av', LIFT_AV, dessineAvant,
+    { pose: [0], retire: [0], monte: [1], haut: [2], descend: [3] },
+    { bas: [0], milieu: [1], haut: [2] });
+  if (location.hash === '#capture') { sAr.lecture = sAv.lecture = false; sAr.a = 50; sAv.a = 60; }
+  function boucle(now) { sAr.tick(now); sAv.tick(now); requestAnimationFrame(boucle); }
+  requestAnimationFrame(boucle);
+})();
+</script>
+</body>
+</html>

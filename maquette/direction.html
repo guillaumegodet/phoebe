@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phoebe, direction avant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --encre:#16252b; --erdre:#0f6f86; --housse:#d9622b; --toile:#f6f3ea; --ciel:#dfe9ec;
+  --ecume:#7cc4d6; --okoume:#cfa873; --gris:#8a979c; --carte:#fffdf7; --trait:#16252b;
+  --coque:#efe4cc; --alu:#a9b4b9; --pneu:#2b3438; --faible:#5b6a70;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+    --coque:#3a3326; --alu:#7d8a90; --pneu:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82;
+  }
+}
+:root[data-theme="dark"]{
+  --encre:#e9eef0; --toile:#11191c; --carte:#18242a; --ciel:#1d2c33; --trait:#dfe7ea;
+  --coque:#3a3326; --alu:#7d8a90; --pneu:#c9d2d6; --faible:#9aa9ae; --erdre:#3fa9c4; --gris:#6f7d82;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--toile);color:var(--encre);font:16px/1.5 Barlow,system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{font:800 clamp(1.7rem,4vw,2.4rem)/1.1 "Bricolage Grotesque",sans-serif;margin:0 0 4px}
+h2{font:600 1.05rem/1.2 "Bricolage Grotesque",sans-serif;margin:0 0 6px}
+.sous{color:var(--faible);margin:0 0 18px}
+.carte{background:var(--carte);border-radius:14px;padding:14px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 6px 24px rgba(22,37,43,.06)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:Barlow,sans-serif;fill:var(--encre)}
+.commandes{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:14px 0}
+button{font:600 .95rem Barlow,sans-serif;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;background:var(--encre);color:var(--toile)}
+button.sec{background:transparent;color:var(--encre);box-shadow:inset 0 0 0 1.5px var(--encre)}
+input[type=range]{flex:1;min-width:200px;accent-color:var(--housse)}
+label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.mesure{background:var(--carte);border-radius:12px;padding:10px 12px}
+.mesure b{display:block;font:800 1.5rem "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.mesure span{color:var(--faible);font-size:.85rem}
+.legende{background:var(--ciel);border-radius:12px;padding:12px 14px;margin:14px 0;min-height:4.6em}
+.grille{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:760px){.grille{grid-template-columns:1fr}}
+.code{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;color:var(--faible);margin-top:8px}
+.code i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+ol{padding-left:1.2em;margin:8px 0 0}
+li{margin:4px 0}
+.note{font-size:.85rem;color:var(--faible);margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>La direction avant</h1>
+  <p class="sous">Deux leviers, deux câbles sous gaine, un palonnier sur la fourche. Schéma animé d'après les cotes de la CAO.</p>
+
+  <div class="mesures">
+    <div class="mesure"><b id="mBraq">0°</b><span>braquage de la roue</span></div>
+    <div class="mesure"><b id="mLev">0°</b><span>levier bâbord (+ = poussé)</span></div>
+    <div class="mesure"><b id="mPoi">0 mm</b><span>déplacement de la poignée</span></div>
+    <div class="mesure"><b id="mCab">0 mm</b><span>course du câble</span></div>
+  </div>
+
+  <div class="carte">
+    <h2>Vue de dessus</h2>
+    <svg id="dessus" viewBox="-1760 -560 3660 1120" aria-label="Vue de dessus de Phoebe, direction animée"></svg>
+    <div class="code">
+      <span><i style="background:var(--housse)"></i>câble qui pousse</span>
+      <span><i style="background:var(--erdre)"></i>câble qui tire</span>
+      <span><i style="background:var(--gris)"></i>gaine (fixe)</span>
+    </div>
+  </div>
+
+  <div class="commandes">
+    <button id="lecture">Pause</button>
+    <button class="sec" data-a="-30">◀ Virer à bâbord</button>
+    <button class="sec" data-a="0">Tout droit</button>
+    <button class="sec" data-a="30">Virer à tribord ▶</button>
+    <input id="curseur" type="range" min="-30" max="30" step="0.5" value="0" aria-label="Braquage">
+    <label><input id="arriere" type="checkbox"> montrer la liaison au mât arrière</label>
+  </div>
+
+  <div class="legende" id="legende"></div>
+
+  <div class="grille">
+    <div class="carte">
+      <h2>1. Le levier bâbord, vu de côté</h2>
+      <svg id="levier" viewBox="-450 -700 440 420"></svg>
+    </div>
+    <div class="carte">
+      <h2>2. Le palonnier de fourche, vu de dessus</h2>
+      <svg id="fourche" viewBox="1230 -320 620 640"></svg>
+    </div>
+  </div>
+
+  <div class="carte" style="margin-top:14px">
+    <h2>Le principe en quatre temps</h2>
+    <ol>
+      <li><b>On pousse un levier.</b> Chaque levier pivote d'avant en arrière sur un axe porté par un longeron d'épicéa, à côté du siège. Le câble est attaché à 95 mm au-dessus du pivot, la poignée est à 290 mm : environ trois fois moins de course au câble qu'à la main.</li>
+      <li><b>Le câble avant pousse.</b> Le câble coulisse dans une gaine fixe, posée sous le plat-bord puis sur le pont, sans traverser la coque. C'est un câble en va-et-vient : il sait pousser autant que tirer. Celui du levier bâbord va à la corne bâbord du palonnier de fourche, celui du levier tribord à la corne tribord.</li>
+      <li><b>Le palonnier fait tourner la fourche.</b> Une barre de ±75 mm en tête de pivot. Corne bâbord poussée vers l'avant : la fourche tourne et la roue braque à tribord. 37,5 mm de câble donnent 30° de braquage.</li>
+      <li><b>L'autre levier suit.</b> La corne tribord recule d'autant : elle tire le câble tribord, qui ramène le levier tribord vers l'arrière. Les deux leviers bougent toujours en sens contraire, comme sur un engin à chenilles : pousser à gauche, c'est tourner à droite.</li>
+    </ol>
+    <p class="note">Les mêmes leviers tirent aussi, par des câbles croisés, le palonnier de la tête de safran : sur l'eau, le mât arrière oriente la poussée dans le même sens que la roue. Les deux directions restent reliées en permanence (case « montrer la liaison au mât arrière »).<br>
+    Schéma de principe, à l'échelle mais simplifié : en vrai l'axe de direction est incliné à 72°, la roue et le palonnier tournent autour du même axe. Cotes tirées de <code>cad/phoebe_cad.py</code> (leviers à x = −230, y = ±262 ; palonniers de ±75 mm). Étude de concept : rien n'est construit ni essayé.</p>
+  </div>
+</main>
+
+<script>
+(() => {
+  // --- cotes de la CAO (mm). Repère : X vers l'avant, Y vers bâbord.
+  const XL = -230, YL = 262, ZL = 335, BRAS = 95, LONG = 290, CORNE = 75;
+  const XH = 1394, XA = 1560, RR = 250, BUT_AV = 1299, BUT_AR = -1173, XP = -1325, YR = 430, XR = -841;
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const el = (parent, tag, attrs = {}) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    parent.appendChild(e); return e;
+  };
+  const P = (x, y) => [x, -y];                 // vue de dessus : bâbord en haut
+  const pts = arr => arr.map(([x, y]) => P(x, y).join(',')).join(' ');
+  const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+
+  // courbe lisse (Catmull-Rom) à travers des points, en coordonnées écran
+  function lisse(arr) {
+    const p = arr.map(([x, y]) => P(x, y));
+    let d = `M${p[0]}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
+      const c1 = [b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6];
+      const c2 = [c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6];
+      d += ` C${c1} ${c2} ${c}`;
+    }
+    return d;
+  }
+
+  // cheminement des gaines (points de passage de la CAO), côté bâbord ; tribord = miroir
+  const gAvant = [[-138, 262], [-80, 264], [100, 266], [320, 296], [540, 278], [760, 232], [900, 190], [1014, 115], [1170, 80], [1250, 75], [1287, 75]];
+  const gArriere = [[-322, 262], [-440, 264], [-620, 256], [-740, 232], [-806, 195], [-900, 105], [-1030, -15], [-1120, -70], [-1167, -75]];
+  const miroir = arr => arr.map(([x, y]) => [x, -y]);
+
+  // ================= VUE DE DESSUS =================
+  const S = document.getElementById('dessus');
+  const fond = el(S, 'g');
+  // coque
+  el(fond, 'path', { d: 'M-1280,-250 C-900,-372 -400,-372 -100,-370 C500,-368 1000,-250 1290,0 C1000,250 500,368 -100,370 C-400,372 -900,372 -1280,250 Z',
+    fill: 'var(--coque)', stroke: 'var(--trait)', 'stroke-width': 5 });
+  el(fond, 'line', { x1: -1280, y1: 0, x2: 1290, y2: 0, stroke: 'var(--okoume)', 'stroke-width': 30, opacity: .7 });  // poutre de quille
+  // bras et roues arrière
+  for (const s of [1, -1]) {
+    el(fond, 'rect', { x: XR - RR, y: -s * YR - 22, width: 2 * RR, height: 44, rx: 18, fill: 'var(--pneu)' });
+    el(fond, 'line', { x1: -572, y1: -s * 360, x2: XR, y2: -s * YR, stroke: 'var(--alu)', 'stroke-width': 26, 'stroke-linecap': 'round' });
+  }
+  el(fond, 'line', { x1: -572, y1: -470, x2: -572, y2: 470, stroke: 'var(--alu)', 'stroke-width': 14 });   // arbre
+  // siège
+  el(fond, 'rect', { x: -620, y: -180, width: 600, height: 360, rx: 40, fill: 'var(--okoume)', opacity: .55 });
+  el(fond, 'text', { x: -320, y: 12, 'text-anchor': 'middle', 'font-size': 46, fill: 'var(--faible)' }).textContent = 'siège';
+  // pédalier
+  el(fond, 'rect', { x: 300, y: -110, width: 340, height: 220, rx: 30, fill: 'none', stroke: 'var(--gris)', 'stroke-width': 4, 'stroke-dasharray': '14 10' });
+  el(fond, 'text', { x: 470, y: 14, 'text-anchor': 'middle', 'font-size': 40, fill: 'var(--faible)' }).textContent = 'pédalier';
+  // longerons de commande
+  for (const s of [1, -1]) el(fond, 'rect', { x: -450, y: s > 0 ? -YL - 32 : YL + 14, width: 380, height: 18, fill: 'var(--okoume)' });
+  // console de direction (étrave prolongée) et butées de gaine
+  el(fond, 'rect', { x: 1240, y: -18, width: 160, height: 36, fill: 'var(--alu)' });
+  el(fond, 'rect', { x: 1287, y: -90, width: 12, height: 180, fill: 'var(--alu)' });
+  el(fond, 'rect', { x: -1173, y: -95, width: 6, height: 190, fill: 'var(--alu)' });
+
+  // étiquettes fixes
+  const lab = (x, y, t, o = {}) => { const e = el(S, 'text', { x, y, 'font-size': 44, ...o }); e.textContent = t; return e; };
+  lab(-1740, -500, 'BÂBORD (gauche)', { 'font-size': 38, fill: 'var(--faible)', 'letter-spacing': 3 });
+  lab(-1740, 530, 'TRIBORD (droite)', { 'font-size': 38, fill: 'var(--faible)', 'letter-spacing': 3 });
+  lab(1880, -500, 'avant →', { 'font-size': 38, fill: 'var(--faible)', 'text-anchor': 'end' });
+
+  // groupe arrière (liaison au mât)
+  const gAR = el(S, 'g');
+  const gaineAR = [];
+  for (const s of [1, -1]) {
+    const pts_ = s > 0 ? gArriere : miroir(gArriere);
+    el(gAR, 'path', { d: lisse(pts_), fill: 'none', stroke: 'var(--gris)', 'stroke-width': 13, 'stroke-linecap': 'round', opacity: .8 });
+    gaineAR.push(el(gAR, 'path', { d: lisse(pts_), fill: 'none', 'stroke-width': 4, 'stroke-dasharray': '30 22' }));
+  }
+  const cabAR = [el(gAR, 'line', { 'stroke-width': 6 }), el(gAR, 'line', { 'stroke-width': 6 })];
+  const mat = el(gAR, 'g');
+  el(mat, 'rect', { x: XP - 330, y: -26, width: 300, height: 52, rx: 26, fill: 'var(--alu)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(mat, 'path', { d: `M${XP - 340},-60 L${XP - 400},-60 L${XP - 400},60 L${XP - 340},60 Z`, fill: 'var(--ecume)', opacity: .8 });
+  el(mat, 'text', { x: XP - 180, y: 90, 'font-size': 36, 'text-anchor': 'middle', fill: 'var(--faible)' }).textContent = 'moteur immergé';
+  const palAR = el(gAR, 'line', { stroke: 'var(--trait)', 'stroke-width': 18, 'stroke-linecap': 'round' });
+  el(gAR, 'circle', { cx: XP, cy: 0, r: 14, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 4 });
+
+  // gaines avant
+  const gaineAV = [];
+  for (const s of [1, -1]) {
+    const pts_ = s > 0 ? gAvant : miroir(gAvant);
+    el(S, 'path', { d: lisse(pts_), fill: 'none', stroke: 'var(--gris)', 'stroke-width': 13, 'stroke-linecap': 'round' });
+    gaineAV.push(el(S, 'path', { d: lisse(pts_), fill: 'none', 'stroke-width': 4, 'stroke-dasharray': '30 22' }));
+  }
+  const fleches = [el(S, 'path', {}), el(S, 'path', {})];
+
+  // roue avant et fourche
+  const roue = el(S, 'g');
+  el(roue, 'rect', { x: XA - RR, y: -20, width: 2 * RR, height: 40, rx: 18, fill: 'var(--pneu)' });
+  el(roue, 'line', { x1: 1443, y1: -55, x2: XA, y2: -55, stroke: 'var(--alu)', 'stroke-width': 18 });
+  el(roue, 'line', { x1: 1443, y1: 55, x2: XA, y2: 55, stroke: 'var(--alu)', 'stroke-width': 18 });
+  el(roue, 'line', { x1: 1443, y1: -60, x2: 1443, y2: 60, stroke: 'var(--alu)', 'stroke-width': 26 });
+  const trajet = el(roue, 'path', { d: `M${XA + RR + 30},0 L${XA + RR + 150},0`, stroke: 'var(--housse)', 'stroke-width': 10, 'marker-end': 'url(#pointe)', fill: 'none' });
+  const defs = el(S, 'defs');
+  const mk = el(defs, 'marker', { id: 'pointe', viewBox: '0 0 10 10', refX: 5, refY: 5, markerWidth: 4, markerHeight: 4, orient: 'auto' });
+  el(mk, 'path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'var(--housse)' });
+  // câbles avant (entre butée et corne) et palonnier
+  const cabAV = [el(S, 'line', { 'stroke-width': 7 }), el(S, 'line', { 'stroke-width': 7 })];
+  const palAV = el(S, 'line', { stroke: 'var(--trait)', 'stroke-width': 18, 'stroke-linecap': 'round' });
+  const cornesAV = [el(S, 'circle', { r: 13 }), el(S, 'circle', { r: 13 })];
+  el(S, 'circle', { cx: XH, cy: 0, r: 13, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 4 });
+
+  // leviers (vus de dessus : la poignée avance ou recule)
+  const lev = [1, -1].map(s => ({
+    s,
+    tige: el(S, 'line', { stroke: 'var(--alu)', 'stroke-width': 22, 'stroke-linecap': 'round' }),
+    poignee: el(S, 'circle', { r: 30, stroke: 'var(--trait)', 'stroke-width': 4 }),
+    txt: el(S, 'text', { 'font-size': 40, 'text-anchor': 'middle', 'font-weight': 600 })
+  }));
+  for (const s of [1, -1]) el(S, 'circle', { cx: XL, cy: -s * YL, r: 10, fill: 'var(--trait)' });
+
+  lab(XH - 60, -165, 'palonnier', { 'text-anchor': 'middle', 'font-size': 40 });
+  lab(-230, -440, 'leviers', { 'text-anchor': 'middle', 'font-size': 40 });
+
+  // flèche le long d'une gaine : position à la fraction f d'un polyligne, orientée selon le sens
+  function sur(arr, f) {
+    const p = arr.map(([x, y]) => P(x, y)); let L = 0; const seg = [];
+    for (let i = 0; i < p.length - 1; i++) { const l = Math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]); seg.push(l); L += l; }
+    let t = f * L;
+    for (let i = 0; i < seg.length; i++) {
+      if (t <= seg[i]) { const k = t / seg[i]; const a = p[i], b = p[i + 1];
+        return { x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) }; }
+      t -= seg[i];
+    }
+  }
+  function triangle(o, sens, taille = 46) {
+    const a = o.ang + (sens < 0 ? Math.PI : 0), c = Math.cos(a), s = Math.sin(a);
+    const q = (u, v) => `${o.x + u * c - v * s},${o.y + u * s + v * c}`;
+    return `M${q(taille, 0)} L${q(-taille * .6, taille * .6)} L${q(-taille * .6, -taille * .6)} Z`;
+  }
+
+  // ================= DÉTAIL : LEVIER, VUE DE CÔTÉ =================
+  const Lv = document.getElementById('levier');
+  const Q = (x, z) => [x, -z];
+  const zc = ZL + BRAS;
+  el(Lv, 'rect', { x: -450, y: -(ZL + 18), width: 380, height: 35, fill: 'var(--okoume)' });
+  el(Lv, 'text', { x: -440, y: -(ZL - 40), 'font-size': 15, fill: 'var(--faible)' }).textContent = 'longeron d\'épicéa';
+  for (const x0 of [-150, -322]) el(Lv, 'rect', { x: x0, y: -(zc + 8), width: 12, height: zc + 8 - ZL - 18, fill: 'var(--alu)' });
+  el(Lv, 'line', { x1: -138, y1: -zc, x2: -10, y2: -zc, stroke: 'var(--gris)', 'stroke-width': 9, 'stroke-linecap': 'round' });
+  el(Lv, 'line', { x1: -450, y1: -zc, x2: -322, y2: -zc, stroke: 'var(--gris)', 'stroke-width': 9 });
+  el(Lv, 'text', { x: -14, y: -(zc - 30), "font-size": 15, "text-anchor": "end" }).textContent = 'vers la fourche →';
+  const tArr = el(Lv, 'text', { x: -444, y: -(zc - 30), "font-size": 15 }); tArr.textContent = '← vers le mât arrière';
+  const lvCabAV = el(Lv, 'line', { 'stroke-width': 4 });
+  const lvCabAR = el(Lv, 'line', { 'stroke-width': 4 });
+  const lvG = el(Lv, 'g');
+  el(lvG, 'line', { x1: XL, y1: -(ZL - 15), x2: XL, y2: -(ZL + LONG - 110), stroke: 'var(--alu)', 'stroke-width': 22, 'stroke-linecap': 'round' });
+  el(lvG, 'line', { x1: XL, y1: -(ZL + LONG - 110), x2: XL, y2: -(ZL + LONG), stroke: 'var(--pneu)', 'stroke-width': 30, 'stroke-linecap': 'round' });
+  const lvAtt = el(Lv, 'circle', { r: 7, fill: 'var(--housse)', stroke: 'var(--trait)', 'stroke-width': 2 });
+  el(Lv, 'circle', { cx: XL, cy: -ZL, r: 8, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  el(Lv, 'text', { x: XL + 14, y: -ZL + 26, 'font-size': 15 }).textContent = 'pivot';
+  const lvTxtAtt = el(Lv, 'text', { 'font-size': 15 }); lvTxtAtt.textContent = 'attache, 95 mm';
+  const lvTxtPoi = el(Lv, 'text', { 'font-size': 15 }); lvTxtPoi.textContent = 'poignée, 290 mm';
+  const lvArc = el(Lv, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 3, 'stroke-dasharray': '6 5' });
+  const lvMesure = el(Lv, 'text', { x: -440, y: -660, 'font-size': 17, 'font-weight': 600 });
+
+  // ================= DÉTAIL : PALONNIER DE FOURCHE, VUE DE DESSUS =================
+  const F = document.getElementById('fourche');
+  el(F, 'rect', { x: 1230, y: -18, width: 170, height: 36, fill: 'var(--alu)' });
+  el(F, 'rect', { x: 1287, y: -95, width: 12, height: 190, fill: 'var(--alu)' });
+  for (const s of [1, -1]) el(F, 'line', { x1: 1230, y1: -s * 75, x2: 1287, y2: -s * 75, stroke: 'var(--gris)', 'stroke-width': 12 });
+  el(F, 'text', { x: 1240, y: -110, 'font-size': 17 }).textContent = 'butées de gaine';
+  const fRoue = el(F, 'g');
+  el(fRoue, 'rect', { x: XA - RR, y: -20, width: 2 * RR, height: 40, rx: 18, fill: 'var(--pneu)', opacity: .9 });
+  el(fRoue, 'line', { x1: 1443, y1: -55, x2: XA, y2: -55, stroke: 'var(--alu)', 'stroke-width': 18 });
+  el(fRoue, 'line', { x1: 1443, y1: 55, x2: XA, y2: 55, stroke: 'var(--alu)', 'stroke-width': 18 });
+  el(fRoue, 'line', { x1: 1443, y1: -60, x2: 1443, y2: 60, stroke: 'var(--alu)', 'stroke-width': 26 });
+  const fCab = [el(F, 'line', { 'stroke-width': 5 }), el(F, 'line', { 'stroke-width': 5 })];
+  const fPal = el(F, 'line', { stroke: 'var(--trait)', 'stroke-width': 16, 'stroke-linecap': 'round' });
+  const fCor = [el(F, 'circle', { r: 10 }), el(F, 'circle', { r: 10 })];
+  el(F, 'circle', { cx: XH, cy: 0, r: 11, fill: 'var(--toile)', stroke: 'var(--trait)', 'stroke-width': 3 });
+  const fTxtB = el(F, 'text', { 'font-size': 16, 'text-anchor': 'middle' });
+  const fTxtT = el(F, 'text', { 'font-size': 16, 'text-anchor': 'middle' });
+  const fArc = el(F, 'path', { fill: 'none', stroke: 'var(--housse)', 'stroke-width': 4, 'marker-end': 'url(#pointeF)' });
+  const mkF = el(el(F, 'defs'), 'marker', { id: 'pointeF', viewBox: '0 0 10 10', refX: 5, refY: 5, markerWidth: 5, markerHeight: 5, orient: 'auto' });
+  el(mkF, 'path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'var(--housse)' });
+  el(F, 'text', { x: 1840, y: 300, 'font-size': 15, 'text-anchor': 'end', fill: 'var(--faible)' }).textContent = 'palonnier ±75 mm, en tête de pivot';
+
+  // ================= MISE À JOUR =================
+  const couleur = d => Math.abs(d) < 0.5 ? css('--gris') : (d > 0 ? css('--housse') : css('--erdre'));
+  const legende = document.getElementById('legende');
+
+  function dessine(th) {
+    const t = rad(th);
+    const s = CORNE * Math.sin(t);                  // course du câble bâbord (+ = poussé vers l'avant)
+    const phi = Math.asin(s / BRAS);               // angle du levier bâbord (+ = poignée vers l'avant)
+    const dPoi = LONG * Math.sin(phi);
+    const dep = { 1: s, '-1': -s };
+
+    // palonnier avant (la corne bâbord avance quand on vire à tribord)
+    const cb = [XH + CORNE * Math.sin(t), CORNE * Math.cos(t)];
+    const ct = [XH - CORNE * Math.sin(t), -CORNE * Math.cos(t)];
+    palAV.setAttribute('x1', P(...cb)[0]); palAV.setAttribute('y1', P(...cb)[1]);
+    palAV.setAttribute('x2', P(...ct)[0]); palAV.setAttribute('y2', P(...ct)[1]);
+    [[cb, 1], [ct, -1]].forEach(([c, sg], i) => {
+      const col = couleur(dep[sg]);
+      cabAV[i].setAttribute('x1', BUT_AV); cabAV[i].setAttribute('y1', -sg * CORNE);
+      cabAV[i].setAttribute('x2', P(...c)[0]); cabAV[i].setAttribute('y2', P(...c)[1]);
+      cabAV[i].setAttribute('stroke', col);
+      cornesAV[i].setAttribute('cx', P(...c)[0]); cornesAV[i].setAttribute('cy', P(...c)[1]);
+      cornesAV[i].setAttribute('fill', col);
+      gaineAV[i].setAttribute('stroke', col);
+      gaineAV[i].setAttribute('stroke-dashoffset', -dep[sg] * 3);
+      const pts_ = sg > 0 ? gAvant : miroir(gAvant);
+      if (Math.abs(dep[sg]) > 0.5) { fleches[i].setAttribute('d', triangle(sur(pts_, .42), dep[sg] > 0 ? 1 : -1)); fleches[i].setAttribute('fill', col); }
+      else fleches[i].setAttribute('d', '');
+    });
+    roue.setAttribute('transform', `rotate(${th} ${XA} 0)`);
+    trajet.style.opacity = Math.abs(th) > 1 ? 1 : 0;
+
+    // palonnier arrière (câbles croisés : il tourne dans l'autre sens, la poussée suit la roue)
+    const rb = [XP - CORNE * Math.sin(t), CORNE * Math.cos(t)];
+    const rt = [XP + CORNE * Math.sin(t), -CORNE * Math.cos(t)];
+    palAR.setAttribute('x1', P(...rb)[0]); palAR.setAttribute('y1', P(...rb)[1]);
+    palAR.setAttribute('x2', P(...rt)[0]); palAR.setAttribute('y2', P(...rt)[1]);
+    // levier bâbord -> corne tribord ; il tire quand on le pousse
+    [[rt, 1], [rb, -1]].forEach(([c, sg], i) => {
+      const col = couleur(-dep[sg]);
+      cabAR[i].setAttribute('x1', BUT_AR); cabAR[i].setAttribute('y1', P(0, c[1] > 0 ? CORNE : -CORNE)[1]);
+      cabAR[i].setAttribute('x2', P(...c)[0]); cabAR[i].setAttribute('y2', P(...c)[1]);
+      cabAR[i].setAttribute('stroke', col);
+      gaineAR[i].setAttribute('stroke', col);
+      gaineAR[i].setAttribute('stroke-dashoffset', dep[sg] * 3);
+    });
+    mat.setAttribute('transform', `rotate(${-th} ${XP} 0)`);
+    // leviers vus de dessus
+    lev.forEach(l => {
+      const d = l.s > 0 ? dPoi : -dPoi;
+      l.tige.setAttribute('x1', XL); l.tige.setAttribute('y1', -l.s * YL);
+      l.tige.setAttribute('x2', XL + d); l.tige.setAttribute('y2', -l.s * YL);
+      l.poignee.setAttribute('cx', XL + d); l.poignee.setAttribute('cy', -l.s * YL);
+      l.poignee.setAttribute('fill', couleur(l.s > 0 ? s : -s));
+      l.txt.setAttribute('x', XL + d); l.txt.setAttribute('y', -l.s * YL + (l.s > 0 ? -50 : 75));
+      l.txt.textContent = Math.abs(d) < 3 ? '' : (d > 0 ? 'poussé' : 'tiré');
+    });
+
+    // détail levier
+    lvG.setAttribute('transform', `rotate(${deg(phi)} ${XL} ${-ZL})`);
+    const att = [XL + BRAS * Math.sin(phi), ZL + BRAS * Math.cos(phi)];
+    lvAtt.setAttribute('cx', att[0]); lvAtt.setAttribute('cy', -att[1]);
+    lvAtt.setAttribute('fill', couleur(s));
+    lvCabAV.setAttribute('x1', att[0]); lvCabAV.setAttribute('y1', -att[1]);
+    lvCabAV.setAttribute('x2', -138); lvCabAV.setAttribute('y2', -zc); lvCabAV.setAttribute('stroke', couleur(s));
+    lvCabAR.setAttribute('x1', att[0]); lvCabAR.setAttribute('y1', -att[1]);
+    lvCabAR.setAttribute('x2', -310); lvCabAR.setAttribute('y2', -zc); lvCabAR.setAttribute('stroke', couleur(-s));
+    const top = [XL + LONG * Math.sin(phi), ZL + LONG * Math.cos(phi)];
+    lvTxtAtt.setAttribute('x', att[0] + 22); lvTxtAtt.setAttribute('y', -att[1] - 22);
+    lvTxtPoi.setAttribute('x', top[0] + 24); lvTxtPoi.setAttribute('y', -top[1] + 6);
+    const a0 = rad(-23.2), a1 = rad(23.2);
+    lvArc.setAttribute('d', `M${XL + LONG * Math.sin(a0)},${-(ZL + LONG * Math.cos(a0)) - 22} A${LONG + 22},${LONG + 22} 0 0 1 ${XL + LONG * Math.sin(a1)},${-(ZL + LONG * Math.cos(a1)) - 22}`);
+    lvMesure.textContent = `levier ${phi >= 0 ? '+' : ''}${deg(phi).toFixed(1)}° · câble ${s >= 0 ? '+' : ''}${s.toFixed(1)} mm`;
+    const montrerAR = document.getElementById('arriere').checked;
+    lvCabAR.style.opacity = montrerAR ? 1 : .25; tArr.style.opacity = montrerAR ? 1 : .35;
+
+    // détail fourche
+    fPal.setAttribute('x1', P(...cb)[0]); fPal.setAttribute('y1', P(...cb)[1]);
+    fPal.setAttribute('x2', P(...ct)[0]); fPal.setAttribute('y2', P(...ct)[1]);
+    [[cb, 1], [ct, -1]].forEach(([c, sg], i) => {
+      const col = couleur(dep[sg]);
+      fCab[i].setAttribute('x1', BUT_AV); fCab[i].setAttribute('y1', -sg * CORNE);
+      fCab[i].setAttribute('x2', P(...c)[0]); fCab[i].setAttribute('y2', P(...c)[1]); fCab[i].setAttribute('stroke', col);
+      fCor[i].setAttribute('cx', P(...c)[0]); fCor[i].setAttribute('cy', P(...c)[1]); fCor[i].setAttribute('fill', col);
+    });
+    fRoue.setAttribute('transform', `rotate(${th} ${XA} 0)`);
+    fTxtB.setAttribute('x', P(...cb)[0]); fTxtB.setAttribute('y', P(...cb)[1] - 22);
+    fTxtB.textContent = Math.abs(s) < .5 ? 'corne bâbord' : `${s > 0 ? '+' : '−'}${Math.abs(s).toFixed(1)} mm`;
+    fTxtT.setAttribute('x', P(...ct)[0]); fTxtT.setAttribute('y', P(...ct)[1] + 34);
+    fTxtT.textContent = Math.abs(s) < .5 ? 'corne tribord' : `${s < 0 ? '+' : '−'}${Math.abs(s).toFixed(1)} mm`;
+    if (Math.abs(th) > 1) {
+      const r = 280, a0f = 0, a1f = t;
+      fArc.setAttribute('d', `M${XA + r},0 A${r},${r} 0 0 ${th > 0 ? 1 : 0} ${XA + r * Math.cos(a1f)},${r * Math.sin(a1f)}`);
+    } else fArc.setAttribute('d', '');
+
+    // chiffres
+    document.getElementById('mBraq').textContent = `${Math.abs(th).toFixed(0)}° ${Math.abs(th) < .5 ? '' : (th > 0 ? 'tribord' : 'bâbord')}`;
+    document.getElementById('mLev').textContent = `${phi >= 0 ? '+' : '−'}${Math.abs(deg(phi)).toFixed(1)}°`;
+    document.getElementById('mPoi').textContent = `${Math.abs(dPoi).toFixed(0)} mm`;
+    document.getElementById('mCab').textContent = `${Math.abs(s).toFixed(1)} mm`;
+
+    // légende
+    let txt;
+    if (Math.abs(th) < 1.5) txt = '<b>Tout droit.</b> Les deux leviers sont au neutre, le palonnier est en travers, la roue dans l\'axe.';
+    else if (th > 0) txt = `<b>Virage à tribord (à droite).</b> Le levier <b>bâbord</b> est poussé : son câble avant <span style="color:var(--housse)">pousse</span> la corne bâbord du palonnier, qui fait tourner la fourche vers la droite. La corne tribord recule et <span style="color:var(--erdre)">tire</span> le câble tribord : le levier tribord revient vers le pilote.`;
+    else txt = `<b>Virage à bâbord (à gauche).</b> Le levier <b>tribord</b> est poussé : son câble avant <span style="color:var(--housse)">pousse</span> la corne tribord du palonnier, qui fait tourner la fourche vers la gauche. La corne bâbord recule et <span style="color:var(--erdre)">tire</span> le câble bâbord : le levier bâbord revient vers le pilote.`;
+    if (document.getElementById('arriere').checked && Math.abs(th) >= 1.5)
+      txt += ' <br><b>Mât arrière :</b> chaque levier tire aussi un câble croisé vers la corne opposée du palonnier de la tête de safran. Le mât tourne, l\'hélice pousse l\'arrière vers l\'extérieur du virage : sur l\'eau, Phoebe tourne du même côté que la roue.';
+    legende.innerHTML = txt;
+  }
+
+  // ================= ANIMATION =================
+  const curseur = document.getElementById('curseur'), bouton = document.getElementById('lecture');
+  const arriere = document.getElementById('arriere');
+  let lecture = true, t0 = performance.now(), th = 0, cible = null;
+  const majArriere = () => { gAR.style.opacity = arriere.checked ? 1 : .12; };
+  arriere.addEventListener('change', () => { majArriere(); dessine(th); });
+  majArriere();
+
+  // cycle : neutre, virage à tribord, neutre, virage à bâbord (avec temps de pause)
+  function cycle(ms) {
+    const T = 9000, u = (ms % T) / T;
+    const seg = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+    if (u < .1) return 0;
+    if (u < .25) return 30 * seg(.1, .25, u);
+    if (u < .4) return 30;
+    if (u < .6) return 30 - 60 * seg(.4, .6, u);
+    if (u < .75) return -30;
+    if (u < .9) return -30 + 30 * seg(.75, .9, u);
+    return 0;
+  }
+  function boucle(now) {
+    if (lecture) th = cycle(now - t0);
+    else if (cible !== null) { th += (cible - th) * .12; if (Math.abs(cible - th) < .05) { th = cible; cible = null; } }
+    curseur.value = th;
+    dessine(th);
+    requestAnimationFrame(boucle);
+  }
+  const pause = () => { lecture = false; bouton.textContent = 'Lecture'; };
+  bouton.addEventListener('click', () => {
+    lecture = !lecture; bouton.textContent = lecture ? 'Pause' : 'Lecture';
+    if (lecture) { cible = null; t0 = performance.now() - 0; }
+  });
+  curseur.addEventListener('input', () => { pause(); cible = null; th = +curseur.value; });
+  document.querySelectorAll('button[data-a]').forEach(b => b.addEventListener('click', () => { pause(); cible = +b.dataset.a; }));
+  if (location.hash === '#capture') { lecture = false; th = 22; arriere.checked = true; majArriere(); }
+  requestAnimationFrame(boucle);
+})();
+</script>
+</body>
+</html>
